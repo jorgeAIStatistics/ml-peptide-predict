@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+from dataclasses import asdict
 import math
 from functools import lru_cache
 from pathlib import Path
@@ -33,6 +34,7 @@ from atlas.mechanistic.models import MODEL_REGISTRY, ParameterError, get_model
 from atlas.mechanistic.solver import DoseEvent, SolverError, SolverSettings, simulate
 from atlas.ml.predict import MODEL_CARD, get_predictor
 from atlas.ml.peptide_service import PEPTIDE_MODEL_FINDINGS
+from atlas.ml.ranking_service import get_ranking_service
 from atlas.ml.affinity_service import CALIBRATION_CARD, get_affinity_service
 from atlas.registry.seed import by_key as seed_by_key
 from atlas.mechanistic.pk_store import load_store, parameters_for
@@ -523,6 +525,69 @@ def create_app() -> Flask:
         except Exception:
             logger.exception("interpretation failed")
             payload["interpretations"] = []
+        return jsonify(payload)
+
+    @app.post("/api/rank")
+    def rank():
+        """Which of two same-series peptides binds more tightly.
+
+        A narrower claim than an affinity estimate and the only one this model
+        has evidence for: within-series ranking passes its own gate at 92.0%,
+        with a 95% interval of [89.0%, 94.5%] taken over held-out molecules.
+        Across series the same ranker fails, so a pair that is not of one
+        series is refused rather than answered.
+
+        No numeric affinity is returned for either molecule. The affinity
+        deployment gate is unchanged and still fails.
+        """
+        body = request.get_json(silent=True) or {}
+
+        def resolve(side: str) -> tuple[str | None, tuple[str, ...], str | None, Any]:
+            smiles = body.get(f"{side}_smiles")
+            key = body.get(f"{side}_compound_key")
+            names: tuple[str, ...] = ()
+            name = None
+            if not smiles and key:
+                row = next((r for r in merged_rows() if r["key"] == key), None)
+                if row is None:
+                    return None, (), None, (f"no registry entry {key!r}", 404)
+                name = row["name"]
+                try:
+                    entry = seed_by_key(key)
+                    names = (entry.name, *entry.aliases)
+                except KeyError:
+                    names = (row["name"],)
+                smiles = row.get("smiles")
+                if not smiles:
+                    return None, names, name, (
+                        f"no structure is resolved for {name}", 422)
+            return smiles, names, name, None
+
+        a_smiles, a_names, a_name, a_err = resolve("a")
+        b_smiles, b_names, b_name, b_err = resolve("b")
+        for err in (a_err, b_err):
+            if err:
+                return jsonify({"error": err[0]}), err[1]
+        if not a_smiles or not b_smiles:
+            return jsonify({
+                "error": "supply 'a_smiles'/'b_smiles' or "
+                         "'a_compound_key'/'b_compound_key'",
+            }), 400
+        if max(len(a_smiles), len(b_smiles)) > 5000:
+            return jsonify({"error": "SMILES string is too long"}), 400
+
+        try:
+            answer = get_ranking_service().rank(
+                a_smiles, b_smiles, names_a=a_names, names_b=b_names)
+        except Exception as exc:
+            logger.exception("ranking failed")
+            return jsonify({"error": f"ranking failed: {exc}"}), 500
+
+        payload = asdict(answer)
+        payload["a"]["smiles"] = a_smiles
+        payload["b"]["smiles"] = b_smiles
+        payload["a"]["name"] = a_name
+        payload["b"]["name"] = b_name
         return jsonify(payload)
 
     @app.get("/api/pk-parameters")

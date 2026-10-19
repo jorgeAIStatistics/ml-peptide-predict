@@ -36,6 +36,7 @@ export const api = {
   interface: (pdbId) => get(`/api/interfaces/${encodeURIComponent(pdbId)}`),
   pkParameters: () => get('/api/pk-parameters'),
   predict: (body, opts) => post('/api/predict', body, opts),
+  rank: (body, opts) => post('/api/rank', body, opts),
   simulate: (body, opts) => post('/api/simulate', body, opts),
   sensitivity: (body, opts) => post('/api/sensitivity', body, opts),
 };

@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 795 tests passing
+Last updated: 2026-10-19 · 815 tests passing
 
 ## What this is
 
@@ -839,6 +839,50 @@ reported as an absent input with the command that restores it, and nothing is
 drawn in its place; the contact map, the measurements and the profile all
 still work, because they never needed the file.
 
+### A ranking gate, separate from the affinity gate
+
+Reproduce with `python3 -m atlas.ml.ranking_gate`; served at `/api/rank` and
+in the prediction console's "Rank a pair" mode.
+
+The affinity gate asks whether a predicted pKi may be published as a number.
+It fails and is untouched. Ranking is a different claim with its own criteria:
+
+| Criterion | Required | Actual | Met |
+|---|---|---|---|
+| within-series accuracy, 95% lower bound | ≥ 0.80 | **0.906** | yes |
+| magnitude discrimination (Spearman) | ≥ 0.30 | **0.679** | yes |
+
+**93.0%** correct on 2,730 held-out pairs, 95% interval **[90.6%, 95.1%]**.
+Measured on the domain the service actually serves — mutual similarity ≥ 0.60
+and a true difference ≥ 0.5 log units — because cluster co-membership is a
+looser condition than mutual similarity: the largest series holds 335
+molecules within 0.4 of a centroid, so two members can be far apart.
+
+**The bound is taken over molecules, not pairs.** Pairs sharing a molecule are
+not independent; a binomial bound on 2,730 pairs claims 92.0% against the
+clustered 90.6%, **1.4 points overconfident**, since a molecule appearing in 16
+pairs is one observation.
+
+Accuracy rises with the true difference — 61.0% below 0.5 log units (near
+chance, which is why that band is excluded), 83.8%, 93.7%, 98.6% above 2. But
+**the hardest calls are between the most similar molecules**: 86.2% above 0.8
+similarity against 94.7% between 0.6 and 0.8. A near-identical pair with a
+real affinity gap is an activity cliff, and the ranker is worst where a
+chemist most needs it. That is reported with the answer.
+
+**Cross-series fails both criteria** (68.5% [66.1%, 70.8%], Spearman 0.157),
+which is what bounds the claim rather than leaving it open. The ranker is the
+ordinary absolute model, differencing two predictions: pairwise training was
+measurably worse at this.
+
+The service composes two gated affinity answers, so it inherits
+measurement-first lookup, target-relevance gating and abstention. It refuses
+identical structures, unparseable input, dissimilar pairs and any pair where
+either molecule is refused. **No numeric affinity appears in a ranking
+payload** — asserted over the whole serialised answer, not only named fields.
+Two measured molecules are labelled a comparison of measurements with no model
+accuracy attached.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -879,7 +923,7 @@ still work, because they never needed the file.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 795 tests
+python3 -m pytest -q                              # 815 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
