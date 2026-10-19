@@ -534,9 +534,52 @@ def _findings(
     return out
 
 
-def run_benchmark(*, save: bool = True) -> BenchmarkReport:
-    bundle = load_dataset()
-    fs = featurize(bundle.records)
+def run_benchmark(
+    *,
+    records: Sequence[Any] | None = None,
+    dataset_version: str | None = None,
+    endpoint: str | None = None,
+    save: bool | None = None,
+    path: Path = BENCHMARK_PATH,
+) -> BenchmarkReport:
+    """Run the Stage B benchmark and return the report.
+
+    With no arguments this is the original Stage B run over the saved MC4R
+    dataset, unchanged -- including the deployment gate, whose thresholds are
+    not a function of which dataset is passed.
+
+    ``records`` injects a different single-target dataset, so the Stage B
+    contrasts can be re-measured on another receptor. Stage B's finding was
+    that all five representation contrasts reverse between the cross-series
+    and within-series evaluations; that was established on one receptor, and
+    one receptor is one trial. Injected runs do not save unless given an
+    explicit ``path``.
+    """
+    if records is None:
+        bundle = load_dataset()
+        records = bundle.records
+        dataset_version = bundle.version
+        endpoint = bundle.endpoint
+        if save is None:
+            save = True
+    else:
+        missing = [
+            n for n, v in (("dataset_version", dataset_version),
+                           ("endpoint", endpoint)) if v is None
+        ]
+        if missing:
+            raise ValueError(
+                f"injected records need their own provenance; missing {missing}"
+            )
+        if save is None:
+            save = False
+        if save and path == BENCHMARK_PATH:
+            raise ValueError(
+                "refusing to save an injected-record benchmark to the "
+                f"canonical {BENCHMARK_PATH.name}; pass an explicit path"
+            )
+    records = list(records)
+    fs = featurize(records)
 
     analyses = [analyse_peptide(s) for s in fs.smiles]
     keep = np.array([a.is_peptide for a in analyses])
@@ -634,7 +677,7 @@ def run_benchmark(*, save: bool = True) -> BenchmarkReport:
     }
 
     report = BenchmarkReport(
-        dataset_version=bundle.version, endpoint=bundle.endpoint,
+        dataset_version=dataset_version, endpoint=endpoint,
         n_peptides=int(keep.sum()), ceilings=ceilings,
         cross_series=cross, within_series=within, contrasts=contrasts,
         gate=gate,
@@ -642,7 +685,7 @@ def run_benchmark(*, save: bool = True) -> BenchmarkReport:
                            int(keep.sum())),
     )
     if save:
-        report.save()
+        report.save(path)
     return report
 
 

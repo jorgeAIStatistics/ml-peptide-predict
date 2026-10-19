@@ -1,0 +1,295 @@
+{
+  "panel_version": "71e36895a4b10915",
+  "endpoint": "Ki",
+  "receptors": [
+    "MC1R",
+    "MC2R",
+    "MC3R",
+    "MC4R",
+    "MC5R"
+  ],
+  "stage_a": {
+    "MC1R": {
+      "status": "ok",
+      "n_molecules": 480,
+      "n_peptides": 359,
+      "noncanonical_peptides": 269,
+      "noncanonical_fraction": 0.7493036211699164,
+      "n_series": 22,
+      "effective_sample_size_ratio": 0.06128133704735376,
+      "largest_cluster_share": 0.36768802228412256,
+      "median_within_cluster_label_sd": 0.8306058767243218,
+      "overall_label_sd": 1.467759390854343
+    },
+    "MC2R": {
+      "status": "abstained",
+      "n_molecules": 23,
+      "n_peptides": 0,
+      "reason": "0 traced peptides, below the 40 needed for the clustering to yield enough independent series to mean anything"
+    },
+    "MC3R": {
+      "status": "ok",
+      "n_molecules": 609,
+      "n_peptides": 269,
+      "noncanonical_peptides": 184,
+      "noncanonical_fraction": 0.6840148698884758,
+      "n_series": 22,
+      "effective_sample_size_ratio": 0.08178438661710037,
+      "largest_cluster_share": 0.1970260223048327,
+      "median_within_cluster_label_sd": 0.6972096095647433,
+      "overall_label_sd": 1.2398678215863659
+    },
+    "MC4R": {
+      "status": "ok",
+      "n_molecules": 1981,
+      "n_peptides": 630,
+      "noncanonical_peptides": 507,
+      "noncanonical_fraction": 0.8047619047619048,
+      "n_series": 30,
+      "effective_sample_size_ratio": 0.047619047619047616,
+      "largest_cluster_share": 0.5317460317460317,
+      "median_within_cluster_label_sd": 0.8625903140318097,
+      "overall_label_sd": 1.281043892307615
+    },
+    "MC5R": {
+      "status": "ok",
+      "n_molecules": 406,
+      "n_peptides": 96,
+      "noncanonical_peptides": 75,
+      "noncanonical_fraction": 0.78125,
+      "n_series": 14,
+      "effective_sample_size_ratio": 0.14583333333333334,
+      "largest_cluster_share": 0.2708333333333333,
+      "median_within_cluster_label_sd": 0.7095277725274407,
+      "overall_label_sd": 1.1800920801820225
+    }
+  },
+  "stage_b": {
+    "MC1R": {
+      "status": "ok",
+      "n_peptides": 359,
+      "cross_series_mae": 0.9186702025695789,
+      "cross_series_r2": 0.39701761638407385,
+      "best_cross_series": "positional_fragment_fp__ridge",
+      "within_series_mae": 0.5299511020923484,
+      "series_mean_predictor_mae": 1.136409047865014,
+      "n_clusters_cross_series": 22,
+      "gate_passes": false,
+      "contrasts": {
+        "fragment_fp_vs_onehot": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.19697308617988052,
+          "within_a_minus_b": -0.01885978590645987
+        },
+        "fragment_fp_vs_whole_molecule_fp": {
+          "cross_a_better": false,
+          "within_a_better": false,
+          "reverses": false,
+          "cross_a_minus_b": 0.19958864653321962,
+          "within_a_minus_b": 0.05312795777757606
+        },
+        "topology_added_to_fragment_fp": {
+          "cross_a_better": true,
+          "within_a_better": true,
+          "reverses": false,
+          "cross_a_minus_b": -0.014243912264510383,
+          "within_a_minus_b": -0.05195206892421467
+        },
+        "residue_chemistry_vs_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.11553108879353458,
+          "within_a_minus_b": -0.01826839598478447
+        },
+        "residue_chemistry_added_to_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.13927437412085153,
+          "within_a_minus_b": -0.02523870594576194
+        }
+      },
+      "n_contrasts_reversing": 3,
+      "n_contrasts_compared": 5
+    },
+    "MC2R": {
+      "status": "abstained",
+      "n_peptides": 0,
+      "reason": "0 traced peptides, below the 40 needed for a cross-series split to hold out whole series"
+    },
+    "MC3R": {
+      "status": "ok",
+      "n_peptides": 269,
+      "cross_series_mae": 0.8273928296296335,
+      "cross_series_r2": 0.04369225258762055,
+      "best_cross_series": "morgan_fp__forest",
+      "within_series_mae": 0.5179429594494025,
+      "series_mean_predictor_mae": 0.8025542762009497,
+      "n_clusters_cross_series": 22,
+      "gate_passes": false,
+      "contrasts": {
+        "fragment_fp_vs_onehot": {
+          "cross_a_better": false,
+          "within_a_better": false,
+          "reverses": false,
+          "cross_a_minus_b": 0.05642248232961866,
+          "within_a_minus_b": 0.004986527012195707
+        },
+        "fragment_fp_vs_whole_molecule_fp": {
+          "cross_a_better": false,
+          "within_a_better": false,
+          "reverses": false,
+          "cross_a_minus_b": 0.23892705100541478,
+          "within_a_minus_b": 0.04340781025223173
+        },
+        "topology_added_to_fragment_fp": {
+          "cross_a_better": true,
+          "within_a_better": true,
+          "reverses": false,
+          "cross_a_minus_b": -0.1765237377779062,
+          "within_a_minus_b": -0.05434274886830126
+        },
+        "residue_chemistry_vs_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.10113169038595426,
+          "within_a_minus_b": -0.014581455213073746
+        },
+        "residue_chemistry_added_to_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.06127299612990056,
+          "within_a_minus_b": -0.010866721008952585
+        }
+      },
+      "n_contrasts_reversing": 2,
+      "n_contrasts_compared": 5
+    },
+    "MC4R": {
+      "status": "ok",
+      "n_peptides": 630,
+      "cross_series_mae": 0.869756460651659,
+      "cross_series_r2": 0.27605272459901187,
+      "best_cross_series": "positional_fragment_fp+morgan_fp__ridge",
+      "within_series_mae": 0.5203152636175586,
+      "series_mean_predictor_mae": 0.8445721997105117,
+      "n_clusters_cross_series": 30,
+      "gate_passes": false,
+      "contrasts": {
+        "fragment_fp_vs_onehot": {
+          "cross_a_better": true,
+          "within_a_better": false,
+          "reverses": true,
+          "cross_a_minus_b": -0.11551749690754143,
+          "within_a_minus_b": 0.024471274414349375
+        },
+        "fragment_fp_vs_whole_molecule_fp": {
+          "cross_a_better": true,
+          "within_a_better": false,
+          "reverses": true,
+          "cross_a_minus_b": -0.01170414570586431,
+          "within_a_minus_b": 0.06462081404112274
+        },
+        "topology_added_to_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.27400514182071234,
+          "within_a_minus_b": -0.0672083755151438
+        },
+        "residue_chemistry_vs_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.04277059394851879,
+          "within_a_minus_b": -0.011265197477515865
+        },
+        "residue_chemistry_added_to_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": true,
+          "reverses": true,
+          "cross_a_minus_b": 0.014560339653612142,
+          "within_a_minus_b": -0.007158709680045838
+        }
+      },
+      "n_contrasts_reversing": 5,
+      "n_contrasts_compared": 5
+    },
+    "MC5R": {
+      "status": "ok",
+      "n_peptides": 96,
+      "cross_series_mae": 0.9744268982142992,
+      "cross_series_r2": 0.21297980823597495,
+      "best_cross_series": "residue_chemistry+positional_fragment_fp__ridge",
+      "within_series_mae": 0.6215753971260237,
+      "series_mean_predictor_mae": 0.8371198717948717,
+      "n_clusters_cross_series": 14,
+      "gate_passes": false,
+      "contrasts": {
+        "fragment_fp_vs_onehot": {
+          "cross_a_better": true,
+          "within_a_better": true,
+          "reverses": false,
+          "cross_a_minus_b": -0.039324385361557024,
+          "within_a_minus_b": -0.05547195670995697
+        },
+        "fragment_fp_vs_whole_molecule_fp": {
+          "cross_a_better": true,
+          "within_a_better": true,
+          "reverses": false,
+          "cross_a_minus_b": -0.006966598765437482,
+          "within_a_minus_b": -0.27608537469937167
+        },
+        "topology_added_to_fragment_fp": {
+          "cross_a_better": true,
+          "within_a_better": false,
+          "reverses": true,
+          "cross_a_minus_b": -0.005617253086416918,
+          "within_a_minus_b": 0.008062362794611921
+        },
+        "residue_chemistry_vs_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": false,
+          "reverses": false,
+          "cross_a_minus_b": 0.11186660758377753,
+          "within_a_minus_b": 0.05885683201058278
+        },
+        "residue_chemistry_added_to_fragment_fp": {
+          "cross_a_better": false,
+          "within_a_better": false,
+          "reverses": false,
+          "cross_a_minus_b": 0.10693008597884068,
+          "within_a_minus_b": 0.04299322156084817
+        }
+      },
+      "n_contrasts_reversing": 1,
+      "n_contrasts_compared": 5
+    }
+  },
+  "study_grouping": {
+    "n_rows": 1354,
+    "n_documents": 39,
+    "n_groups": 17,
+    "largest_group_rows": 595,
+    "largest_group_molecules": 203,
+    "largest_group_fraction_of_rows": 0.43943870014771047,
+    "singleton_groups": 5,
+    "note": "Groups are connected components of the (molecule, document) graph, so neither a molecule nor a document straddles a split. A large largest_group_fraction_of_rows means the literature is cross-cited enough that study-grouped holdout cannot be both leak-free and small."
+  },
+  "findings": [
+    "Stage A's series ceiling replicates. Independent analogue series per receptor: MC1R 22, MC3R 22, MC4R 30, MC5R 14. Effective-sample-size ratios MC1R 0.061, MC3R 0.082, MC4R 0.048, MC5R 0.146. The ~30-series ceiling is a property of melanocortin peptide chemistry, not of the MC4R literature: no receptor's peptides resolve into many more independent series than MC4R's.",
+    "The non-canonical residue burden replicates across receptors: MC1R 74.9%, MC3R 68.4%, MC4R 80.5%, MC5R 78.1%. Stage A measured 80.5% on MC4R; this is a class-wide property, so a representation restricted to the 20 canonical amino acids is inadequate for every receptor in the family, not just the one it was diagnosed on.",
+    "Stage B's reversal finding does NOT replicate as stated. Contrasts reversing between the cross-series and within-series evaluations, per receptor: MC1R 3/5, MC3R 2/5, MC4R 5/5, MC5R 1/5. All five reverse only on MC4R. Stage B's claim that all five reverse was measured on one receptor and is therefore weaker than it reads: the direction of a representation contrast is partly a property of the particular receptor's data, so no single contrast result should be treated as a general fact about peptide representations.",
+    "The best cross-series representation differs on every receptor: MC1R positional_fragment_fp__ridge, MC3R morgan_fp__forest, MC4R positional_fragment_fp+morgan_fp__ridge, MC5R residue_chemistry+positional_fragment_fp__ridge. 4 distinct winners across 4 receptors, so no representation wins twice. Stage B's representation ranking therefore does not transfer either: picking a representation on one receptor and applying it to another is not supported by these measurements.",
+    "Cross-series MAE per receptor: MC1R 0.919, MC3R 0.827, MC4R 0.870, MC5R 0.974. Deployment gate: failed by every receptor. The gate is unchanged and is evaluated per single-target dataset; expanding to the family did not move MC4R's result, because MC4R's own records are identical to what Stage B already used.",
+    "The gate is a conjunction, and that matters here: MC1R R2 +0.397 clears the R2 >= 0.30 criterion, but its MAE 0.919 does not clear MAE <= 0.70, so it does not pass. A receptor can rank molecules better than MC4R's model while still being too inaccurate per molecule to publish a number.",
+    "Abstentions: MC2R (abstained, 0 peptides). Below 40 traced peptides neither the clustering nor the cross-series split has enough independent groups to support a number, so none is reported.",
+    "Study grouping is coarse in this corpus. The 39 documents behind the peptide rows collapse into 17 leak-free study groups, the largest holding 43.9% of rows (203 molecules). Molecules are re-measured across papers, so a leak-free study group is a connected component of the (molecule, document) graph rather than a single document. A study-grouped holdout therefore cannot be tuned to a target size: whole components move, and the giant component is either wholly in or wholly out."
+  ],
+  "built_at": "2026-10-19T14:05:50.938341+00:00"
+}

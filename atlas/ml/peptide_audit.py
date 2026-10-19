@@ -772,10 +772,59 @@ def _findings(report: dict[str, Any]) -> list[str]:
     return out
 
 
-def run_audit(*, save: bool = True) -> AuditReport:
-    """Run the whole Stage A audit and return the report."""
-    bundle = load_dataset()
-    records = bundle.records
+def run_audit(
+    *,
+    records: Sequence[Any] | None = None,
+    dataset_version: str | None = None,
+    endpoint: str | None = None,
+    target: dict[str, str] | None = None,
+    save: bool | None = None,
+    path: Path = AUDIT_PATH,
+) -> AuditReport:
+    """Run the whole Stage A audit and return the report.
+
+    With no arguments this is the original Stage A run over the saved MC4R
+    dataset, unchanged.
+
+    ``records`` injects a different single-target dataset -- in practice one
+    melanocortin receptor's rows, via
+    :func:`atlas.ml.multitarget.records_for_receptor` -- so Stage A can be
+    re-run over the expanded data without this module learning about panels.
+    Its provenance must be supplied with it: an audit that reported another
+    receptor's census under MC4R's version string would be a fabricated
+    attribution. Injected runs do not save unless given an explicit ``path``,
+    so a per-receptor re-run cannot overwrite the canonical audit the Stage A
+    findings cite.
+    """
+    if records is None:
+        bundle = load_dataset()
+        records = bundle.records
+        dataset_version = bundle.version
+        endpoint = bundle.endpoint
+        target = bundle.target
+        if save is None:
+            save = True
+    else:
+        missing = [
+            n for n, v in (("dataset_version", dataset_version),
+                           ("endpoint", endpoint), ("target", target))
+            if v is None
+        ]
+        if missing:
+            raise ValueError(
+                "injected records need their own provenance; missing "
+                f"{missing}. Reporting one receptor's audit under another's "
+                "version string would misattribute it."
+            )
+        if save is None:
+            save = False
+        if save and path == AUDIT_PATH:
+            raise ValueError(
+                "refusing to save an injected-record audit to the canonical "
+                f"{AUDIT_PATH.name}, which the Stage A findings cite; pass an "
+                "explicit path"
+            )
+    records = list(records)
     fs = featurize(records)
 
     # featurize drops unparseable molecules, so align records to it by id.
@@ -795,11 +844,11 @@ def run_audit(*, save: bool = True) -> AuditReport:
         "failure": failure_decomposition(fs, analyses, aligned, peptide_mask),
     }
     report = AuditReport(
-        dataset_version=bundle.version, endpoint=bundle.endpoint,
-        target=bundle.target, findings=_findings(body), **body,
+        dataset_version=dataset_version, endpoint=endpoint,
+        target=target, findings=_findings(body), **body,
     )
     if save:
-        report.save()
+        report.save(path)
     return report
 
 

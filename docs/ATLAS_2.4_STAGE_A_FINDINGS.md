@@ -11,6 +11,17 @@ The peptide affinity model was not deployed. This stage establishes why, by
 measurement. Every number below is produced by the committed code from the
 committed dataset.
 
+> **Replicated 2026-10-19 (ATLAS 2.5 Stage 3b).** This audit was measured on
+> MC4R alone. Re-run per receptor over the Stage 3 melanocortin panel, its two
+> central findings hold across the family: independent analogue series per
+> receptor are MC1R 22, MC3R 22, MC4R 30, MC5R 14 (effective sample size
+> 0.048–0.146 of nominal), so the **~30-series ceiling is a property of
+> melanocortin peptide chemistry rather than of the MC4R literature** — MC4R,
+> with 2.3× the peptides of its nearest rival, has the most series. The
+> non-canonical residue burden is **68.4–80.5%** across receptors against the
+> 80.5% measured here, so it is class-wide. MC2R abstains: 23 molecules and no
+> traced peptides. See `docs/ATLAS_2.5_STAGE_3_PANEL.md` §8.1.
+
 ---
 
 ## 1. The previous peptide classification was a proxy, and it was wrong on 44 molecules

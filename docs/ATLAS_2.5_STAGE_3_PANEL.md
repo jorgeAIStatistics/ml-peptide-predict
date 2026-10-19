@@ -1,11 +1,14 @@
 # ATLAS 2.5 — Stage 3: the melanocortin receptor panel
 
 **Panel:** `71e36895a4b10915` · 5 receptors · Ki endpoint
-**Code:** `atlas/ml/multitarget.py`, `atlas/ml/panel_benchmark.py`
-**Data:** `data/ml/melanocortin_panel.json`, `data/ml/panel_benchmark.json`
-**Reproduce:** `python3 -m atlas.ml.multitarget` then
-`python3 -m atlas.ml.panel_benchmark`
-**Tests:** 32 new (627 total)
+**Code:** `atlas/ml/multitarget.py`, `atlas/ml/panel_benchmark.py`,
+`atlas/ml/panel_replication.py`
+**Data:** `data/ml/melanocortin_panel.json`, `data/ml/panel_benchmark.json`,
+`data/ml/panel_replication.json`
+**Reproduce:** `python3 -m atlas.ml.multitarget`, then
+`python3 -m atlas.ml.panel_benchmark`, then
+`python3 -m atlas.ml.panel_replication`
+**Tests:** 66 new (661 total)
 
 Stage 1 established that ATLAS had exactly one target, so a peptide–target
 dual encoder could not be evaluated: the target side had zero variance, any
@@ -200,15 +203,169 @@ Benchmarking across all three is Stage 6 work.
 
 ---
 
-## 7. What has not changed
+## 7. Study grouping: coarser than the document count suggests
+
+The brief asks for three groupings. Peptide-cluster grouping is
+`molecule_cluster_labels` + `grouped_cluster_split` (§3), target grouping is
+`leave_one_receptor_out` (§5), and study grouping is
+`document_groups` + `leave_documents_out`, added here.
+
+**A study group cannot simply be one document.** Melanocortin molecules are
+re-measured across papers, so a molecule can belong to several documents and a
+document to several molecules. Holding out documents independently would put
+the same molecule on both sides — the leak §3 exists to prevent. The only
+grouping that keeps both guarantees is the transitive closure: molecules and
+documents are nodes, each measurement an edge, and a group is a connected
+component. Neither a molecule nor a document can then straddle a split.
+
+The price of that closure is measured, not assumed:
+
+| | All Ki rows | Peptide Ki rows |
+|---|---|---|
+| Rows | 3,499 | 1,354 |
+| Documents | 86 | 39 |
+| Leak-free study groups | 37 | **17** |
+| Largest group | 1,572 rows (44.9%) | **595 rows (43.9%)**, 203 molecules |
+| Singleton groups | 5 | 5 |
+
+**39 documents collapse to 17 groups, and the largest holds 43.9% of all
+peptide rows.** Two consequences a later stage must not trip over:
+
+1. **A study-grouped holdout cannot be tuned to a target size.** Whole
+   components move, and the giant component is either wholly in or wholly
+   out. Asking `leave_documents_out` for a 25% test set returns 37.3%, because
+   the groups are too coarse to land closer.
+2. **This is a property of the corpus, not a bug.** A densely cross-cited
+   literature genuinely does not contain many independent studies. Reporting
+   a study-grouped result as though it rested on 39 independent papers would
+   overstate it by more than a factor of two.
+
+---
+
+## 8. Re-running Stage A and Stage B over the expanded data
+
+`atlas/ml/panel_replication.py`. Stage A and Stage B were each measured on
+**one receptor**, so each of their findings is a single observation that
+cannot distinguish a property of peptide SAR from a property of the MC4R
+literature. The panel makes that distinguishable.
+
+**Per receptor, not pooled.** Pooling the 1,354 peptide rows into one larger
+dataset and re-auditing that would put a molecule's MC1R and MC4R affinities
+in the same label column as though they were replicates of one quantity — a
+median 1.31 log units apart (§2). The "expanded data" Stage A can honestly
+consume is not one bigger single-target dataset, because no such thing
+exists; it is four of them. Each re-run is a genuine single-target problem of
+exactly the shape Stage A was written for, which makes the comparison across
+receptors a replication test rather than a pooling artefact.
+
+**The control.** MC4R is re-run through the same panel adapter and must
+reproduce the canonical numbers exactly. It does — 1,981 molecules, 630
+peptides, 30 series, MAE 0.870, R² 0.276, identical to
+`peptide_audit.json` and `peptide_benchmark.json` — and two tests assert it.
+Without that control, a difference at another receptor could be an artefact of
+the adapter rather than a fact about the receptor.
+
+### 8.1 Stage A's series ceiling replicates
+
+| Receptor | Molecules | Peptides | Series | Eff. sample ratio | Largest cluster | Non-canonical |
+|---|---|---|---|---|---|---|
+| MC1R | 480 | 359 | 22 | 0.061 | 36.8% | 74.9% |
+| MC3R | 609 | 269 | 22 | 0.082 | 19.7% | 68.4% |
+| MC4R | 1,981 | 630 | **30** | 0.048 | 53.2% | 80.5% |
+| MC5R | 406 | 96 | 14 | 0.146 | 27.1% | 78.1% |
+| MC2R | 23 | **0** | — | — | — | abstains |
+
+**The ~30-series ceiling is a property of melanocortin peptide chemistry, not
+of the MC4R literature.** No receptor's peptides resolve into many more
+independent series than MC4R's; MC4R, with 2.3× the peptides of its nearest
+rival, has the *most* at 30. Effective sample size stays between 0.048 and
+0.146 of the nominal count everywhere. Adding receptors does not buy series.
+
+**The non-canonical residue burden is class-wide**: 68.4% to 80.5%. Stage A
+diagnosed 80.5% on MC4R; a representation restricted to the 20 canonical
+amino acids is therefore inadequate for every receptor in the family.
+
+### 8.2 Stage A's conclusions survive; the gate fails everywhere
+
+| Receptor | Peptides | Clusters | Cross-series MAE | Cross-series R² | Best representation | Gate |
+|---|---|---|---|---|---|---|
+| MC1R | 359 | 22 | 0.919 | **+0.397** | positional_fragment_fp (ridge) | fails |
+| MC3R | 269 | 22 | **0.827** | +0.044 | morgan_fp (forest) | fails |
+| MC4R | 630 | 30 | 0.870 | +0.276 | positional_fragment_fp+morgan_fp (ridge) | fails |
+| MC5R | 96 | 14 | 0.974 | +0.213 | residue_chemistry+positional_fragment_fp (ridge) | fails |
+
+**The deployment gate fails on all four receptors.** Best cross-series MAE
+anywhere is 0.827 (MC3R) against the 0.70 the gate requires. Expanding to the
+family did not earn the right to publish numeric estimates, and the gate was
+not touched.
+
+**The gate being a conjunction matters here.** MC1R's R² of +0.397 *clears*
+the R² ≥ 0.30 criterion — better than MC4R's +0.276 — while its MAE of 0.919
+does not clear 0.70. A receptor can rank molecules better than MC4R's model
+and still be too inaccurate per molecule to publish a number. A gate on R²
+alone would have passed MC1R.
+
+### 8.3 Stage B's reversal finding does **not** replicate
+
+Stage B's headline was that **all five** representation contrasts reverse
+between the cross-series and within-series evaluations. Re-measured:
+
+| Receptor | Contrasts reversing |
+|---|---|
+| MC1R | 3 / 5 |
+| MC3R | 2 / 5 |
+| **MC4R** | **5 / 5** |
+| MC5R | 1 / 5 |
+
+**All five reverse on MC4R and on no other receptor.** The finding is
+therefore substantially weaker than it reads in
+`docs/ATLAS_2.4_STAGE_B_FINDINGS.md`: the *direction* of a representation
+contrast is partly a property of the particular receptor's data, so no single
+contrast result should be treated as a general fact about peptide
+representations. The structural point Stage B was making — that cross-series
+and within-series evaluations can disagree, so reporting one number hides
+which question was asked — stands, and is if anything reinforced. The specific
+tally of five does not generalise.
+
+**Nor does the representation ranking.** The best cross-series representation
+is *different on all four receptors* — four distinct winners from four
+receptors, no representation winning twice. Choosing a representation on one
+receptor and applying it to another is not supported by these measurements.
+`residue_chemistry`, whose contribution the Stage 2 audit found negative
+cross-series on MC4R, is part of the winning combination on MC5R.
+
+### 8.4 What this does and does not license
+
+The honest summary is that the expansion **confirmed Stage A and weakened
+Stage B**:
+
+- Stage A's diagnosis of *why* the MC4R model fails — too few independent
+  series, pervasive non-canonical chemistry — holds across the family and is
+  now a class-wide finding rather than a single-target one.
+- Stage B's contrast results were an n=1 measurement reported as though
+  general, and three of the four new receptors disagree with it.
+- The expansion did **not** improve any model. No receptor passes the gate,
+  and the best cross-series MAE in the family is worse than the 0.70 required.
+
+Expanding the data made ATLAS's existing claims testable and one of them did
+not survive. That is the result, and it is a negative one.
+
+---
+
+## 9. What has not changed
 
 - **The deployment gate still fails.** Nothing here touched
   `atlas/ml/peptide_benchmark.py`'s `GATE`, and the MC4R model's cross-series
   MAE 0.870 / R² 0.276 is unchanged. The peptide affinity model publishes no
   numeric estimates.
-- **Stage A's conclusions stand.** The panel's peptide population is 640
-  against 630, so the structural census, the 30-series finding and the
-  non-canonical fraction are all materially unchanged.
+- **Stage A's conclusions stand, and §8 now measures that rather than
+  inferring it.** The original wording here reasoned from the peptide count
+  alone (640 against 630). That is weaker than re-running the audit, which
+  §8 does: Stage A replicates on every receptor that carries enough peptides.
+- **Stage B's headline finding does not replicate.** See §8.3. All five
+  representation contrasts reverse on MC4R and on no other receptor, so that
+  finding is a property of MC4R's data rather than of peptide
+  representations.
 - **Endpoints remain unpooled.** Only Ki was built. EC50 and IC50 are
   available through the same code path as separate datasets and have not been
   fetched.
@@ -217,7 +374,7 @@ Benchmarking across all three is Stage 6 work.
 
 ---
 
-## 8. Honest limitations
+## 10. Honest limitations
 
 - **MC2R is effectively absent** from the peptide panel: 23 molecules, no
   traced peptides. Four receptors, not five, carry peptide data.

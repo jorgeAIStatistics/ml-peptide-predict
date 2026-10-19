@@ -16,6 +16,19 @@
 > finding strengthened: **all five** contrasts now reverse between the two
 > evaluations, where three of three did before.
 
+> **Scope limit established 2026-10-19 (ATLAS 2.5 Stage 3b).** Everything
+> below was measured on **MC4R alone**, and the "all five contrasts reverse"
+> finding does **not** replicate on the rest of the melanocortin family. Re-run
+> per receptor over the Stage 3 panel: MC4R 5/5, MC1R 3/5, MC3R 2/5, MC5R 1/5.
+> All five reverse on MC4R and on no other receptor, so the direction of a
+> representation contrast is partly a property of this receptor's data. The
+> representation *ranking* does not transfer either — four distinct best
+> representations across four receptors, none winning twice. What survives is
+> the structural point of §1: the cross-series and within-series evaluations
+> can disagree, so reporting one number hides which question was asked. The
+> specific tally of five should not be cited as a general fact about peptide
+> representations. See `docs/ATLAS_2.5_STAGE_3_PANEL.md` §8.3.
+
 Stage A specified what to build. Stage B built it and measured it — including
 where Stage A's own predictions turned out to be wrong.
 

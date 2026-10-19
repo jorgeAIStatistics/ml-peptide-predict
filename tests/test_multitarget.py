@@ -16,7 +16,9 @@ import pytest
 from atlas.ml.dataset import ENDPOINT_ASSAY_TYPE, ENDPOINT_LABEL, MC4R
 from atlas.ml.multitarget import (
     MELANOCORTIN_RECEPTORS, PANEL_PATH, PanelRow, TargetPanel,
-    generalisation_regimes, leave_one_receptor_out, load_panel,
+    document_group_audit, document_groups, generalisation_regimes,
+    leave_documents_out, leave_one_receptor_out, load_panel,
+    records_for_receptor,
 )
 
 
@@ -189,3 +191,188 @@ def test_leave_one_receptor_out_does_not_split_a_molecule_by_accident():
     train_mols = {rows[i].molecule_chembl_id for i in tr}
     test_mols = {rows[i].molecule_chembl_id for i in te}
     assert train_mols & test_mols == {"M1"}
+
+
+# ------------------------------------------------- study/document grouping ----
+
+def _doc_row(mol: str, receptor: str, docs: tuple[str, ...]) -> PanelRow:
+    return PanelRow(
+        molecule_chembl_id=mol, smiles="CC", receptor=receptor,
+        target_chembl_id=MELANOCORTIN_RECEPTORS[receptor]["target_chembl_id"],
+        endpoint="Ki", value=8.0, value_min=8.0, value_max=8.0,
+        n_replicates=1, replicate_spread=0.0,
+        document_ids=docs, assay_ids=("A1",),
+    )
+
+
+def test_a_molecule_shared_between_documents_fuses_their_groups():
+    """The reason a study group cannot simply be one document.
+
+    M2 is measured in both D1 and D2, so holding out D2 alone would put M2 on
+    both sides of the split. The transitive closure fuses D1 and D2 instead.
+    """
+    rows = [
+        _doc_row("M1", "MC4R", ("D1",)),
+        _doc_row("M2", "MC4R", ("D1", "D2")),
+        _doc_row("M3", "MC4R", ("D2",)),
+        _doc_row("M4", "MC4R", ("D3",)),
+    ]
+    labels = document_groups(rows)
+    assert labels[0] == labels[1] == labels[2]
+    assert labels[3] != labels[0]
+    assert len(set(labels.tolist())) == 2
+
+
+def test_a_molecule_with_no_document_is_its_own_group():
+    rows = [_doc_row("M1", "MC4R", ()), _doc_row("M2", "MC4R", ())]
+    labels = document_groups(rows)
+    assert len(set(labels.tolist())) == 2
+
+
+def test_all_rows_of_one_molecule_share_a_study_group():
+    """A molecule on several receptors is one node, so its rows cannot split."""
+    rows = [
+        _doc_row("M1", "MC1R", ("D1",)),
+        _doc_row("M1", "MC4R", ("D2",)),
+        _doc_row("M9", "MC4R", ("D9",)),
+    ]
+    labels = document_groups(rows)
+    assert labels[0] == labels[1] != labels[2]
+
+
+def test_no_molecule_and_no_document_straddles_a_study_split(panel):
+    rows = panel.for_endpoint("Ki")
+    train, test = leave_documents_out(rows, test_fraction=0.25)
+    assert len(train) + len(test) == len(rows)
+    assert not (set(train.tolist()) & set(test.tolist()))
+
+    tr_mols = {rows[i].molecule_chembl_id for i in train}
+    te_mols = {rows[i].molecule_chembl_id for i in test}
+    assert not (tr_mols & te_mols), "a molecule straddles the study split"
+
+    tr_docs = {d for i in train for d in rows[i].document_ids}
+    te_docs = {d for i in test for d in rows[i].document_ids}
+    assert not (tr_docs & te_docs), "a document straddles the study split"
+
+
+def test_study_split_holds_out_whole_groups(panel):
+    rows = panel.for_endpoint("Ki")
+    labels = document_groups(rows)
+    train, test = leave_documents_out(rows, test_fraction=0.25)
+    assert not (set(labels[train].tolist()) & set(labels[test].tolist()))
+
+
+def test_study_group_audit_is_internally_consistent(panel):
+    rows = panel.for_endpoint("Ki")
+    a = document_group_audit(rows)
+    labels = document_groups(rows)
+    assert a["n_rows"] == len(rows)
+    assert a["n_groups"] == len(set(labels.tolist()))
+    assert 0 < a["largest_group_rows"] <= a["n_rows"]
+    assert a["largest_group_fraction_of_rows"] == pytest.approx(
+        a["largest_group_rows"] / a["n_rows"])
+
+
+def test_study_grouping_is_coarse_in_this_corpus(panel):
+    """Recorded as a measurement, because it limits what the split can do.
+
+    Molecules are re-measured across papers, so the leak-free closure is much
+    coarser than the document count. A later stage must not ask this split for
+    a precisely sized test set.
+    """
+    a = document_group_audit(panel.for_endpoint("Ki"))
+    assert a["n_groups"] < a["n_documents"]
+    assert a["largest_group_fraction_of_rows"] > 0.2
+
+
+# ----------------------------------------------------- per-receptor records ----
+
+def test_records_for_receptor_keeps_only_that_receptor(panel):
+    rows = panel.for_endpoint("Ki")
+    recs = records_for_receptor(rows, "MC1R")
+    want = [r for r in rows if r.receptor == "MC1R"]
+    assert len(recs) == len(want)
+    assert {r.molecule_chembl_id for r in recs} == {
+        r.molecule_chembl_id for r in want}
+
+
+def test_records_for_receptor_preserves_values(panel):
+    rows = panel.for_endpoint("Ki")
+    by_mol = {r.molecule_chembl_id: r for r in rows if r.receptor == "MC3R"}
+    for rec in records_for_receptor(rows, "MC3R"):
+        src = by_mol[rec.molecule_chembl_id]
+        assert rec.pki == src.value
+        assert rec.pki_min == src.value_min
+        assert rec.pki_max == src.value_max
+        assert rec.n_replicates == src.n_replicates
+        assert rec.document_ids == src.document_ids
+
+
+def test_mc4r_panel_rows_reproduce_the_standalone_dataset(panel):
+    """The panel's MC4R slice must equal the separately built mc4r_pki.json.
+
+    Two independently saved artefacts built through different code paths. If
+    they agree molecule for molecule and value for value, the panel pipeline
+    did not perturb the data Stage A and Stage B were measured on, and any
+    difference found at another receptor is a fact about that receptor rather
+    than an artefact of the adapter.
+    """
+    from atlas.ml.dataset import DATASET_PATH, load_dataset
+
+    if not DATASET_PATH.exists():
+        pytest.skip("mc4r_pki.json not built")
+    standalone = {r.molecule_chembl_id: r.pki for r in load_dataset().records}
+    viapanel = {
+        r.molecule_chembl_id: r.pki
+        for r in records_for_receptor(panel.for_endpoint("Ki"), "MC4R")
+    }
+    assert viapanel == standalone
+
+
+def test_per_receptor_counts_match_the_rows_they_claim(panel):
+    """The recorded counts are not a free-floating claim."""
+    for key, n in panel.counts["per_receptor_endpoint"].items():
+        receptor, endpoint = key.split("|")
+        actual = sum(
+            1 for r in panel.rows
+            if r.receptor == receptor and r.endpoint == endpoint)
+        assert actual == n, f"{key} claims {n} but holds {actual}"
+    assert panel.counts["total_measurements"] == len(panel.rows)
+    assert panel.counts["distinct_molecules"] == len(
+        {r.molecule_chembl_id for r in panel.rows})
+
+
+@pytest.mark.parametrize("receptor", sorted(MELANOCORTIN_RECEPTORS))
+def test_per_receptor_counts_match_chembl(panel, receptor):
+    """Against ChEMBL itself, through the cached client.
+
+    Skipped when the cache is cold and the network is unavailable, because the
+    cache directory is not committed. ChEMBL reports raw activity rows; the
+    panel holds unique molecules after filtering, so the check is that the
+    panel never claims more molecules than ChEMBL has rows for that target and
+    that the target is non-empty exactly when the panel says so.
+    """
+    from datetime import timedelta
+
+    from atlas.ml.dataset import API, ENDPOINT_ASSAY_TYPE
+    from atlas.sources.base import CachedHttpClient
+
+    target = MELANOCORTIN_RECEPTORS[receptor]["target_chembl_id"]
+    http = CachedHttpClient(ttl=timedelta(days=30))
+    try:
+        payload, _ = http.get_json(f"{API}/activity", {
+            "target_chembl_id": target, "standard_type": "Ki",
+            "standard_units": "nM", "standard_relation": "=",
+            "assay_type": ENDPOINT_ASSAY_TYPE["Ki"], "format": "json",
+            "limit": 1, "offset": 0,
+        })
+    except Exception as exc:                        # noqa: BLE001
+        pytest.skip(f"ChEMBL unavailable and cache cold: {exc}")
+
+    raw = payload.get("page_meta", {}).get("total_count")
+    if raw is None:
+        pytest.skip("ChEMBL returned no total_count")
+    claimed = panel.counts["per_receptor_endpoint"].get(f"{receptor}|Ki", 0)
+    assert claimed <= raw, (
+        f"{receptor} panel claims {claimed} molecules from {raw} ChEMBL rows")
+    assert (claimed > 0) == (raw > 0)

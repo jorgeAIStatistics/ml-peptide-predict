@@ -45,7 +45,8 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "MELANOCORTIN_RECEPTORS", "PANEL_PATH", "PanelRow", "TargetPanel",
     "build_panel", "load_panel", "leave_one_receptor_out",
-    "generalisation_regimes",
+    "generalisation_regimes", "document_groups", "document_group_audit",
+    "leave_documents_out", "records_for_receptor",
 ]
 
 PANEL_PATH = DATA_DIR / "melanocortin_panel.json"
@@ -352,6 +353,148 @@ def leave_one_receptor_out(
     test = np.array([i for i, r in enumerate(rows) if r.receptor == held_out])
     train = np.array([i for i, r in enumerate(rows) if r.receptor != held_out])
     return train, test
+
+
+def document_groups(rows: Sequence[PanelRow]) -> np.ndarray:
+    """Study-grouping label per row: connected components of (molecule, document).
+
+    A study group cannot simply be "one document". Melanocortin molecules are
+    re-measured across papers, so a molecule can belong to several documents
+    and a document to several molecules. Holding out documents independently
+    would then put the same molecule on both sides of the split, which is the
+    leak molecule-grouping exists to prevent.
+
+    The only grouping that keeps both guarantees at once is the transitive
+    closure: molecules and documents are nodes, each measurement is an edge,
+    and a group is a connected component. Neither a molecule nor a document
+    can then straddle a split.
+
+    The price is measured rather than assumed, in :func:`document_group_audit`
+    -- the closure can collapse a densely cross-cited literature into one
+    giant component, and if it does, study-grouped evaluation is not available
+    at a useful test size. That is a property of the corpus, not a bug.
+    """
+    parent: dict[Any, Any] = {}
+
+    def find(x: Any) -> Any:
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: Any, b: Any) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    for r in rows:
+        mol = ("mol", r.molecule_chembl_id)
+        find(mol)
+        for doc in r.document_ids:
+            union(mol, ("doc", doc))
+
+    roots: dict[Any, int] = {}
+    labels = np.empty(len(rows), dtype=int)
+    for i, r in enumerate(rows):
+        root = find(("mol", r.molecule_chembl_id))
+        labels[i] = roots.setdefault(root, len(roots))
+    return labels
+
+
+def document_group_audit(rows: Sequence[PanelRow]) -> dict[str, Any]:
+    """How much of the corpus the study-grouping closure fuses together."""
+    labels = document_groups(rows)
+    sizes = collections.Counter(labels.tolist())
+    mols_per_group: dict[int, set[str]] = collections.defaultdict(set)
+    for lab, r in zip(labels.tolist(), rows):
+        mols_per_group[lab].add(r.molecule_chembl_id)
+    largest = max(sizes.values()) if sizes else 0
+    n_docs = len({d for r in rows for d in r.document_ids})
+    return {
+        "n_rows": len(rows),
+        "n_documents": n_docs,
+        "n_groups": len(sizes),
+        "largest_group_rows": int(largest),
+        "largest_group_molecules": (
+            max((len(m) for m in mols_per_group.values()), default=0)
+        ),
+        "largest_group_fraction_of_rows": (
+            float(largest / len(rows)) if rows else 0.0
+        ),
+        "singleton_groups": int(sum(1 for v in sizes.values() if v == 1)),
+        "note": (
+            "Groups are connected components of the (molecule, document) "
+            "graph, so neither a molecule nor a document straddles a split. A "
+            "large largest_group_fraction_of_rows means the literature is "
+            "cross-cited enough that study-grouped holdout cannot be both "
+            "leak-free and small."
+        ),
+    }
+
+
+def leave_documents_out(
+    rows: Sequence[PanelRow], *, test_fraction: float = 0.25, seed: int = 0
+) -> tuple[np.ndarray, np.ndarray]:
+    """Hold out whole study groups -- the brief's study/document grouping.
+
+    Groups are the connected components of :func:`document_groups`, so a
+    held-out group shares neither a molecule nor a document with training.
+    Groups are taken in random order until the test fraction is reached, and
+    the giant component, if there is one, is therefore either wholly in or
+    wholly out; :func:`document_group_audit` reports whether that makes the
+    split usable.
+    """
+    labels = document_groups(rows)
+    rng = np.random.default_rng(seed)
+    order = rng.permutation(np.unique(labels))
+    target = int(round(test_fraction * len(rows)))
+    chosen: list[int] = []
+    n = 0
+    for g in order:
+        if n >= target:
+            break
+        chosen.append(int(g))
+        n += int((labels == g).sum())
+    in_test = np.isin(labels, chosen)
+    return np.where(~in_test)[0], np.where(in_test)[0]
+
+
+def records_for_receptor(
+    rows: Sequence[PanelRow], receptor: str
+) -> list[ActivityRecord]:
+    """One receptor's panel rows as :class:`ActivityRecord`s.
+
+    A single receptor's rows *are* a single-target dataset of exactly the shape
+    the ATLAS 2.4 Stage A audit and Stage B benchmark already consume, so this
+    adapter lets both be re-run per receptor over the expanded data without
+    either of them learning about panels.
+
+    Per receptor, deliberately. Pooling receptors into one label column would
+    put a molecule's MC1R and MC4R affinities in the same column as though they
+    were replicates of one quantity; the panel's own overlap audit measures the
+    median gap between them at over a log unit. Re-running per receptor keeps
+    every run a genuine single-target problem and makes the comparison across
+    receptors a replication test rather than a pooling artefact.
+    """
+    out = [
+        ActivityRecord(
+            molecule_chembl_id=r.molecule_chembl_id,
+            smiles=r.smiles,
+            pki=r.value,
+            pki_min=r.value_min,
+            pki_max=r.value_max,
+            n_replicates=r.n_replicates,
+            replicate_spread=r.replicate_spread,
+            molecule_type=None,
+            document_ids=r.document_ids,
+            assay_ids=r.assay_ids,
+        )
+        for r in rows
+        if r.receptor == receptor
+    ]
+    out.sort(key=lambda r: r.molecule_chembl_id)
+    return out
 
 
 def generalisation_regimes(

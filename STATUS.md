@@ -595,6 +595,55 @@ abstention case the Stage 1 audit anticipated.
 **Deferred with a reason:** protein language model embeddings — no PyTorch or
 transformers installed.
 
+#### Three groupings, including study grouping
+
+Peptide-cluster (`grouped_cluster_split`), target (`leave_one_receptor_out`)
+and study (`document_groups` + `leave_documents_out`). A study group cannot be
+one document: molecules are re-measured across papers, so a leak-free group is
+a connected component of the (molecule, document) graph. Measured cost of that
+closure — **39 documents behind the peptide rows collapse to 17 groups, the
+largest holding 43.9% of rows**. A study-grouped holdout therefore cannot be
+tuned to a target size, and a result from it rests on 17 independent units,
+not 39.
+
+### Stage 3b: Stage A and Stage B re-run per receptor (one finding did not survive)
+
+`atlas/ml/panel_replication.py`; data `data/ml/panel_replication.json`;
+reproduce with `python3 -m atlas.ml.panel_replication`. Full tables in
+`docs/ATLAS_2.5_STAGE_3_PANEL.md` §8.
+
+Stage A and Stage B were each measured on **one receptor**, so each finding
+was a single observation. Re-run per receptor — not pooled, because pooling
+would put a molecule's MC1R and MC4R affinities in one label column a median
+1.31 log units apart. MC4R re-run through the same adapter reproduces the
+canonical numbers exactly as a control, asserted by two tests.
+
+**Stage A replicates.** Series per receptor MC1R 22, MC3R 22, MC4R 30, MC5R
+14; effective sample size 0.048–0.146 of nominal. The **~30-series ceiling is
+a property of melanocortin peptide chemistry, not of the MC4R literature** —
+MC4R, with 2.3× the peptides of its nearest rival, has the most series. The
+non-canonical burden is class-wide at **68.4–80.5%**, so canonical-only
+representations are inadequate family-wide.
+
+**Stage B's headline finding does NOT replicate.** Stage B found all five
+representation contrasts reversing between cross-series and within-series
+evaluation. Re-measured: **MC4R 5/5, MC1R 3/5, MC3R 2/5, MC5R 1/5** — all five
+reverse on MC4R and nowhere else. The structural point (the two evaluations
+can disagree, so one number hides which question was asked) stands; the tally
+of five was an n=1 result reported as general. **Nor does the representation
+ranking transfer** — four distinct best representations across four receptors,
+none winning twice.
+
+**The gate fails on every receptor.** Best cross-series MAE in the family is
+0.827 (MC3R) against 0.70 required. The conjunction matters: MC1R's R² of
+**+0.397 clears** the R² ≥ 0.30 criterion — better than MC4R's +0.276 — while
+its MAE 0.919 does not clear 0.70. A gate on R² alone would have passed it.
+The gate was not touched and the peptide model still publishes no numeric
+estimates.
+
+The expansion **confirmed Stage A and weakened Stage B**, and improved no
+model. That is a negative result and is recorded as one.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -635,7 +684,7 @@ transformers installed.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 627 tests
+python3 -m pytest -q                              # 661 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
