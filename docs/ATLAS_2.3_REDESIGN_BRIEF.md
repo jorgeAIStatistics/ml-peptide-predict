@@ -104,3 +104,37 @@ Four directional references (not layouts to copy): editorial scientific visual
 identity; biological information as visual centrepiece (3D molecular render);
 precision scientific instrumentation (dense analytical workstation);
 publication-grade biological graphics (annotated pathway figure).
+
+---
+
+## Implementation log
+
+### Stage 1–2 complete — commit below
+**Delivered:** new design system, new application shell, new navigation
+architecture, reconstructed Molecular Atlas, specimen workspace.
+
+**Diagnosis that changed the plan.** The reviewer was seeing the *dark* palette:
+the previous build selected it automatically from `prefers-color-scheme`. Light
+is now the instrument's defined appearance, set on `<html data-theme="light">`,
+with dark available only by explicit toggle and remembered per browser. There is
+no `prefers-color-scheme` rule anywhere in the system, and a test asserts that.
+
+**Frontend replaced, not patched.** The previous `app.js`/`app.css` had grown to
+3,072 lines through 43 accumulated patch functions. Both deleted. The new
+frontend is six ES modules with separated concerns — `ui` (primitives and
+notation), `api` (one fetch layer), `figures` (scientific figures), `atlas`,
+`workspaces`, `app` (shell and routing) — plus `design.css` (tokens) and
+`components.css` (research components).
+
+### Remaining
+- **Stage 3** Simulation Studio and Model Intelligence are rebuilt in the new
+  language but deserve the linked-view and live-parameter work the brief asks for.
+- **Stage 4** Evidence Library is rebuilt as a reason landscape; the coverage
+  map and timeline views are not built.
+- **Stage 5** Systems Explorer, Geroscience Atlas and Interaction Laboratory are
+  navigable with honest unbuilt states naming the evidence each needs. They stay
+  empty deliberately: drawing a network or mapping compounds onto hallmarks
+  without a knowledge graph would mean inventing relationships.
+- **Stage 6** Motion is currently workspace entry, spine expansion and hover
+  states. Shared-element transitions between landscape and specimen are not built.
+- **Stage 7** Full accessibility and performance audit not yet run.

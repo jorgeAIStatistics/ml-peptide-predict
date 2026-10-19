@@ -223,9 +223,21 @@ class TestVerificationEndpoint:
 
 
 class TestStaticFrontend:
-    @pytest.mark.parametrize("path", ["/", "/app.css", "/app.js"])
+    @pytest.mark.parametrize("path", [
+        "/", "/design.css", "/components.css",
+        "/js/app.js", "/js/ui.js", "/js/api.js", "/js/figures.js",
+        "/js/atlas.js", "/js/workspaces.js",
+    ])
     def test_assets_are_served(self, client, path):
         assert client.get(path).status_code == 200
+
+    def test_frontend_defaults_to_light(self, client):
+        """The instrument has a defined appearance; the OS preference does not
+        change what a figure looks like. Dark is opt-in only."""
+        html = client.get("/").get_data(as_text=True)
+        assert 'data-theme="light"' in html
+        css = client.get("/design.css").get_data(as_text=True)
+        assert "prefers-color-scheme" not in css
 
     def test_page_has_no_external_script_dependency(self, client):
         """The interface must work offline: no CDN scripts or stylesheets."""

@@ -1,0 +1,544 @@
+/* ============================================================
+   ATLAS — Scientific Instrument Design System
+   ============================================================
+   Light-first by default. Dark is an explicit opt-in via
+   [data-theme="dark"], never selected automatically: the
+   instrument has a defined appearance, and the operating
+   system's preference does not change what a figure looks like.
+
+   Hierarchy comes from rules, alignment, type and negative
+   space. There is no card grid in this system; panels are
+   bounded regions of one continuous research canvas.
+   ============================================================ */
+
+:root {
+  /* --- surfaces ------------------------------------------ */
+  --canvas: #F6F5F0;
+  --surface: #FFFFFF;
+  --stone: #EDECE6;
+  --sunk: #FBFAF7;
+  --spine: #F1F0EA;
+
+  /* --- ink ----------------------------------------------- */
+  --ink: #182423;
+  --ink-2: #3D4A47;
+  --ink-3: #65716E;
+  --ink-4: #8E9794;
+  --ink-5: #B4BBB8;
+
+  /* --- semantic accents ---------------------------------- */
+  --teal: #0E6B63;          /* active biological relationship, selection */
+  --teal-deep: #0A4F49;
+  --teal-wash: #E4EFED;
+  --blue: #4E7E8E;          /* model context, information */
+  --blue-wash: #E8F0F3;
+  --amber: #8A6A14;         /* uncertainty, qualified evidence */
+  --amber-wash: #F7F0DC;
+  --copper: #9F5436;        /* scientific emphasis, absence */
+  --copper-wash: #F6EAE4;
+  --stone-ink: #6F6655;
+
+  /* --- line work ----------------------------------------- */
+  --rule: #DDDCD5;
+  --rule-soft: #E9E8E1;
+  --rule-strong: #C6C5BB;
+  --grid: rgba(24, 36, 35, 0.045);
+
+  /* --- type ---------------------------------------------- */
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino,
+             "Source Serif 4", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter,
+          system-ui, "Segoe UI", sans-serif;
+  --mono: "SF Mono", "JetBrains Mono", "IBM Plex Mono", ui-monospace,
+          Menlo, Consolas, monospace;
+
+  /* type scale, 1.25 minor third off a 13px base */
+  --t-micro: 9.5px;
+  --t-fine: 10.5px;
+  --t-small: 11.5px;
+  --t-base: 13px;
+  --t-lead: 15px;
+  --t-title: 19px;
+  --t-display: 26px;
+  --t-hero: 38px;
+
+  /* --- spacing: 4px base --------------------------------- */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+
+  /* --- metrics ------------------------------------------- */
+  --spine-w: 60px;
+  --spine-open: 232px;
+  --bar-h: 50px;
+  --specimen-h: 46px;
+  --inspector-w: 400px;
+  --r: 2px;
+
+  /* --- motion -------------------------------------------- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --fast: 120ms;
+  --mid: 220ms;
+  --slow: 380ms;
+}
+
+[data-theme="dark"] {
+  --canvas: #10161A;
+  --surface: #161D21;
+  --stone: #1B2429;
+  --sunk: #131A1E;
+  --spine: #131A1F;
+
+  --ink: #E6EAE8;
+  --ink-2: #BAC3C1;
+  --ink-3: #929D9A;
+  --ink-4: #6D7876;
+  --ink-5: #4C5553;
+
+  --teal: #57B6AA;
+  --teal-deep: #86D2C7;
+  --teal-wash: #14302E;
+  --blue: #86B3C2;
+  --blue-wash: #16272D;
+  --amber: #CFAE5B;
+  --amber-wash: #2A2514;
+  --copper: #D68C6B;
+  --copper-wash: #30201A;
+  --stone-ink: #AFA48C;
+
+  --rule: #27333A;
+  --rule-soft: #1D262B;
+  --rule-strong: #3A4951;
+  --grid: rgba(230, 234, 232, 0.04);
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font: 400 var(--t-base)/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+/* ============================================================
+   Typography primitives
+   ============================================================ */
+
+.display { font-family: var(--display); font-weight: 400; letter-spacing: -0.012em; }
+.t-hero { font: 400 var(--t-hero)/1.08 var(--display); letter-spacing: -0.02em; }
+.t-display { font: 400 var(--t-display)/1.18 var(--display); letter-spacing: -0.012em; }
+.t-title { font: 400 var(--t-title)/1.25 var(--display); }
+
+/* Small caps label — the instrument's annotation voice. Used for
+   field labels and figure captions, never for body copy. */
+.label {
+  font: 600 var(--t-micro)/1 var(--sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+/* Every number in ATLAS uses tabular figures so columns align. */
+.num, .numeric {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+.unit { font-size: 0.78em; color: var(--ink-4); margin-left: 0.25em; }
+
+/* Figure numbering, as in a published paper. */
+.fig-mark {
+  font: 600 var(--t-micro)/1 var(--mono);
+  letter-spacing: 0.1em;
+  color: var(--ink-4);
+  text-transform: uppercase;
+}
+.fig-caption {
+  font-size: var(--t-small);
+  line-height: 1.55;
+  color: var(--ink-3);
+  max-width: 68ch;
+}
+
+a { color: var(--teal); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+::selection { background: var(--teal-wash); }
+
+/* ============================================================
+   Application frame
+   ============================================================ */
+
+.frame {
+  display: grid;
+  grid-template-rows: var(--bar-h) auto minmax(0, 1fr);
+  height: 100%;
+}
+
+/* --- instrument bar ------------------------------------- */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  padding: 0 var(--s4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+  z-index: 30;
+}
+
+.mark {
+  display: flex; align-items: baseline; gap: var(--s2);
+  flex-shrink: 0;
+}
+.mark-word {
+  font: 500 16px/1 var(--display);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+/* The reticle: a small instrument crosshair, the product's one glyph. */
+.reticle { width: 11px; height: 11px; flex: none; color: var(--teal); }
+
+.bar-spacer { flex: 1; }
+
+.readout {
+  display: flex; align-items: center; gap: var(--s4);
+  font: 400 var(--t-fine)/1 var(--mono);
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+.readout b { color: var(--ink-2); font-weight: 500; }
+.readout-item { display: flex; align-items: center; gap: var(--s1); }
+
+/* --- scope strip ---------------------------------------- */
+.scope {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: var(--s2) var(--s4);
+  background: var(--amber-wash);
+  border-bottom: 1px solid color-mix(in srgb, var(--amber) 22%, var(--rule));
+  font-size: var(--t-small);
+  color: var(--amber);
+}
+
+/* --- body: spine + canvas ------------------------------- */
+.body {
+  display: grid;
+  grid-template-columns: var(--spine-w) minmax(0, 1fr);
+  min-height: 0;
+}
+
+/* ============================================================
+   The spine — module navigation by biological scale
+   ============================================================ */
+
+.spine {
+  background: var(--spine);
+  border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column;
+  padding: var(--s3) 0;
+  overflow: hidden;
+  transition: width var(--mid) var(--ease);
+}
+
+.spine-group { margin-bottom: var(--s4); }
+.spine-group + .spine-group { border-top: 1px solid var(--rule-soft); padding-top: var(--s4); }
+
+.spine-caption {
+  height: 12px;
+  margin: 0 0 var(--s2) 14px;
+  font: 600 var(--t-micro)/1 var(--sans);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-5);
+  opacity: 0; transition: opacity var(--fast) var(--ease);
+  white-space: nowrap;
+}
+
+.module {
+  display: grid;
+  grid-template-columns: var(--spine-w) 1fr;
+  align-items: center;
+  width: 100%;
+  border: 0; background: none; cursor: pointer;
+  padding: 0; margin: 0;
+  color: var(--ink-3);
+  text-align: left;
+  position: relative;
+  height: 38px;
+}
+.module::before {
+  content: ""; position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 2px; background: transparent;
+  transition: background var(--fast) var(--ease);
+}
+.module:hover { color: var(--ink); }
+.module:hover .module-glyph { color: var(--teal); }
+.module:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+
+.module[aria-current="page"] { color: var(--ink); background: var(--surface); }
+.module[aria-current="page"]::before { background: var(--teal); }
+.module[aria-current="page"] .module-glyph { color: var(--teal); }
+
+.module-glyph {
+  display: grid; place-items: center;
+  width: var(--spine-w); height: 38px;
+  color: var(--ink-4);
+  transition: color var(--fast) var(--ease);
+}
+.module-glyph svg { width: 18px; height: 18px; }
+
+.module-name {
+  font-size: var(--t-small);
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--fast) var(--ease);
+}
+
+.spine:hover, .spine:focus-within { width: var(--spine-open); }
+.spine:hover .module-name, .spine:focus-within .module-name,
+.spine:hover .spine-caption, .spine:focus-within .spine-caption { opacity: 1; }
+
+.spine-foot { margin-top: auto; padding: var(--s3) 0 0; }
+
+/* ============================================================
+   Canvas — the continuous research surface
+   ============================================================ */
+
+.canvas {
+  min-width: 0;
+  overflow: auto;
+  position: relative;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+  scroll-behavior: smooth;
+}
+
+/* Workspace: a bounded region of the canvas, not a floating card. */
+.workspace { display: none; }
+.workspace.is-active { display: block; animation: enter var(--mid) var(--ease); }
+
+@keyframes enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --- workspace header: editorial masthead ---------------- */
+.masthead {
+  padding: var(--s6) var(--s6) var(--s5);
+  border-bottom: 1px solid var(--rule);
+  background:
+    linear-gradient(to bottom, var(--surface), var(--surface)) padding-box;
+  position: relative;
+}
+.masthead::after {
+  /* a hairline tick rule, like a measuring edge */
+  content: ""; position: absolute; left: var(--s6); right: var(--s6); bottom: -1px;
+  height: 1px;
+  background: repeating-linear-gradient(to right,
+    var(--rule-strong) 0 1px, transparent 1px 8px);
+}
+.masthead-eyebrow {
+  display: flex; align-items: center; gap: var(--s2);
+  margin-bottom: var(--s2);
+}
+.masthead h1 { margin: 0 0 var(--s2); font: 400 var(--t-display)/1.15 var(--display); }
+.masthead p { margin: 0; max-width: 76ch; font-size: var(--t-small); line-height: 1.6; color: var(--ink-3); }
+
+.region { padding: var(--s5) var(--s6); }
+.region + .region { border-top: 1px solid var(--rule-soft); }
+.region-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--s4); margin-bottom: var(--s3); flex-wrap: wrap;
+}
+.region-head h2 { margin: 0; font: 400 var(--t-lead)/1.3 var(--display); }
+
+/* ============================================================
+   Controls — instrument, not consumer app
+   ============================================================ */
+
+.field { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; }
+
+input[type="text"], input[type="search"], input[type="number"], select {
+  font: 400 var(--t-base)/1.2 var(--sans);
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  padding: 7px 9px;
+  min-width: 0;
+  transition: border-color var(--fast) var(--ease);
+}
+input[type="number"] { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input:hover, select:hover { border-color: var(--ink-4); }
+input:focus-visible, select:focus-visible, button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+.btn {
+  font: 500 var(--t-small)/1 var(--sans);
+  padding: 8px 14px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: border-color var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.btn:hover { border-color: var(--teal); color: var(--teal); }
+.btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+.btn-primary:hover { background: var(--teal-deep); border-color: var(--teal-deep); color: #fff; }
+.btn[disabled] { opacity: .45; cursor: default; }
+
+.btn-ghost {
+  border-color: transparent; background: none;
+  color: var(--ink-3); padding: 6px 8px;
+}
+.btn-ghost:hover { color: var(--teal); border-color: var(--rule); }
+
+/* segmented control — the mode switch on an instrument */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.segmented button {
+  font: 500 var(--t-fine)/1 var(--mono);
+  letter-spacing: 0.04em;
+  padding: 7px 11px;
+  background: var(--surface); color: var(--ink-3);
+  border: 0; border-right: 1px solid var(--rule);
+  cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.segmented button:last-child { border-right: 0; }
+.segmented button:hover { color: var(--ink); background: var(--sunk); }
+.segmented button[aria-pressed="true"] { background: var(--teal); color: #fff; }
+
+/* ============================================================
+   Scientific marks
+   ============================================================ */
+
+/* status marks use geometry as well as colour, so they survive
+   greyscale printing and colour-vision differences */
+.mark-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--t-small); white-space: nowrap;
+}
+.mark-status::before { content: ""; width: 7px; height: 7px; flex: none; background: currentColor; }
+.st-resolved { color: var(--teal); }
+.st-ambiguous { color: var(--amber); }
+.st-ambiguous::before { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.st-unresolved { color: var(--copper); }
+.st-unresolved::before { background: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
+.st-mixture { color: var(--blue); }
+.st-mixture::before { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.st-supplier { color: var(--stone-ink); }
+.st-supplier::before { background: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 4px); }
+
+/* evidence class chip */
+.ev {
+  display: inline-grid; place-items: center;
+  width: 20px; height: 20px;
+  font: 600 var(--t-fine)/1 var(--mono);
+  border: 1px solid currentColor; border-radius: var(--r);
+}
+.ev-A { color: var(--teal); background: var(--teal-wash); }
+.ev-B { color: var(--blue); background: var(--blue-wash); }
+.ev-C { color: var(--amber); background: var(--amber-wash); }
+.ev-D, .ev-E { color: var(--copper); background: var(--copper-wash); }
+
+/* ============================================================
+   Figures
+   ============================================================ */
+
+.figure { margin: 0; }
+.figure-head {
+  display: flex; align-items: baseline; gap: var(--s3);
+  margin-bottom: var(--s3); flex-wrap: wrap;
+}
+.figure-title { font: 500 var(--t-base)/1.3 var(--sans); margin: 0; }
+.figure-body { position: relative; }
+.figure svg { display: block; width: 100%; height: auto; overflow: visible; }
+.figure figcaption { margin-top: var(--s3); }
+
+.ax-line { stroke: var(--rule-strong); stroke-width: 1; }
+.ax-grid { stroke: var(--rule-soft); stroke-width: 1; }
+.ax-text { fill: var(--ink-4); font: 400 10px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.ax-title { fill: var(--ink-3); font: 600 var(--t-micro)/1 var(--sans); letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* ============================================================
+   Utility
+   ============================================================ */
+
+.row { display: flex; align-items: center; gap: var(--s3); }
+.row-wrap { flex-wrap: wrap; }
+.stack { display: grid; gap: var(--s3); }
+.spacer { flex: 1; }
+.muted { color: var(--ink-3); }
+.fine { font-size: var(--t-small); }
+.hidden { display: none !important; }
+
+.skip {
+  position: absolute; left: -9999px; z-index: 100;
+  background: var(--surface); padding: 10px 16px; border: 1px solid var(--teal);
+}
+.skip:focus { left: 8px; top: 8px; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  :root { --inspector-w: 340px; }
+  .masthead, .region { padding-left: var(--s5); padding-right: var(--s5); }
+}
+
+@media (max-width: 860px) {
+  body { overflow: auto; }
+  .frame { grid-template-rows: var(--bar-h) auto auto minmax(0, 1fr); height: auto; }
+  .body { grid-template-columns: minmax(0, 1fr); }
+  .spine {
+    flex-direction: row; overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--rule);
+    padding: 0; width: auto !important;
+  }
+  .spine-group { display: flex; margin: 0; border: 0; padding: 0; }
+  .spine-group + .spine-group { border-left: 1px solid var(--rule-soft); padding-top: 0; }
+  .spine-caption, .spine-foot { display: none; }
+  .module { grid-template-columns: auto auto; width: auto; gap: 0 6px; padding: 0 12px 0 8px; }
+  .module::before { top: auto; bottom: 0; left: 8px; right: 8px; width: auto; height: 2px; }
+  .module-name { opacity: 1; }
+  .module-glyph { width: 22px; }
+  .masthead { padding: var(--s5) var(--s4) var(--s4); }
+  .masthead::after { left: var(--s4); right: var(--s4); }
+  .region { padding: var(--s4); }
+  .readout { display: none; }
+}
+
+@media (max-width: 420px) {
+  :root { --t-display: 22px; --t-hero: 28px; }
+  .mark-word { font-size: 14px; letter-spacing: 0.16em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .bar, .spine, .scope { display: none; }
+  .canvas { background: none; overflow: visible; }
+}

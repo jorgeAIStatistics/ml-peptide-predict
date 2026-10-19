@@ -1,335 +1,64 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ATLAS — Computational Pharmacology Workbench</title>
-<link rel="stylesheet" href="app.css">
+<title>ATLAS — Computational Biology Research Instrument</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" fill="%23F6F5F0"/><g fill="none" stroke="%230E6B63" stroke-width="1.3"><circle cx="8" cy="8" r="5"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3"/></g></svg>'>
+<link rel="stylesheet" href="design.css">
+<link rel="stylesheet" href="components.css">
 </head>
 <body>
 
-<a class="skip-link" href="#workspace">Skip to workspace</a>
+<a class="skip" href="#canvas">Skip to workspace</a>
 
-<header class="instrument-bar">
-  <div class="brand">
-    <span class="brand-mark">ATLAS</span>
-    <span class="brand-sub">Computational Pharmacology Workbench</span>
-  </div>
-  <div class="bar-meta" id="bar-meta">
-    <span class="chip chip-quiet" id="chip-snapshot">snapshot …</span>
-    <span class="chip chip-quiet" id="chip-entries">… entries</span>
-    <span class="chip chip-verify" id="chip-verify">verification …</span>
-  </div>
-</header>
+<div class="frame">
 
-<div class="scope-strip" role="note">
-  <span class="scope-icon" aria-hidden="true">※</span>
-  <span id="scope-note">Research platform for literature analysis and computational modelling.</span>
+  <header class="bar">
+    <div class="mark">
+      <svg class="reticle" viewBox="0 0 12 12" fill="none" stroke="currentColor"
+           stroke-width="1.2" aria-hidden="true">
+        <circle cx="6" cy="6" r="4.2"/><path d="M6 0v3M6 9v3M0 6h3M9 6h3"/>
+      </svg>
+      <span class="mark-word">Atlas</span>
+    </div>
+    <span class="bar-spacer"></span>
+    <div class="readout" id="readout"></div>
+    <button class="btn btn-ghost palette-trigger" id="palette-open" type="button"
+            title="Search compounds and workspaces (⌘K)">
+      <span>Search</span><kbd>⌘K</kbd>
+    </button>
+    <button class="btn btn-ghost theme-toggle" id="theme-toggle" type="button"
+            aria-pressed="false" title="Switch to dark">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+        <circle cx="8" cy="8" r="3.4"/>
+        <path d="M8 .8v2M8 13.2v2M.8 8h2M13.2 8h2M2.9 2.9l1.4 1.4M11.7 11.7l1.4 1.4M13.1 2.9l-1.4 1.4M4.3 11.7l-1.4 1.4"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="scope" role="note">
+    <span aria-hidden="true">※</span>
+    <span id="scope-note">Research platform for literature analysis and computational modelling.</span>
+  </div>
+
+  <div class="body">
+    <nav class="spine" id="spine" aria-label="Research modules"></nav>
+    <main class="canvas" id="canvas" tabindex="-1">
+      <div class="specimen-bar" id="specimen-bar" hidden></div>
+    </main>
+  </div>
 </div>
 
-<div class="shell">
-  <nav class="rail" aria-label="Workspaces">
-    <div class="rail-group">
-      <h2 class="rail-heading">Workspaces</h2>
-      <ul class="rail-list" id="rail-list">
-        <li><button class="rail-item is-active" data-view="atlas">
-          <span class="rail-num">01</span>
-          <span class="rail-label">Compound Atlas</span>
-          <span class="rail-note">identity &amp; provenance</span>
-        </button></li>
-        <li><button class="rail-item" data-view="studio">
-          <span class="rail-num">02</span>
-          <span class="rail-label">Model Studio</span>
-          <span class="rail-note">mechanistic simulation</span>
-        </button></li>
-        <li><button class="rail-item" data-view="gaps">
-          <span class="rail-num">03</span>
-          <span class="rail-label">Evidence &amp; Gaps</span>
-          <span class="rail-note">what may be computed</span>
-        </button></li>
-        <li><button class="rail-item" data-view="verification">
-          <span class="rail-num">04</span>
-          <span class="rail-label">Verification</span>
-          <span class="rail-note">solver correctness</span>
-        </button></li>
-        <li><button class="rail-item" data-view="modellab">
-          <span class="rail-num">05</span>
-          <span class="rail-label">Model Lab</span>
-          <span class="rail-note">trained ML &amp; applicability</span>
-        </button></li>
-      </ul>
-    </div>
-
-    <div class="rail-group rail-legend">
-      <h2 class="rail-heading">Identity status</h2>
-      <ul class="legend-list" id="legend-identity"></ul>
-    </div>
-
-    <div class="rail-foot">
-      <p>Evidence is read from a versioned snapshot. Numbers are measured
-      counts, never estimates.</p>
-    </div>
-  </nav>
-
-  <main class="workspace" id="workspace">
-
-    <!-- ============ 01 COMPOUND ATLAS ============ -->
-    <section class="view is-active" id="view-atlas" aria-labelledby="atlas-title">
-      <div class="split">
-        <div class="split-main">
-          <div class="panel panel-flush">
-            <div class="panel-head">
-              <div>
-                <h1 class="panel-title" id="atlas-title">Compound Atlas</h1>
-                <p class="panel-sub">Molecular identity resolved against ChEMBL and
-                  PubChem, with literature volume measured from PubMed and
-                  ClinicalTrials.gov.</p>
-              </div>
-            </div>
-
-            <div class="toolbar">
-              <div class="field field-search">
-                <label class="field-label" for="atlas-search">Search</label>
-                <input type="search" id="atlas-search" placeholder="name or alias…"
-                       autocomplete="off" spellcheck="false">
-              </div>
-              <div class="field">
-                <label class="field-label" for="atlas-area">Research area</label>
-                <select id="atlas-area"><option value="">all areas</option></select>
-              </div>
-              <div class="field">
-                <label class="field-label" for="atlas-status">Identity</label>
-                <select id="atlas-status"><option value="">any status</option></select>
-              </div>
-              <p class="toolbar-count" id="atlas-count"></p>
-            </div>
-
-            <div class="table-scroll">
-              <table class="data-table" id="atlas-table">
-                <thead>
-                  <tr>
-                    <th scope="col" class="sortable" data-sort="name">Compound</th>
-                    <th scope="col" class="sortable" data-sort="identity_status">Identity</th>
-                    <th scope="col" class="sortable" data-sort="modality">Modality</th>
-                    <th scope="col" class="num sortable" data-sort="molecular_weight">MW</th>
-                    <th scope="col" class="num sortable" data-sort="publications">Pubs</th>
-                    <th scope="col" class="num sortable" data-sort="human_pk_publications">Hum PK</th>
-                    <th scope="col" class="num sortable" data-sort="trials_with_results">Trials&nbsp;⊕</th>
-                    <th scope="col" class="sortable" data-sort="density">Density</th>
-                    <th scope="col">Permitted</th>
-                  </tr>
-                </thead>
-                <tbody id="atlas-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <aside class="split-side" id="atlas-inspector" aria-live="polite">
-          <div class="empty-state">
-            <p class="empty-glyph" aria-hidden="true">◫</p>
-            <h2>Contextual inspector</h2>
-            <p>Select a compound to inspect its resolved identity, the source of
-              each field, recorded caveats, and which analyses the evidence gate
-              permits.</p>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <!-- ============ 02 MODEL STUDIO ============ -->
-    <section class="view" id="view-studio" aria-labelledby="studio-title" hidden>
-      <div class="studio">
-        <aside class="studio-controls">
-          <div class="panel">
-            <div class="panel-head">
-              <div>
-                <h1 class="panel-title" id="studio-title">Model Studio</h1>
-                <p class="panel-sub">Numerical integration of compartmental models.
-                  Every trajectory below is solver output.</p>
-              </div>
-            </div>
-
-            <div class="control-block">
-              <label class="field-label" for="studio-model">Model</label>
-              <select id="studio-model"></select>
-              <p class="control-hint" id="studio-model-desc"></p>
-            </div>
-
-            <div class="control-block">
-              <h3 class="control-heading">Parameters</h3>
-              <div id="studio-params" class="param-grid"></div>
-              <p class="control-hint">Units are fixed by the model and
-                dimension-checked server-side.</p>
-            </div>
-
-            <div class="control-block">
-              <h3 class="control-heading">Dosing</h3>
-              <div class="param-grid">
-                <div class="param-row">
-                  <label for="studio-dose">Dose</label>
-                  <input type="number" id="studio-dose" value="10" min="0.0001" step="any">
-                  <span class="unit">mg</span>
-                </div>
-                <div class="param-row">
-                  <label for="studio-ndoses">Doses</label>
-                  <input type="number" id="studio-ndoses" value="1" min="1" max="200" step="1">
-                  <span class="unit">n</span>
-                </div>
-                <div class="param-row">
-                  <label for="studio-interval">Interval</label>
-                  <input type="number" id="studio-interval" placeholder="auto" min="0.0001" step="any">
-                  <span class="unit">h</span>
-                </div>
-                <div class="param-row">
-                  <label for="studio-horizon">Horizon</label>
-                  <input type="number" id="studio-horizon" placeholder="auto" min="0.0001" step="any">
-                  <span class="unit">h</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="control-block">
-              <label class="field-label" for="studio-compound">Attribute to compound
-                <span class="optional">(optional)</span></label>
-              <select id="studio-compound">
-                <option value="">— none, exploratory only —</option>
-              </select>
-              <p class="control-hint">Naming a compound asks the evidence gate
-                whether the result may be described as its pharmacokinetics.</p>
-              <div id="studio-pk"></div>
-            </div>
-
-            <div class="control-actions">
-              <button class="btn btn-primary" id="studio-run">Run simulation</button>
-              <button class="btn" id="studio-reset">Reset</button>
-            </div>
-            <p class="control-error" id="studio-error" role="alert" hidden></p>
-          </div>
-
-          <div class="panel panel-equations">
-            <h3 class="control-heading">Equations integrated</h3>
-            <ol class="equation-list" id="studio-equations"></ol>
-          </div>
-        </aside>
-
-        <div class="studio-canvas" id="studio-canvas">
-          <div class="empty-state empty-tall">
-            <p class="empty-glyph" aria-hidden="true">∫</p>
-            <h2>No run yet</h2>
-            <p>Choose a model and parameters, then run the solver. Results carry
-              their evidence class, mass-balance diagnostic and run identifier.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ 03 EVIDENCE & GAPS ============ -->
-    <section class="view" id="view-gaps" aria-labelledby="gaps-title" hidden>
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <h1 class="panel-title" id="gaps-title">Evidence &amp; Gaps</h1>
-            <p class="panel-sub">Which analyses the measured evidence permits for
-              each registry entry, and the reason for every refusal.</p>
-          </div>
-        </div>
-        <div class="gap-summary" id="gap-summary"></div>
-        <div class="table-scroll">
-          <table class="data-table matrix-table" id="gap-table">
-            <thead><tr id="gap-head"></tr></thead>
-            <tbody id="gap-tbody"></tbody>
-          </table>
-        </div>
-        <div class="matrix-key">
-          <span class="mk"><i class="cell-dot cell-yes"></i> permitted</span>
-          <span class="mk"><i class="cell-dot cell-no"></i> refused — hover or focus a cell for the reason</span>
-          <span class="mk"><i class="cell-dot cell-na"></i> not applicable</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ 04 VERIFICATION ============ -->
-    <section class="view" id="view-verification" aria-labelledby="verify-title" hidden>
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <h1 class="panel-title" id="verify-title">Solver Verification</h1>
-            <p class="panel-sub">Numerical output compared against closed-form
-              solutions, conservation laws and exact analytic identities.</p>
-          </div>
-        </div>
-        <div class="verify-banner" id="verify-banner"></div>
-        <div id="verify-body"></div>
-      </div>
-    </section>
-
-    <!-- ============ 05 MODEL LAB ============ -->
-    <section class="view" id="view-modellab" aria-labelledby="ml-title" hidden>
-      <div class="panel">
-        <div class="panel-head">
-          <div>
-            <h1 class="panel-title" id="ml-title">Model Lab</h1>
-            <p class="panel-sub">A trained machine-learning endpoint model, its
-              held-out performance under splits of increasing honesty, and the
-              domain it may be used on.</p>
-          </div>
-        </div>
-        <div id="ml-card"></div>
-      </div>
-
-      <div class="panel" style="margin-top:20px">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title" style="font-size:19px">Performance by split</h2>
-            <p class="panel-sub">Mean absolute error in log units, lower is
-              better. The dashed line is the mean-predictor baseline: anything
-              to its right is worse than predicting the training average.</p>
-          </div>
-        </div>
-        <div id="ml-splits"></div>
-      </div>
-
-      <div class="panel" style="margin-top:20px">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title" style="font-size:19px">Peptide ligands</h2>
-            <p class="panel-sub">A peptide-specific model was built and evaluated.
-              What it measured, and why it is not deployed.</p>
-          </div>
-        </div>
-        <div id="ml-peptide"></div>
-      </div>
-
-      <div class="panel" style="margin-top:20px">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title" style="font-size:19px">Prediction console</h2>
-            <p class="panel-sub">Enter a structure or choose a registry entry.
-              The model answers only within its measured domain.</p>
-          </div>
-        </div>
-        <div class="toolbar">
-          <div class="field field-search">
-            <label class="field-label" for="ml-smiles">SMILES</label>
-            <input type="text" id="ml-smiles" placeholder="paste a structure…"
-                   autocomplete="off" spellcheck="false">
-          </div>
-          <div class="field">
-            <label class="field-label" for="ml-compound">or registry entry</label>
-            <select id="ml-compound"><option value="">— choose —</option></select>
-          </div>
-          <button class="btn btn-primary" id="ml-predict" style="flex:0 0 auto">Predict</button>
-        </div>
-        <div id="ml-result"></div>
-      </div>
-    </section>
-
-  </main>
+<div class="palette" id="palette" hidden>
+  <div class="palette-box" role="dialog" aria-modal="true" aria-label="Search">
+    <input type="text" id="palette-input" placeholder="Search compounds and workspaces…"
+           autocomplete="off" spellcheck="false">
+    <ul class="palette-list" id="palette-list"></ul>
+    <p class="palette-foot fine muted">Enter to open · Esc to dismiss</p>
+  </div>
 </div>
 
-<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
-
-<script type="module" src="app.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>
