@@ -35,6 +35,9 @@ from atlas.ml.peptide_service import PEPTIDE_MODEL_FINDINGS
 from atlas.ml.affinity_service import CALIBRATION_CARD, get_affinity_service
 from atlas.registry.seed import by_key as seed_by_key
 from atlas.mechanistic.pk_store import load_store, parameters_for
+from atlas.interpretation.attach import (
+    interpret_affinity, interpret_model_card, interpret_simulation,
+)
 from atlas.registry.seed import RESEARCH_AREAS, SEED_REGISTRY
 
 logger = logging.getLogger(__name__)
@@ -383,6 +386,10 @@ def create_app() -> Flask:
             "calibration": CALIBRATION_CARD,
             "calibration_report": calibration_report(),
             "peptide_v2_report": peptide_v2_report(),
+            "interpretations": interpret_model_card(
+                MODEL_CARD, CALIBRATION_CARD,
+                (ml_report() or {}).get("noise_estimate"),
+            ),
         })
 
     @app.post("/api/predict")
@@ -498,6 +505,23 @@ def create_app() -> Flask:
                 "explanation": r.abstention_explanation,
                 "what_would_resolve_it": r.what_would_resolve_it,
             }
+
+        # Every reported number carries its interpretation, built from the
+        # metadata of whatever produced it.
+        row = next((x for x in merged_rows() if x["key"] == key), None) if key else None
+        if row is not None:
+            pk = parameters_for(key) or {}
+            extracted = {e["name"]: e for e in pk.get("extracted", [])}
+            if "cmax" in extracted:
+                row = dict(row, label_cmax_ng_per_ml=extracted["cmax"]["value"])
+            if "protein_binding" in extracted:
+                row = dict(row,
+                           unbound_fraction=1.0 - extracted["protein_binding"]["value"])
+        try:
+            payload["interpretations"] = interpret_affinity(payload, row)
+        except Exception:
+            logger.exception("interpretation failed")
+            payload["interpretations"] = []
         return jsonify(payload)
 
     @app.get("/api/pk-parameters")
@@ -635,6 +659,10 @@ def create_app() -> Flask:
                 "interpretation": label["interpretation"],
                 "abstention": abstention,
                 "compound_key": compound_key,
+                "interpretations": _simulation_interpretations(
+                    model, clean, dose_mg, doses, interval_h, res, analysis,
+                    exact_auc, half_life, label,
+                ),
             }
         )
 
@@ -648,6 +676,36 @@ def create_app() -> Flask:
         return send_from_directory(STATIC, filename)
 
     return app
+
+
+def _simulation_interpretations(model, params, dose_mg, doses, interval_h,
+                                res, analysis, exact_auc, half_life, label):
+    """Build interpretations for a simulation's derived quantities."""
+    try:
+        return interpret_simulation({
+            "evidence_class": label["evidence_class"],
+            "model_display_name": getattr(model, "display_name", model.name),
+            "parameters": params,
+            "dose_mg": dose_mg,
+            "interval_h": interval_h if len(doses) > 1 else None,
+            "diagnostics": {
+                "mass_balance_relative_error": res.mass_balance_relative_error,
+                "solver": res.settings.as_dict(),
+                "terminal_half_life_h": half_life,
+                "is_flip_flop": bool(
+                    getattr(model, "is_flip_flop", lambda _p: False)(params)),
+            },
+            "nca": {
+                "cmax_mg_per_l": analysis.cmax_mg_per_l,
+                "tmax_h": analysis.tmax_h,
+                "analytic_auc_inf_mg_h_per_l": exact_auc,
+                "extrapolated_fraction": analysis.extrapolated_fraction,
+                "terminal_half_life_h": analysis.terminal.half_life_h,
+            },
+        })
+    except Exception:
+        logger.exception("simulation interpretation failed")
+        return []
 
 
 def _count(rows: list[dict[str, Any]], field: str) -> dict[str, int]:

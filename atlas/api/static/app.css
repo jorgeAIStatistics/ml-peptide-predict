@@ -949,3 +949,58 @@ button.cell-btn { background: none; border: 0; padding: 2px; cursor: help; line-
   font-size: 11.5px; font-weight: 600; color: var(--ink);
 }
 .pk-loaded { color: var(--teal) !important; }
+
+
+/* ---------------- scientific interpretation ---------------- */
+.interp {
+  border: 1px solid var(--divider);
+  border-left: 2px solid var(--blue);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  background: var(--surface);
+}
+.interp[open] { border-left-color: var(--teal); }
+.interp-summary {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding: 10px 13px; cursor: pointer; list-style: none;
+}
+.interp-summary::-webkit-details-marker { display: none; }
+.interp-summary::before {
+  content: "+"; font-family: var(--mono); color: var(--ink-4);
+  font-size: 12px; width: 10px;
+}
+.interp[open] .interp-summary::before { content: "–"; color: var(--teal); }
+.interp-summary:hover { background: color-mix(in srgb, var(--teal) 4%, transparent); }
+.interp-summary:focus-visible { outline: 2px solid var(--teal); outline-offset: -2px; }
+.interp-symbol {
+  font: 600 12px/1 var(--mono); color: var(--teal);
+  min-width: 56px;
+}
+.interp-value {
+  font: 400 13px/1 var(--mono); color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.interp-name { font-size: 11.5px; color: var(--ink-3); }
+
+.interp-section { padding: 11px 15px; border-top: 1px solid var(--divider-soft); }
+.interp-heading {
+  margin: 0 0 7px;
+  font: 600 9px/1 var(--sans);
+  letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-4);
+}
+.interp-text { margin: 0 0 7px; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); }
+.interp-formula {
+  margin: 0 0 8px; padding: 7px 9px;
+  font: 400 11px/1.5 var(--mono); color: var(--ink);
+  background: var(--sunk); border: 1px solid var(--divider-soft);
+  overflow-wrap: anywhere;
+}
+.interp-label {
+  margin: 9px 0 4px;
+  font: 600 10px/1 var(--sans); letter-spacing: 0.06em; color: var(--ink-3);
+}
+.interp-list { margin: 0; padding-left: 16px; font-size: 11px; line-height: 1.55; color: var(--ink-2); }
+.interp-list li { margin-bottom: 4px; }
+.interp-negative li { color: var(--oxide); }
+.interp-kv { grid-template-columns: 150px minmax(0, 1fr); margin-top: 8px; }
+.interp-kv dd { font-size: 11.5px; }

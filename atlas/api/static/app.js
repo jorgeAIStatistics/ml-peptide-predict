@@ -861,6 +861,15 @@ function renderRun(run) {
     doseTimes,
     ariaLabel: 'Drug amount in each compartment over time, with the conserved total',
   });
+
+  if ((run.interpretations || []).length) {
+    const panel = el('div', { class: 'panel' },
+      el('div', { class: 'chart-head' },
+        el('h2', { class: 'chart-title', text: 'Scientific interpretation' })));
+    renderInterpretations(panel, run.interpretations,
+      'What each computed quantity means');
+    host.append(panel);
+  }
 }
 
 
@@ -961,6 +970,10 @@ async function loadModelLab() {
     const data = await getJSON('/api/model-card');
     state.modelCard = data;
     renderModelCard(data.card, data.report);
+    if ((data.interpretations || []).length) {
+      renderInterpretations($('#ml-card'), data.interpretations,
+        'What the performance numbers mean');
+    }
     renderSplitCharts(data.report);
     if (data.peptide_findings) {
       renderPeptideFindings(data.peptide_findings, data.peptide_report);
@@ -1199,6 +1212,111 @@ function metricGrid() {
   return grid;
 }
 
+/* ---------------- scientific interpretation ---------------- */
+
+/**
+ * Render one interpretation as four coordinated views behind progressive
+ * disclosure. <details> is used rather than custom tabs: it is keyboard
+ * accessible and searchable by the browser without any script.
+ */
+function renderInterpretation(i) {
+  const box = el('details', { class: 'interp' },
+    el('summary', { class: 'interp-summary' },
+      el('span', { class: 'interp-symbol', text: i.symbol }),
+      el('span', { class: 'interp-value',
+        text: i.mathematics?.stated_value || (i.value == null ? '—' : fmt(i.value)) }),
+      el('span', { class: 'interp-name', text: i.name })));
+
+  const section = (title, node) => el('div', { class: 'interp-section' },
+    el('h4', { class: 'interp-heading', text: title }), node);
+
+  // View 1 — what the number is, mathematically
+  const math = el('div', {},
+    el('p', { class: 'interp-text', text: i.what_is_measured?.definition || '' }),
+    el('p', { class: 'interp-formula', text: i.mathematics?.transformation || '' }));
+  if ((i.derived || []).length) {
+    const dl = el('dl', { class: 'kv interp-kv' });
+    for (const d of i.derived) {
+      dl.append(el('dt', { text: d.label }),
+        el('dd', {}, document.createTextNode(String(d.value)),
+          el('span', { class: 'prov', text: d.how })));
+    }
+    math.append(dl);
+  }
+  box.append(section('Result and mathematics', math));
+
+  // View 2 — biological meaning, including what it does not establish
+  const bio = el('div', {});
+  const list = (label, items, cls) => {
+    if (!(items || []).length) return;
+    bio.append(el('p', { class: 'interp-label', text: label }));
+    const ul = el('ul', { class: `interp-list ${cls || ''}` });
+    for (const x of items) ul.append(el('li', { text: x }));
+    bio.append(ul);
+  };
+  list('Establishes', i.biological_meaning?.establishes);
+  list('Does not establish', i.biological_meaning?.does_not_establish, 'interp-negative');
+  list('Common misreadings', i.biological_meaning?.common_misreadings, 'interp-negative');
+  box.append(section('Biological meaning', bio));
+
+  // View 3 — why the model produced this
+  if ((i.why_this_result || []).length) {
+    const ul = el('ul', { class: 'interp-list' });
+    for (const c of i.why_this_result) {
+      ul.append(el('li', {}, el('strong', { text: `${titleCase(c.kind)}: ` }),
+        document.createTextNode(c.detail)));
+    }
+    box.append(section('Why this result', ul));
+  }
+
+  // View 4 — uncertainty and what would test it
+  const unc = el('div', {});
+  const u = i.uncertainty || {};
+  if (u.interval_low != null && u.interval_high != null) {
+    unc.append(el('p', { class: 'interp-text',
+      text: `Interval ${fmt(u.interval_low)} – ${fmt(u.interval_high)}`
+        + (u.interval_nominal ? ` at a nominal ${(u.interval_nominal * 100).toFixed(0)}%` : '')
+        + (u.interval_measured_coverage != null
+           ? `, measured coverage ${u.interval_measured_coverage.toFixed(3)}` : '') }));
+  }
+  if (u.applicability) unc.append(el('p', { class: 'interp-text', text: u.applicability }));
+  if (u.dominant_driver) {
+    unc.append(el('p', { class: 'interp-label', text: 'Dominant source of uncertainty' }),
+      el('p', { class: 'interp-text', text: u.dominant_driver }));
+  }
+  if ((u.drivers || []).length) {
+    const ul = el('ul', { class: 'interp-list' });
+    for (const d of u.drivers.slice(0, 4)) ul.append(el('li', { text: d }));
+    unc.append(el('p', { class: 'interp-label', text: 'Contributing factors' }), ul);
+  }
+  const vm = i.validation?.measurements_that_would_test_it || [];
+  if (vm.length) {
+    const ul = el('ul', { class: 'interp-list' });
+    for (const x of vm) ul.append(el('li', { text: x }));
+    unc.append(el('p', { class: 'interp-label', text: 'What would test this' }), ul);
+  }
+  const oa = i.validation?.open_assumptions || [];
+  if (oa.length) {
+    const ul = el('ul', { class: 'interp-list interp-negative' });
+    for (const x of oa) ul.append(el('li', { text: x }));
+    unc.append(el('p', { class: 'interp-label', text: 'Open assumptions' }), ul);
+  }
+  box.append(section('Uncertainty and validation', unc));
+  return box;
+}
+
+function renderInterpretations(host, interpretations, heading) {
+  if (!(interpretations || []).length) return;
+  const wrap = el('div', { class: 'insp-section' },
+    el('h3', { class: 'insp-heading', text: heading || 'What these numbers mean' }),
+    el('p', { class: 'analysis-why',
+      text: 'Each value is explained from its own definition and from the metadata '
+        + 'of whatever produced it. Expand one to see the mathematics, what it does '
+        + 'and does not establish, and what would test it.' }));
+  for (const i of interpretations) wrap.append(renderInterpretation(i));
+  host.append(wrap);
+}
+
 function renderPrediction(r) {
   const host = $('#ml-result');
   host.textContent = '';
@@ -1247,6 +1365,7 @@ function renderPrediction(r) {
           el('a', { href: m.chembl_url, target: '_blank', rel: 'noopener',
                     text: m.molecule_chembl_id }),
           el('span', { class: 'src-meta', text: `dataset ${r.dataset_version}` })))));
+    renderInterpretations(host, r.interpretations);
     return;
   }
 
@@ -1268,6 +1387,7 @@ function renderPrediction(r) {
                        return ul; })()
             : null))));
     host.append(relevancePanel(r));
+    renderInterpretations(host, r.interpretations);
     return;
   }
 
@@ -1321,6 +1441,7 @@ function renderPrediction(r) {
                  text: 'Nearest training molecules — this is the explanation' }),
       list));
   }
+  renderInterpretations(host, r.interpretations);
 }
 
 function renderPeptideFindings(f, report) {

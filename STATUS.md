@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-18 · 418 tests passing
+Last updated: 2026-10-19 · 462 tests passing
 
 ## What this is
 
@@ -359,6 +359,41 @@ establish that the true disposition is one-compartment. Labels report population
 means; between-subject variability is represented only by the standard
 deviations stated.
 
+### Scientific Interpretation Engine
+
+Every number ATLAS reports now carries an explanation computed from its own
+value and from the metadata of whatever produced it. None of it is prewritten
+narrative attached after the fact: a pKi of 5.45 is reported as a Ki of 3.55 µM
+because 10^−5.45 was evaluated, and a ±1.21 log interval is reported as a
+263-fold range because 10^2.42 was evaluated.
+
+Each interpretation answers six questions — what was measured, what the number
+means mathematically, what it implies biologically, how uncertain it is, why the
+model produced it, and what would confirm or refute it.
+
+The load-bearing field is **what a quantity does not establish**, since most
+misreading in pharmacology comes from treating a real number as answering a
+question it cannot: affinity as efficacy, exposure as benefit, plasma as tissue,
+occupancy as response.
+
+Covered: pKi, Ki, AUC, Cmax, Tmax, half-life, clearance, volume of distribution,
+bioavailability, MAE, R², interval coverage, Tanimoto similarity, receptor
+occupancy.
+
+Derived quantities are computed, not stated: half-life → elimination rate
+constant, time to steady state, and accumulation ratio at a given interval;
+AUC + dose → implied clearance; MAE on a log scale → fold-error and its ratio to
+the measured experimental noise floor; coverage → signed gap against nominal.
+
+**Cross-endpoint bridge.** Where a measured Cmax and a measured Ki both exist,
+the engine computes the exposure-to-affinity ratio and the implied equilibrium
+occupancy. For PT-141: peak 71 nM against a measured Ki of 20.9 nM, giving 73%
+occupancy at peak — reported with the caveats that make it honest (plasma is not
+tissue, total is not free, occupancy is not response).
+
+Interpretations attach to measurements, predictions, simulations and model-card
+metrics, and are absent for abstentions, which have no number to explain.
+
 ## Verification vs validation
 
 This distinction is load-bearing and currently sits on one side of it.
@@ -419,7 +454,7 @@ prospective evaluation.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 418 tests
+python3 -m pytest -q                              # 462 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
