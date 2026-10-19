@@ -31,7 +31,9 @@ from atlas.mechanistic.metrics import nca
 from atlas.mechanistic.models import MODEL_REGISTRY, ParameterError, get_model
 from atlas.mechanistic.solver import DoseEvent, SolverError, SolverSettings, simulate
 from atlas.ml.predict import MODEL_CARD, get_predictor
-from atlas.ml.peptide_service import PEPTIDE_MODEL_FINDINGS, get_affinity_service
+from atlas.ml.peptide_service import PEPTIDE_MODEL_FINDINGS
+from atlas.ml.affinity_service import CALIBRATION_CARD, get_affinity_service
+from atlas.registry.seed import by_key as seed_by_key
 from atlas.registry.seed import RESEARCH_AREAS, SEED_REGISTRY
 
 logger = logging.getLogger(__name__)
@@ -145,6 +147,25 @@ def peptide_report() -> dict[str, Any]:
     payload = json.loads(path.read_text())
     payload["available"] = True
     return payload
+
+
+def _json_file(name: str) -> dict[str, Any]:
+    path = DATA / "ml" / name
+    if not path.exists():
+        return {"available": False}
+    payload = json.loads(path.read_text())
+    payload["available"] = True
+    return payload
+
+
+@lru_cache(maxsize=1)
+def calibration_report() -> dict[str, Any]:
+    return _json_file("calibration_report.json")
+
+
+@lru_cache(maxsize=1)
+def peptide_v2_report() -> dict[str, Any]:
+    return _json_file("peptide_v2_report.json")
 
 
 @lru_cache(maxsize=1)
@@ -358,44 +379,54 @@ def create_app() -> Flask:
             "report": ml_report(),
             "peptide_findings": PEPTIDE_MODEL_FINDINGS,
             "peptide_report": peptide_report(),
+            "calibration": CALIBRATION_CARD,
+            "calibration_report": calibration_report(),
+            "peptide_v2_report": peptide_v2_report(),
         })
 
     @app.post("/api/predict")
     def predict():
-        """Affinity for a molecule: measured value, model prediction, or refusal.
+        """Affinity for a molecule, gated on evidence at every step.
 
-        Order matters scientifically. A measured affinity is class A direct
-        experimental evidence; a model prediction is a weaker class C
-        inference. Returning a prediction for a molecule whose affinity has
-        been measured -- and which sits in the model's own training set --
-        would replace evidence with inference. PT-141, melanotan I and
-        melanotan II all fall in that category.
+        Returns a measurement where one exists, a calibrated prediction only
+        where target relevance and applicability both hold, and otherwise a
+        structured refusal. A model-generated number is never returned for a
+        compound with no established relationship to the target.
         """
         body = request.get_json(silent=True) or {}
         smiles = body.get("smiles")
         key = body.get("compound_key")
         compound_name = None
+        names: tuple[str, ...] = ()
 
         if not smiles and key:
             row = next((r for r in merged_rows() if r["key"] == key), None)
             if row is None:
                 return jsonify({"error": f"no registry entry {key!r}"}), 404
             compound_name = row["name"]
+            try:
+                entry = seed_by_key(key)
+                names = (entry.name, *entry.aliases)
+            except KeyError:
+                names = (row["name"],)
             smiles = row.get("smiles")
             if not smiles:
                 return jsonify({
                     "answer_kind": "abstention",
-                    "smiles": None,
-                    "compound_key": key,
+                    "smiles": None, "compound_key": key,
                     "compound_name": compound_name,
                     "evidence_class": EvidenceClass.INSUFFICIENT.value,
+                    "target_relevance": "D_unsupported_target_relationship",
+                    "target_relevance_label": "Unsupported target relationship",
+                    "may_create_graph_edge": False,
                     "abstention": {
-                        "reason": AbstentionReason.UNRESOLVED_MOLECULAR_IDENTITY.value,
+                        "reason": (
+                            AbstentionReason.UNRESOLVED_MOLECULAR_IDENTITY.value
+                        ),
                         "explanation": (
                             f"No structure is resolved for {compound_name}, so it "
                             "can neither be matched against measured data nor "
-                            "featurised. Identity status: "
-                            f"{row.get('identity_status')}."
+                            f"featurised. Identity status: {row.get('identity_status')}."
                         ),
                         "what_would_resolve_it": [
                             "A SMILES string, InChI or sequence for the intended "
@@ -409,101 +440,70 @@ def create_app() -> Flask:
         if len(smiles) > 5000:
             return jsonify({"error": "SMILES string is too long"}), 400
 
-        base = {"smiles": smiles, "compound_key": key, "compound_name": compound_name}
-
         try:
-            answer = get_affinity_service().lookup(smiles)
+            r = get_affinity_service().answer(smiles, names=names)
         except Exception as exc:
             logger.exception("affinity lookup failed")
             return jsonify({"error": f"lookup failed: {exc}"}), 500
 
-        # 1. A measured value outranks anything a model can say.
-        if answer.is_measured:
-            return jsonify({
-                **base,
-                "answer_kind": "measurement",
-                "evidence_class": answer.evidence_class,
-                "modality": answer.modality,
-                "target": answer.target,
-                "measurement": {
-                    "pki": answer.pki,
-                    "pki_min": answer.pki_min,
-                    "pki_max": answer.pki_max,
-                    "is_discordant": answer.is_discordant,
-                    "ki_nm": answer.ki_nm,
-                    "molecule_chembl_id": answer.molecule_chembl_id,
-                    "chembl_url": (
-                        "https://www.ebi.ac.uk/chembl/compound_report_card/"
-                        f"{answer.molecule_chembl_id}/"
-                    ),
-                    "n_replicates": answer.n_replicates,
-                    "replicate_spread": answer.replicate_spread,
-                    "n_documents": len(answer.document_ids),
-                    "document_ids": answer.document_ids,
-                    "match_kind": answer.match_kind,
-                },
-                "dataset_version": answer.dataset_version,
-            })
+        payload: dict[str, Any] = {
+            "answer_kind": r.answer_kind,
+            "smiles": smiles,
+            "compound_key": key,
+            "compound_name": compound_name,
+            "evidence_class": r.evidence_class,
+            "target": r.target,
+            "modality": r.modality,
+            "target_relevance": r.target_relevance,
+            "target_relevance_label": r.target_relevance_label,
+            "target_rationale": r.target_rationale,
+            "target_evidence": r.target_evidence,
+            "may_create_graph_edge": r.may_create_graph_edge,
+            "max_similarity": r.max_similarity,
+            "similarity_band": r.similarity_band,
+            "limitations": r.limitations,
+            "dataset_version": r.dataset_version,
+        }
 
-        # 2. For small molecules, the validated model may apply.
-        if answer.modality == "small_molecule_like":
-            try:
-                pred = get_predictor().predict(smiles)
-            except Exception as exc:
-                logger.exception("prediction failed")
-                return jsonify({"error": f"prediction failed: {exc}"}), 500
+        if r.answer_kind == "measurement":
+            payload["measurement"] = {
+                "pki": r.pki, "pki_min": r.pki_min, "pki_max": r.pki_max,
+                "ki_nm": r.ki_nm, "is_discordant": r.is_discordant,
+                "molecule_chembl_id": r.molecule_chembl_id,
+                "chembl_url": (
+                    "https://www.ebi.ac.uk/chembl/compound_report_card/"
+                    f"{r.molecule_chembl_id}/"
+                ),
+                "n_replicates": r.n_replicates,
+                "n_documents": r.n_documents,
+            }
+        elif r.answer_kind == "prediction":
+            payload["prediction"] = {
+                "predicted_pki": r.predicted_pki,
+                "predicted_ki_nm": (
+                    None if r.predicted_pki is None
+                    else float(10 ** (9.0 - r.predicted_pki))
+                ),
+                "interval_low": r.interval_low,
+                "interval_high": r.interval_high,
+                "interval_nominal": r.interval_nominal,
+                "interval_empirical_coverage": r.interval_empirical_coverage,
+                "nearest_neighbours": r.nearest_neighbours,
+            }
+            payload["calibration"] = r.calibration
+        else:
+            payload["abstention"] = {
+                "reason": r.abstention_reason,
+                "explanation": r.abstention_explanation,
+                "what_would_resolve_it": r.what_would_resolve_it,
+            }
+        return jsonify(payload)
 
-            if pred.abstained:
-                return jsonify({
-                    **base,
-                    "answer_kind": "abstention",
-                    "evidence_class": EvidenceClass.INSUFFICIENT.value,
-                    "modality": pred.modality,
-                    "max_tanimoto_to_training": pred.max_tanimoto_to_training,
-                    "abstention": {
-                        "reason": pred.abstention_reason,
-                        "explanation": pred.abstention_explanation,
-                        "what_would_resolve_it": pred.what_would_resolve_it,
-                    },
-                })
-
-            return jsonify({
-                **base,
-                "answer_kind": "prediction",
-                "evidence_class": pred.evidence_class,
-                "modality": pred.modality,
-                "max_tanimoto_to_training": pred.max_tanimoto_to_training,
-                "prediction": {
-                    "predicted_pki": pred.predicted_pki,
-                    "predicted_ki_nm": pred.predicted_ki_nm,
-                    "interval_low": pred.interval_low,
-                    "interval_high": pred.interval_high,
-                    "interval_coverage_measured": pred.interval_coverage_measured,
-                    "interval_nominal": pred.interval_nominal,
-                    "nearest_neighbours": pred.nearest_neighbours,
-                },
-                "model_card": {
-                    "name": MODEL_CARD["name"],
-                    "endpoint": MODEL_CARD["endpoint"],
-                    "quality_tier": MODEL_CARD["quality_tier"],
-                    "headline_performance": MODEL_CARD["headline_performance"],
-                },
-                "dataset_version": pred.dataset_version,
-            })
-
-        # 3. A peptide with no measurement: the refusal carries the numbers.
+    @app.get("/api/calibration")
+    def calibration():
         return jsonify({
-            **base,
-            "answer_kind": "abstention",
-            "evidence_class": EvidenceClass.INSUFFICIENT.value,
-            "modality": answer.modality,
-            "abstention": {
-                "reason": answer.abstention_reason,
-                "explanation": answer.abstention_explanation,
-                "what_would_resolve_it": answer.what_would_resolve_it,
-            },
-            "peptide_model_findings": PEPTIDE_MODEL_FINDINGS["cluster_split"],
-            "dataset_version": answer.dataset_version,
+            "card": CALIBRATION_CARD,
+            "report": calibration_report(),
         })
 
     @app.post("/api/simulate")

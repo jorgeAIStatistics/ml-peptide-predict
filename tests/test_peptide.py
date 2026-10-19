@@ -327,16 +327,32 @@ class TestAPIMeasurementFlow:
         r = client.post("/api/predict", json={"compound_key": "melanotan-1"}).get_json()
         assert r["measurement"]["n_documents"] >= 1
 
-    def test_small_molecule_still_gets_a_prediction(self, client):
+    def test_remote_small_molecule_is_refused_on_target_relevance(self, client):
+        """A fingerprint can be computed for anything; relevance must be shown."""
         smi = "CC(C)(C)NC(=O)[C@@H]1CCCN1C(=O)[C@H](Cc1ccccc1)NC(=O)c1ccccc1"
         r = client.post("/api/predict", json={"smiles": smi}).get_json()
+        assert r["answer_kind"] == "abstention"
+        assert r["target_relevance"].startswith("C_")
+        assert r["may_create_graph_edge"] is False
+
+    def test_close_analogue_of_a_documented_active_is_predicted(self, client):
+        """Structural evidence alone can reach class B when no name is given."""
+        from atlas.ml.dataset import load_dataset
+        from rdkit import Chem
+        rec = next(r for r in load_dataset().records if r.pki >= 8.0)
+        flat = Chem.MolToSmiles(Chem.MolFromSmiles(rec.smiles), isomericSmiles=False)
+        r = client.post("/api/predict", json={"smiles": flat}).get_json()
         assert r["answer_kind"] == "prediction"
-        assert r["evidence_class"].startswith("C_")
+        assert r["target_relevance"].startswith("B_")
+        assert r["may_create_graph_edge"] is False
+        p = r["prediction"]
+        assert p["interval_low"] < p["predicted_pki"] < p["interval_high"]
 
     def test_unmeasured_peptide_abstains(self, client):
         r = client.post("/api/predict", json={"compound_key": "semaglutide"}).get_json()
         assert r["answer_kind"] == "abstention"
-        assert r["peptide_model_findings"]["r2"] < 0.2
+        assert r["target_relevance"][0] in "CD"
+        assert r["may_create_graph_edge"] is False
 
     def test_mixture_abstains_on_identity(self, client):
         r = client.post("/api/predict", json={"compound_key": "glow"}).get_json()

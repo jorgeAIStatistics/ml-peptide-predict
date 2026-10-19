@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-18 · 325 tests passing
+Last updated: 2026-10-18 · 370 tests passing
 
 ## What this is
 
@@ -161,6 +161,8 @@ never tested against an independent external dataset or prospectively.
 PYTHONPATH=. python3 -m atlas.ml.dataset   # build dataset from ChEMBL
 PYTHONPATH=. python3 -m atlas.ml.train     # train, evaluate, write registry
 PYTHONPATH=. python3 -m atlas.ml.peptide_train   # peptide experiment
+PYTHONPATH=. python3 -m atlas.ml.calibrate_experiment  # calibration comparison
+PYTHONPATH=. python3 -m atlas.ml.peptide_v2            # representation comparison
 ```
 
 ### Peptide ligands — served by measurement, not by a model
@@ -215,6 +217,98 @@ Inspecting the raw ChEMBL query surfaced three defects, all now filtered:
 - **80 duplicate records** inflated apparent replication, which is why the
   median replicate spread read as exactly zero. Records are deduplicated on
   (molecule, document, rounded value) before aggregation.
+
+### Uncertainty calibration
+
+The previous model's nominal 90% intervals covered 79.4% of held-out molecules.
+The cause was structural: the calibration set was drawn from the training pool,
+so it was in-distribution, while the test set was scaffold-shifted. Conformal
+coverage holds under exchangeability; these were not exchangeable.
+
+Data roles are now strictly separate — **train / select / calibrate / test**,
+all Bemis-Murcko scaffold-disjoint, enforced by a constructor that raises on any
+overlap. Model selection uses the `select` split and never touches `test`.
+
+| strategy | nominal | empirical | median width |
+|---|---|---|---|
+| random calibration (previous) | 0.90 | 0.838 | 2.154 |
+| **disjoint calibration** | 0.90 | **0.909** | 2.636 |
+| mondrian (per-band) | 0.90 | 0.889 | 2.415 |
+
+Subgroup coverage under disjoint calibration:
+
+| subgroup | n | coverage | MAE |
+|---|---|---|---|
+| similarity 0.0–0.4 | 6 | 0.500 | 1.340 |
+| similarity 0.4–0.55 | 22 | 0.909 | 0.496 |
+| similarity 0.55–0.7 | 79 | 0.924 | 0.599 |
+| similarity 0.7–1.0 | 289 | 0.913 | 0.581 |
+| peptide-like | 134 | 0.925 | 0.586 |
+| small-molecule-like | 262 | 0.901 | 0.594 |
+
+**Limitations.** Correct coverage cost ~0.5 log units of width: a median
+interval of 2.64 log units spans roughly a 430-fold range in Ki. The intervals
+are honest and the model is imprecise on unseen chemotypes. The lowest
+similarity band held 6 test molecules, so its 0.50 coverage is an observation on
+six points, not an estimate. Nominal coverage is **not** guaranteed under
+distribution shift and is not claimed.
+
+### Target relevance (A / B / C / D)
+
+A model returns a number for any molecule whose fingerprint it can compute. That
+is a statement about chemical similarity, not biology. Asked about **Pinealon**,
+the earlier model returned pKi 5.45; 0 of its 18 publications concern MC4R and
+its nearest documented active is 0.375 Tanimoto away. **KPV** was likewise given
+4.95.
+
+Four classes are now enforced before any number is shown:
+
+- **A — documented engagement.** A measurement exists. Only class A may become a
+  knowledge-graph interaction edge.
+- **B — prediction within a validated domain.** No measurement, but ≥0.70
+  Tanimoto to a documented active, and literature does not contradict it.
+- **C — exploratory screening hypothesis.** Inside the applicability domain but
+  target relevance unestablished. **No affinity value is published**, because a
+  number attached to an unestablished interaction reads as evidence it occurs.
+- **D — unsupported.** Outside the domain, or no evidence of any kind.
+
+Literature evidence is MC4R-specific. A broader "melanocortin" term matched 160
+of Semax's 214 publications — Semax is an ACTH(4-10) analogue — which would have
+been a false positive for *this* target. Ambiguous short aliases are dropped from
+literature queries: `MT-2` retrieves metallothionein-2 papers and had inflated
+melanotan II's publication count from 625 to 2728.
+
+Current registry outcomes: Pinealon, KPV, Semax, Dihexa and semaglutide all
+abstain at class C; GLOW and Amino H2O at class D. No registry compound receives
+a model-generated MC4R affinity.
+
+### Peptide representation and endpoint separation
+
+Endpoints are built separately because they measure different quantities:
+
+| endpoint | peptides | molecules | quantity |
+|---|---|---|---|
+| Ki (binding) | 628 | 1981 | equilibrium binding affinity |
+| EC50 (functional) | 551 | 1115 | agonist potency |
+| IC50 (binding) | 272 | 688 | displacement potency |
+| Kd (binding) | 11 | 11 | direct binding constant |
+
+For the 201 peptides measured both ways, pKi and pEC50 correlate at Pearson
+0.657 with the difference having **sd 1.03 log units** — comparable to the whole
+model error. Pooling them would inject that as label noise.
+
+Held-out performance on Taylor-Butina cluster splits:
+
+| endpoint | best representation | MAE | R² | Spearman | mean baseline |
+|---|---|---|---|---|---|
+| Ki binding | multitask fingerprints / RF | 1.121 | 0.270 | 0.561 | 1.324 |
+| EC50 functional | combined / RF | 0.878 | 0.180 | 0.531 | 0.992 |
+
+**Peptide-specific descriptors did not help on either endpoint** (Ki 1.335 vs
+1.253 for fingerprints; EC50 0.919 vs 0.907), despite being validated at 94.8%
+against HELM sequences. **Multitask sharing across the two endpoints did help**
+for Ki binding: MAE 1.121 vs 1.253, with R² rising from −0.003 to 0.270. That is
+the one representation change that survived an honest split.
 
 ## Verification vs validation
 
@@ -273,7 +367,7 @@ prospective evaluation.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 325 tests
+python3 -m pytest -q                              # 370 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

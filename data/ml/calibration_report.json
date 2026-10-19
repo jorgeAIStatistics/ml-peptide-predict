@@ -1,0 +1,297 @@
+{
+  "created_at": "2026-10-19T03:16:15.190656+00:00",
+  "dataset_version": "29fe2a249bcd581d",
+  "seed": 20261018,
+  "alpha": 0.1,
+  "split": {
+    "description": "772 Bemis-Murcko scaffold groups partitioned into four disjoint roles; no scaffold appears in more than one role.",
+    "sizes": {
+      "train": 991,
+      "select": 297,
+      "calibrate": 297,
+      "test": 396
+    },
+    "median_similarity_calibration_to_train": 0.7710843086242676,
+    "median_similarity_test_to_train": 0.7766968011856079
+  },
+  "model_selection": {
+    "candidates": [
+      {
+        "model": "fingerprint_knn",
+        "mae": 0.6706463270970884,
+        "rmse": 0.8498568410114304,
+        "r2": 0.6553028731417722,
+        "spearman": 0.7683432697855539,
+        "pearson": 0.8103985484551107
+      },
+      {
+        "model": "fingerprint_rf",
+        "mae": 0.7360014798182953,
+        "rmse": 0.9275896279491002,
+        "r2": 0.5893631859130952,
+        "spearman": 0.7588900471191673,
+        "pearson": 0.796340540097437
+      },
+      {
+        "model": "fingerprint_ridge",
+        "mae": 0.7777957102921892,
+        "rmse": 1.0299600264798365,
+        "r2": 0.49372456718007596,
+        "spearman": 0.7170035384015974,
+        "pearson": 0.7230425629060008
+      }
+    ],
+    "chosen": "fingerprint_knn",
+    "selected_on": "select split (never the test split)"
+  },
+  "band_quantiles": {
+    "0.0\u20130.4": 1.3181114396699747,
+    "0.4\u20130.55": 1.3181114396699747,
+    "0.55\u20130.7": 1.6902605502709145,
+    "0.7\u20131.0": 1.2073166429256281
+  },
+  "band_calibration_counts": {
+    "0.0\u20130.4": 6,
+    "0.4\u20130.55": 16,
+    "0.55\u20130.7": 57,
+    "0.7\u20131.0": 218
+  },
+  "reports": [
+    {
+      "strategy": "random_calibration (previous behaviour)",
+      "nominal_coverage": 0.9,
+      "empirical_coverage": 0.8383838383838383,
+      "n_test": 396,
+      "mae": 0.5948524942164407,
+      "rmse": 0.7797133824216022,
+      "median_interval_width": 2.1535702963795416,
+      "mean_interval_width": 2.153570296379542,
+      "coverage_by_similarity": {
+        "0.0\u20130.4": {
+          "n": 6,
+          "coverage": 0.3333333333333333,
+          "mae": 1.270161709703431,
+          "median_width": 2.1535702963795416
+        },
+        "0.4\u20130.55": {
+          "n": 22,
+          "coverage": 0.8636363636363636,
+          "mae": 0.6513308347201056,
+          "median_width": 2.1535702963795416
+        },
+        "0.55\u20130.7": {
+          "n": 79,
+          "coverage": 0.8481012658227848,
+          "mae": 0.6072844228257307,
+          "median_width": 2.153570296379543
+        },
+        "0.7\u20131.0": {
+          "n": 289,
+          "coverage": 0.8442906574394463,
+          "mae": 0.5731344971779061,
+          "median_width": 2.1535702963795416
+        }
+      },
+      "coverage_by_modality": {
+        "peptide_like": {
+          "n": 134,
+          "coverage": 0.835820895522388,
+          "mae": 0.6004779848962474,
+          "median_width": 2.1535702963795416
+        },
+        "small_molecule_like": {
+          "n": 262,
+          "coverage": 0.8396946564885496,
+          "mae": 0.5919753348611199,
+          "median_width": 2.1535702963795416
+        }
+      },
+      "error_by_similarity": {
+        "0.0\u20130.4": {
+          "n": 6,
+          "mae": 1.270161709703431,
+          "rmse": 1.5564245847911913
+        },
+        "0.4\u20130.55": {
+          "n": 22,
+          "mae": 0.6513308347201056,
+          "rmse": 0.769369192616285
+        },
+        "0.55\u20130.7": {
+          "n": 79,
+          "mae": 0.6072844228257307,
+          "rmse": 0.8029360376502843
+        },
+        "0.7\u20131.0": {
+          "n": 289,
+          "mae": 0.5731344971779061,
+          "rmse": 0.7493027752565926
+        }
+      },
+      "calibration_set_size": 297,
+      "bands_using_fallback": [],
+      "limitations": [
+        "Calibration points were held out of fitting but drawn from the training pool, so they share scaffolds with the fitted data. Residuals there are smaller than on unseen chemotypes, and the quantile is set against median similarity 0.861 while being applied at 0.777.",
+        "Conformal coverage is guaranteed only under exchangeability of the calibration and test sets. Under chemotype or modality shift that assumption fails, and nominal coverage is not guaranteed."
+      ]
+    },
+    {
+      "strategy": "disjoint_calibration",
+      "nominal_coverage": 0.9,
+      "empirical_coverage": 0.9090909090909091,
+      "n_test": 396,
+      "mae": 0.5915972745596925,
+      "rmse": 0.7681290199405122,
+      "median_interval_width": 2.63622287933995,
+      "mean_interval_width": 2.636222879339949,
+      "coverage_by_similarity": {
+        "0.0\u20130.4": {
+          "n": 6,
+          "coverage": 0.5,
+          "mae": 1.3397283318842563,
+          "median_width": 2.6362228793399494
+        },
+        "0.4\u20130.55": {
+          "n": 22,
+          "coverage": 0.9090909090909091,
+          "mae": 0.4958791569833195,
+          "median_width": 2.63622287933995
+        },
+        "0.55\u20130.7": {
+          "n": 79,
+          "coverage": 0.9240506329113924,
+          "mae": 0.5987453048909894,
+          "median_width": 2.636222879339949
+        },
+        "0.7\u20131.0": {
+          "n": 289,
+          "coverage": 0.9134948096885813,
+          "mae": 0.5813976823332578,
+          "median_width": 2.6362228793399503
+        }
+      },
+      "coverage_by_modality": {
+        "peptide_like": {
+          "n": 134,
+          "coverage": 0.9253731343283582,
+          "mae": 0.5859341246481118,
+          "median_width": 2.6362228793399503
+        },
+        "small_molecule_like": {
+          "n": 262,
+          "coverage": 0.9007633587786259,
+          "mae": 0.594493694743478,
+          "median_width": 2.636222879339949
+        }
+      },
+      "error_by_similarity": {
+        "0.0\u20130.4": {
+          "n": 6,
+          "mae": 1.3397283318842563,
+          "rmse": 1.5513934794523416
+        },
+        "0.4\u20130.55": {
+          "n": 22,
+          "mae": 0.4958791569833195,
+          "rmse": 0.6832563695434737
+        },
+        "0.55\u20130.7": {
+          "n": 79,
+          "mae": 0.5987453048909894,
+          "rmse": 0.7602447389644817
+        },
+        "0.7\u20131.0": {
+          "n": 289,
+          "mae": 0.5813976823332578,
+          "rmse": 0.7516477873871545
+        }
+      },
+      "calibration_set_size": 297,
+      "bands_using_fallback": [],
+      "limitations": [
+        "Conformal coverage is guaranteed only under exchangeability of the calibration and test sets. Under chemotype or modality shift that assumption fails, and nominal coverage is not guaranteed."
+      ]
+    },
+    {
+      "strategy": "mondrian (per-similarity-band)",
+      "nominal_coverage": 0.9,
+      "empirical_coverage": 0.8888888888888888,
+      "n_test": 396,
+      "mae": 0.5915972745596925,
+      "rmse": 0.7681290199405122,
+      "median_interval_width": 2.414633285851256,
+      "mean_interval_width": 2.6229909777154954,
+      "coverage_by_similarity": {
+        "0.0\u20130.4": {
+          "n": 6,
+          "coverage": 0.5,
+          "mae": 1.3397283318842563,
+          "median_width": 2.6362228793399494
+        },
+        "0.4\u20130.55": {
+          "n": 22,
+          "coverage": 0.9090909090909091,
+          "mae": 0.4958791569833195,
+          "median_width": 2.63622287933995
+        },
+        "0.55\u20130.7": {
+          "n": 79,
+          "coverage": 0.9493670886075949,
+          "mae": 0.5987453048909894,
+          "median_width": 3.380521100541829
+        },
+        "0.7\u20131.0": {
+          "n": 289,
+          "coverage": 0.8788927335640139,
+          "mae": 0.5813976823332578,
+          "median_width": 2.414633285851256
+        }
+      },
+      "coverage_by_modality": {
+        "peptide_like": {
+          "n": 134,
+          "coverage": 0.8955223880597015,
+          "mae": 0.5859341246481118,
+          "median_width": 2.414633285851256
+        },
+        "small_molecule_like": {
+          "n": 262,
+          "coverage": 0.8854961832061069,
+          "mae": 0.594493694743478,
+          "median_width": 2.4146332858512567
+        }
+      },
+      "error_by_similarity": {
+        "0.0\u20130.4": {
+          "n": 6,
+          "mae": 1.3397283318842563,
+          "rmse": 1.5513934794523416
+        },
+        "0.4\u20130.55": {
+          "n": 22,
+          "mae": 0.4958791569833195,
+          "rmse": 0.6832563695434737
+        },
+        "0.55\u20130.7": {
+          "n": 79,
+          "mae": 0.5987453048909894,
+          "rmse": 0.7602447389644817
+        },
+        "0.7\u20131.0": {
+          "n": 289,
+          "mae": 0.5813976823332578,
+          "rmse": 0.7516477873871545
+        }
+      },
+      "calibration_set_size": 297,
+      "bands_using_fallback": [
+        "0.0\u20130.4",
+        "0.4\u20130.55"
+      ],
+      "limitations": [
+        "Conformal coverage is guaranteed only under exchangeability of the calibration and test sets. Under chemotype or modality shift that assumption fails, and nominal coverage is not guaranteed.",
+        "Similarity bands 0.0\u20130.4, 0.4\u20130.55 had fewer than 25 calibration points and fall back to the global quantile, so their conditional coverage is not separately guaranteed."
+      ]
+    }
+  ]
+}

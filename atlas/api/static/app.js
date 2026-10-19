@@ -1060,6 +1060,89 @@ async function runPrediction() {
   }
 }
 
+const RELEVANCE_CLASS = {
+  A_documented_experimental_engagement: 'A',
+  B_prediction_within_validated_domain: 'B',
+  C_exploratory_screening_hypothesis: 'C',
+  D_unsupported_target_relationship: 'D',
+};
+
+function relevancePanel(r) {
+  const letter = RELEVANCE_CLASS[r.target_relevance] || 'D';
+  const te = r.target_evidence || {};
+  const box = el('div', { class: `relevance relevance-${letter}` },
+    el('div', { class: 'relevance-head' },
+      el('span', { class: 'relevance-badge', text: `Target relevance ${letter}` }),
+      el('span', { class: 'relevance-label', text: r.target_relevance_label || '' })),
+    el('p', { class: 'relevance-text', text: r.target_rationale || '' }));
+
+  const facts = el('dl', { class: 'kv relevance-kv' });
+  const add = (k, v) => { facts.append(el('dt', { text: k }), el('dd', { text: v })); };
+  add('Target', r.target || '—');
+  if (te.total_publications != null) {
+    add('Literature', `${te.target_publications} of ${te.total_publications} publications `
+      + `concern this target (${((te.target_publication_fraction || 0) * 100).toFixed(1)}%)`);
+  }
+  if (te.max_similarity_to_documented_actives != null) {
+    add('Nearest active', `${te.nearest_documented_active || '—'} at Tanimoto `
+      + `${te.max_similarity_to_documented_actives.toFixed(3)}`
+      + (te.nearest_documented_active_pki != null
+        ? `, measured pKi ${te.nearest_documented_active_pki.toFixed(2)}` : ''));
+  }
+  if (r.max_similarity != null) {
+    add('Applicability', `Tanimoto ${r.max_similarity.toFixed(3)} to training set `
+      + `(band ${r.similarity_band})`);
+  }
+  add('Knowledge graph', r.may_create_graph_edge
+    ? 'May become an interaction edge — it is a measurement'
+    : 'Will NOT become an interaction edge');
+  box.append(facts);
+  return box;
+}
+
+function calibrationPanel(cal, bandCoverage) {
+  if (!cal) return null;
+  const ok = cal.is_adequately_calibrated;
+  const box = el('div', { class: 'insp-section' },
+    el('h3', { class: 'insp-heading', text: 'Calibration status' }),
+    el('p', { class: 'analysis-why' },
+      el('strong', { text: ok ? 'Adequately calibrated. ' : 'Not adequately calibrated. ' }),
+      document.createTextNode(
+        `Nominal ${(cal.nominal_coverage * 100).toFixed(0)}% intervals cover `
+        + `${(cal.empirical_coverage * 100).toFixed(1)}% of held-out molecules `
+        + `(previously ${(cal.previous_empirical_coverage * 100).toFixed(1)}% when `
+        + 'calibrated on in-distribution data). Median width '
+        + `${cal.median_interval_width_log.toFixed(2)} log units.`)));
+
+  const tbl = el('table', { class: 'data-table mini-table' },
+    el('thead', {}, el('tr', {},
+      el('th', { text: 'subgroup' }), el('th', { class: 'num', text: 'n' }),
+      el('th', { class: 'num', text: 'coverage' }))));
+  const tb = el('tbody', {});
+  for (const [band, st] of Object.entries(cal.coverage_by_similarity || {})) {
+    tb.append(el('tr', { class: band === bandCoverage ? 'is-selected' : '' },
+      el('td', { text: `similarity ${band}` }),
+      el('td', { class: 'num', text: String(st.n) }),
+      el('td', { class: 'num', text: st.coverage == null ? '—' : st.coverage.toFixed(3) })));
+  }
+  for (const [mod, st] of Object.entries(cal.coverage_by_modality || {})) {
+    tb.append(el('tr', {},
+      el('td', { text: titleCase(mod) }),
+      el('td', { class: 'num', text: String(st.n) }),
+      el('td', { class: 'num', text: st.coverage == null ? '—' : st.coverage.toFixed(3) })));
+  }
+  tbl.append(tb);
+  box.append(tbl);
+
+  if ((cal.limitations || []).length) {
+    const ul = el('ul', { class: 'analysis-resolve' });
+    for (const l of cal.limitations) ul.append(el('li', { text: l }));
+    box.append(el('h3', { class: 'insp-heading', style: 'margin-top:14px',
+                          text: 'Calibration limitations' }), ul);
+  }
+  return box;
+}
+
 function metricGrid() {
   const grid = el('div', { class: 'metric-wrap' });
   grid.add = (label, value, unit, note, cls) => {
@@ -1079,7 +1162,7 @@ function renderPrediction(r) {
   host.textContent = '';
   const name = r.compound_name || r.smiles;
 
-  // ---- 1. a measured value outranks any prediction
+  // ---- measurement: class A
   if (r.answer_kind === 'measurement') {
     const m = r.measurement;
     host.append(el('div', { class: 'evidence-banner cls-A' },
@@ -1088,8 +1171,8 @@ function renderPrediction(r) {
         el('p', { class: 'evidence-label', text: `Measured affinity for ${name}` }),
         el('p', { class: 'evidence-text',
           text: 'This molecule has a measured binding affinity in ChEMBL, so the '
-            + 'experimental value is reported rather than a model estimate. Direct '
-            + 'experimental evidence outranks any inference.' }))));
+            + 'experimental value is reported rather than a model estimate.' }))));
+    host.append(relevancePanel(r));
 
     if (m.is_discordant) {
       host.append(el('div', { class: 'caveat', style: 'margin:14px 18px' },
@@ -1100,23 +1183,18 @@ function renderPrediction(r) {
             `Independent records span pKi ${m.pki_min.toFixed(2)} to `
             + `${m.pki_max.toFixed(2)} — a factor of `
             + `${Math.round(10 ** (m.pki_max - m.pki_min))} in affinity. The median `
-            + 'below is a summary of disagreeing measurements, not a settled value.'))));
+            + 'is a summary of disagreeing measurements, not a settled value.'))));
     }
 
     const grid = metricGrid();
     grid.add('Measured pKi', m.pki.toFixed(2),
       m.pki_max > m.pki_min ? ` (${m.pki_min.toFixed(2)}–${m.pki_max.toFixed(2)})` : '',
-      m.match_kind === 'exact_structure'
-        ? 'median of reported values; exact structural match'
-        : 'same skeleton, different stereochemistry or salt',
-      m.match_kind === 'exact_structure' && !m.is_discordant ? 'good' : 'warn');
+      'median of reported values', m.is_discordant ? 'warn' : 'good');
     grid.add('Ki', m.ki_nm < 1000 ? m.ki_nm.toFixed(1) : (m.ki_nm / 1000).toFixed(2),
       m.ki_nm < 1000 ? 'nM' : 'µM', 'derived from pKi');
     grid.add('Independent studies', String(m.n_documents), '',
       `${m.n_replicates} activity records`);
-    grid.add('Replicate spread', m.replicate_spread.toFixed(3), 'log',
-      m.replicate_spread === 0 ? 'records agree exactly' : 'disagreement across records',
-      m.replicate_spread > 0.5 ? 'warn' : 'good');
+    grid.add('Evidence class', 'A', '', 'direct experimental measurement', 'good');
     host.append(grid);
 
     host.append(el('div', { class: 'insp-section' },
@@ -1126,70 +1204,64 @@ function renderPrediction(r) {
           el('span', { class: 'src-db', text: 'chembl' }),
           el('a', { href: m.chembl_url, target: '_blank', rel: 'noopener',
                     text: m.molecule_chembl_id }),
-          el('span', { class: 'src-meta', text: `${r.target} · dataset ${r.dataset_version}` })))));
+          el('span', { class: 'src-meta', text: `dataset ${r.dataset_version}` })))));
     return;
   }
 
-  // ---- 2. a refusal, with the numbers behind it
+  // ---- abstention: class C or D
   if (r.answer_kind === 'abstention') {
     const ab = r.abstention;
-    const box = el('div', {},
-      el('p', { class: 'evidence-label', text: `No value for ${name}` }),
-      el('p', { class: 'evidence-text', text: ab.explanation }),
-      el('div', { class: 'abstention' },
-        el('p', { class: 'abstention-head' },
-          el('span', { text: '⊘', 'aria-hidden': 'true' }),
-          el('span', { text: `abstention · ${ab.reason}` })),
-        r.max_tanimoto_to_training != null
-          ? el('p', { text: `Nearest training molecule: Tanimoto ${r.max_tanimoto_to_training.toFixed(3)}.` })
-          : null,
-        (ab.what_would_resolve_it || []).length
-          ? (() => { const ul = el('ul', {});
-                     for (const x of ab.what_would_resolve_it) ul.append(el('li', { text: x }));
-                     return ul; })()
-          : null));
-
     host.append(el('div', { class: 'evidence-banner cls-E' },
-      el('span', { class: 'evidence-class', text: 'E', 'aria-hidden': 'true' }), box));
-
-    if (r.peptide_model_findings) {
-      const f = r.peptide_model_findings;
-      const grid = metricGrid();
-      grid.add('Peptide model MAE', f.mae.toFixed(3), 'log',
-        `against a baseline of ${f.baseline_mae.toFixed(3)}`, 'warn');
-      grid.add('Improvement over mean', `${(f.improvement_over_baseline * 100).toFixed(1)}`, '%',
-        'not enough to serve a number', 'warn');
-      grid.add('Variance explained', `${(f.r2 * 100).toFixed(1)}`, '%', 'R² on a cluster split', 'warn');
-      grid.add('Interval coverage', f.conformal_coverage_at_90_nominal.toFixed(3), '',
-        'measured, against 0.90 nominal', 'warn');
-      host.append(grid);
-    }
+      el('span', { class: 'evidence-class', text: 'E', 'aria-hidden': 'true' }),
+      el('div', {},
+        el('p', { class: 'evidence-label', text: `No affinity reported for ${name}` }),
+        el('p', { class: 'evidence-text', text: ab.explanation }),
+        el('div', { class: 'abstention' },
+          el('p', { class: 'abstention-head' },
+            el('span', { text: '⊘', 'aria-hidden': 'true' }),
+            el('span', { text: `abstention · ${ab.reason}` })),
+          (ab.what_would_resolve_it || []).length
+            ? (() => { const ul = el('ul', {});
+                       for (const x of ab.what_would_resolve_it) ul.append(el('li', { text: x }));
+                       return ul; })()
+            : null))));
+    host.append(relevancePanel(r));
     return;
   }
 
-  // ---- 3. a model prediction
+  // ---- prediction: class B/C within the validated domain
   const p = r.prediction;
   host.append(el('div', { class: 'evidence-banner cls-B' },
     el('span', { class: 'evidence-class', text: 'C', 'aria-hidden': 'true' }),
     el('div', {},
-      el('p', { class: 'evidence-label', text: 'Independently evaluated computational inference' }),
+      el('p', { class: 'evidence-label',
+        text: 'Independently evaluated computational inference' }),
       el('p', { class: 'evidence-text',
-        text: `${r.model_card.endpoint}. Model ${r.model_card.name}, `
-          + `${titleCase(r.model_card.quality_tier)}, MAE `
-          + `${r.model_card.headline_performance.mae_log_units.toFixed(3)} log units `
-          + 'on a scaffold split. No measured value exists for this molecule.' }))));
+        text: 'No measured value exists for this molecule. It lies inside the '
+          + 'validated domain and its target relevance is supported, so a '
+          + 'calibrated prediction is reported. This is an inference, not '
+          + 'evidence of engagement.' }))));
+  host.append(relevancePanel(r));
 
   const grid = metricGrid();
   grid.add('Predicted pKi', p.predicted_pki.toFixed(2), '',
-    `90% interval ${p.interval_low.toFixed(2)} – ${p.interval_high.toFixed(2)}`);
-  grid.add('≈ Ki', p.predicted_ki_nm < 1000 ? p.predicted_ki_nm.toFixed(0) : (p.predicted_ki_nm / 1000).toFixed(1),
+    `${(p.interval_nominal * 100).toFixed(0)}% interval `
+    + `${p.interval_low.toFixed(2)} – ${p.interval_high.toFixed(2)}`);
+  grid.add('≈ Ki', p.predicted_ki_nm < 1000 ? p.predicted_ki_nm.toFixed(0)
+    : (p.predicted_ki_nm / 1000).toFixed(1),
     p.predicted_ki_nm < 1000 ? 'nM' : 'µM', 'derived from pKi');
-  grid.add('Interval coverage', p.interval_coverage_measured.toFixed(3), '',
-    'measured on the scaffold split at 0.90 nominal', 'warn');
-  grid.add('Similarity to training', r.max_tanimoto_to_training.toFixed(3), '',
-    r.max_tanimoto_to_training > 0.7 ? 'well inside the domain' : 'near the domain edge',
-    r.max_tanimoto_to_training > 0.7 ? 'good' : 'warn');
+  grid.add('Interval width', (p.interval_high - p.interval_low).toFixed(2), 'log',
+    `about a ${Math.round(10 ** (p.interval_high - p.interval_low))}-fold range in Ki`,
+    'warn');
+  grid.add('Coverage in this band', p.interval_empirical_coverage == null ? '—'
+    : p.interval_empirical_coverage.toFixed(3), '',
+    `measured for similarity ${r.similarity_band}`,
+    p.interval_empirical_coverage != null && p.interval_empirical_coverage >= 0.87
+      ? 'good' : 'warn');
   host.append(grid);
+
+  const cp = calibrationPanel(r.calibration, r.similarity_band);
+  if (cp) host.append(cp);
 
   if ((p.nearest_neighbours || []).length) {
     const list = el('ul', { class: 'src-list' });
@@ -1198,14 +1270,13 @@ function renderPrediction(r) {
         el('span', { class: 'src-db', text: 'chembl' }),
         el('a', {
           href: `https://www.ebi.ac.uk/chembl/compound_report_card/${n.molecule_chembl_id}/`,
-          target: '_blank', rel: 'noopener', text: n.molecule_chembl_id,
-        }),
+          target: '_blank', rel: 'noopener', text: n.molecule_chembl_id }),
         el('span', { class: 'src-meta',
           text: `Tanimoto ${n.tanimoto.toFixed(3)} · measured pKi ${n.measured_pki.toFixed(2)}` })));
     }
     host.append(el('div', { class: 'insp-section' },
-      el('h3', { class: 'insp-heading', text: 'Nearest training molecules — this is the explanation' }),
-      el('p', { class: 'analysis-why', text: 'A similarity model predicts by analogy. These are the measured molecules the answer is drawn from.' }),
+      el('h3', { class: 'insp-heading',
+                 text: 'Nearest training molecules — this is the explanation' }),
       list));
   }
 }

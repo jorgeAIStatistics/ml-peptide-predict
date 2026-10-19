@@ -898,3 +898,41 @@ button.cell-btn { background: none; border: 0; padding: 2px; cursor: help; line-
   margin: 2px 20px 0; max-width: 84ch;
   font-size: 11px; line-height: 1.5; color: var(--ink-3);
 }
+
+
+/* ---------------- target relevance ---------------- */
+.relevance {
+  margin: 14px 18px;
+  border: 1px solid var(--divider);
+  border-left-width: 3px;
+  border-radius: var(--r);
+  padding: 13px 15px;
+  background: var(--sunk);
+}
+.relevance-A { border-left-color: var(--teal); background: var(--teal-soft); }
+.relevance-B { border-left-color: var(--blue); background: var(--blue-soft); }
+.relevance-C { border-left-color: var(--amber); background: var(--amber-soft); }
+.relevance-D { border-left-color: var(--oxide); background: var(--oxide-soft); }
+
+.relevance-head {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.relevance-badge {
+  font: 600 9.5px/1 var(--mono);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 7px; border: 1px solid currentColor;
+}
+.relevance-A .relevance-badge { color: var(--teal); }
+.relevance-B .relevance-badge { color: var(--blue); }
+.relevance-C .relevance-badge { color: var(--amber); }
+.relevance-D .relevance-badge { color: var(--oxide); }
+.relevance-label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.relevance-text { margin: 0 0 10px; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); }
+.relevance-kv { grid-template-columns: 112px minmax(0, 1fr); }
+.relevance-kv dd { font-family: var(--sans); font-size: 11.5px; line-height: 1.45; }
+
+.mini-table { margin-top: 10px; font-size: 11.5px; }
+.mini-table thead th { font-size: 9px; padding: 6px 9px; }
+.mini-table tbody td { padding: 5px 9px; }
+.mini-table tbody tr { cursor: default; }
