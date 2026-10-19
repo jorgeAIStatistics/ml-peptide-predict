@@ -1,0 +1,866 @@
+{
+  "mode": "retrospective_structure",
+  "criteria": {
+    "hbond_donor_acceptor_max_a": 3.5,
+    "hbond_angular_criterion": "not applied: these structures carry no hydrogens, so D-H...A angles cannot be evaluated and the count is of candidates",
+    "salt_bridge_max_a": 4.0,
+    "hydrophobic_max_a": 4.5,
+    "aromatic_centroid_max_a": 6.0,
+    "aromatic_stacked_max_deg": 30.0,
+    "aromatic_tshaped_min_deg": 60.0,
+    "cation_pi_max_a": 6.0,
+    "covalent_bond_max_a": 1.95,
+    "sasa_algorithm": "Shrake-Rupley (Biopython), probe 1.40 A"
+  },
+  "n_structures": 10,
+  "n_distinct_ligands": 9,
+  "profiles": [
+    {
+      "pdb_id": "7PIU",
+      "ligand": "setmelanotide",
+      "method": "cryo-EM",
+      "resolution": 2.58,
+      "receptor_chain": "R",
+      "peptide_chain": "P",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 8,
+      "n_receptor_interface_residues": 65,
+      "hbond_candidates": 20,
+      "hbond_min_distance_a": 2.542417287826538,
+      "salt_bridges": 3,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG1:CZ",
+            "ARG1:NH1",
+            "ARG1:NH2",
+            "ARG1:NE"
+          ],
+          "distance_a": 2.8
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG6:CZ",
+            "ARG6:NE",
+            "ARG6:NH1",
+            "ARG6:NH2"
+          ],
+          "distance_a": 3.12
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG6:CZ",
+            "ARG6:NE",
+            "ARG6:NH1",
+            "ARG6:NH2"
+          ],
+          "distance_a": 2.54
+        }
+      ],
+      "hydrophobic_contacts": 53,
+      "aromatic_stacked": 2,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 0,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 14359.081983903332,
+        "sasa_peptide_alone_a2": 1191.4654506866927,
+        "sasa_peptide_in_complex_a2": 373.30214723959443,
+        "buried_peptide_a2": 818.1633034470983,
+        "buried_receptor_a2": 655.9002690838533,
+        "interface_area_a2": 737.0317862654758,
+        "buried_surface_area_a2": 1474.0635725309517,
+        "peptide_fraction_buried": 0.6866865530809606
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 9.875,
+        "centroid_separation_a": 4.2316060066223145,
+        "peptide_heavy_atoms": 74.0,
+        "peptide_rings_found": 4.0,
+        "peptide_cationic_groups": 3.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 3,
+          "4.5": 3,
+          "5.0": 3
+        },
+        "hbond_candidates": {
+          "3.2": 14,
+          "3.5": 20,
+          "3.9": 22
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.542417287826538,
+        "cation_to_ring_centroid_a": 7.9896745681762695,
+        "donor_acceptor_a": 2.542417287826538
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "6W25",
+      "ligand": "SHU9119",
+      "method": "X-ray",
+      "resolution": 2.75,
+      "receptor_chain": "A",
+      "peptide_chain": "B",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 9,
+      "n_receptor_interface_residues": 72,
+      "hbond_candidates": 28,
+      "hbond_min_distance_a": 2.7041845321655273,
+      "salt_bridges": 2,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG5:CZ",
+            "ARG5:NE",
+            "ARG5:NH1",
+            "ARG5:NH2"
+          ],
+          "distance_a": 3.18
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG5:CZ",
+            "ARG5:NE",
+            "ARG5:NH1",
+            "ARG5:NH2"
+          ],
+          "distance_a": 2.8
+        }
+      ],
+      "hydrophobic_contacts": 85,
+      "aromatic_stacked": 3,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 0,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 22533.836538958472,
+        "sasa_peptide_alone_a2": 1275.12465561828,
+        "sasa_peptide_in_complex_a2": 325.30027025366354,
+        "buried_peptide_a2": 949.8243853646165,
+        "buried_receptor_a2": 703.777324310493,
+        "interface_area_a2": 826.8008548375548,
+        "buried_surface_area_a2": 1653.6017096751095,
+        "peptide_fraction_buried": 0.7448874752594816
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 13.222222222222221,
+        "centroid_separation_a": 2.8533432483673096,
+        "peptide_heavy_atoms": 78.0,
+        "peptide_rings_found": 5.0,
+        "peptide_cationic_groups": 1.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 2,
+          "4.5": 2,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 18,
+          "3.5": 28,
+          "3.9": 38
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.8033573627471924,
+        "cation_to_ring_centroid_a": 7.750942230224609,
+        "donor_acceptor_a": 2.7041845321655273
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "7PIV",
+      "ligand": "NDP-alpha-MSH",
+      "method": "cryo-EM",
+      "resolution": 2.86,
+      "receptor_chain": "R",
+      "peptide_chain": "P",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 13,
+      "n_receptor_interface_residues": 74,
+      "hbond_candidates": 14,
+      "hbond_min_distance_a": 2.5945944786071777,
+      "salt_bridges": 1,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG8:CZ",
+            "ARG8:NH2",
+            "ARG8:NE",
+            "ARG8:NH1"
+          ],
+          "distance_a": 2.59
+        }
+      ],
+      "hydrophobic_contacts": 43,
+      "aromatic_stacked": 1,
+      "aromatic_tshaped": 2,
+      "aromatic_oblique": 1,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 14264.477809458653,
+        "sasa_peptide_alone_a2": 1950.8690208932078,
+        "sasa_peptide_in_complex_a2": 941.9084389571424,
+        "buried_peptide_a2": 1008.9605819360654,
+        "buried_receptor_a2": 854.9699013836434,
+        "interface_area_a2": 931.9652416598544,
+        "buried_surface_area_a2": 1863.9304833197089,
+        "peptide_fraction_buried": 0.5171851985604403
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 4.769230769230769,
+        "centroid_separation_a": 6.409681797027588,
+        "peptide_heavy_atoms": 114.0,
+        "peptide_rings_found": 6.0,
+        "peptide_cationic_groups": 3.0,
+        "peptide_anionic_groups": 1.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 1,
+          "4.5": 1,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 12,
+          "3.5": 14,
+          "3.9": 24
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.5945944786071777,
+        "cation_to_ring_centroid_a": 6.808842658996582,
+        "donor_acceptor_a": 2.5945944786071777
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "8WKY",
+      "ligand": "S25",
+      "method": "X-ray",
+      "resolution": 2.9,
+      "receptor_chain": "A",
+      "peptide_chain": "B",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 10,
+      "n_receptor_interface_residues": 65,
+      "hbond_candidates": 26,
+      "hbond_min_distance_a": 2.5549843311309814,
+      "salt_bridges": 2,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG6:CZ",
+            "ARG6:NH1",
+            "ARG6:NH2",
+            "ARG6:NE"
+          ],
+          "distance_a": 2.81
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG6:CZ",
+            "ARG6:NH1",
+            "ARG6:NH2",
+            "ARG6:NE"
+          ],
+          "distance_a": 2.7
+        }
+      ],
+      "hydrophobic_contacts": 63,
+      "aromatic_stacked": 2,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 0,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 22810.08089019184,
+        "sasa_peptide_alone_a2": 1282.6026765762135,
+        "sasa_peptide_in_complex_a2": 399.84127896836003,
+        "buried_peptide_a2": 882.7613976078535,
+        "buried_receptor_a2": 667.5051741161515,
+        "interface_area_a2": 775.1332858620025,
+        "buried_surface_area_a2": 1550.266571724005,
+        "peptide_fraction_buried": 0.6882578788657306
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 9.4,
+        "centroid_separation_a": 3.402935028076172,
+        "peptide_heavy_atoms": 79.0,
+        "peptide_rings_found": 5.0,
+        "peptide_cationic_groups": 1.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 2,
+          "4.5": 2,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 16,
+          "3.5": 26,
+          "3.9": 36
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.6988842487335205,
+        "cation_to_ring_centroid_a": 7.179721832275391,
+        "donor_acceptor_a": 2.5549843311309814
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "7AUE",
+      "ligand": "setmelanotide-type",
+      "method": "cryo-EM",
+      "resolution": 2.97,
+      "receptor_chain": "R",
+      "peptide_chain": "C",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 9,
+      "n_receptor_interface_residues": 61,
+      "hbond_candidates": 12,
+      "hbond_min_distance_a": 2.6806094646453857,
+      "salt_bridges": 2,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG2:CZ",
+            "ARG2:NE",
+            "ARG2:NH1",
+            "ARG2:NH2"
+          ],
+          "distance_a": 2.68
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG7:CZ",
+            "ARG7:NH2",
+            "ARG7:NE",
+            "ARG7:NH1"
+          ],
+          "distance_a": 3.93
+        }
+      ],
+      "hydrophobic_contacts": 31,
+      "aromatic_stacked": 1,
+      "aromatic_tshaped": 0,
+      "aromatic_oblique": 0,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 15347.950359226916,
+        "sasa_peptide_alone_a2": 1309.5975403016796,
+        "sasa_peptide_in_complex_a2": 506.5326431831399,
+        "buried_peptide_a2": 803.0648971185396,
+        "buried_receptor_a2": 711.3957116281654,
+        "interface_area_a2": 757.2303043733525,
+        "buried_surface_area_a2": 1514.460608746705,
+        "peptide_fraction_buried": 0.6132150316451764
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 5.111111111111111,
+        "centroid_separation_a": 4.368408679962158,
+        "peptide_heavy_atoms": 78.0,
+        "peptide_rings_found": 4.0,
+        "peptide_cationic_groups": 2.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 2,
+          "4.5": 2,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 4,
+          "3.5": 12,
+          "3.9": 22
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.6806094646453857,
+        "cation_to_ring_centroid_a": 8.640655517578125,
+        "donor_acceptor_a": 2.6806094646453857
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "7F53",
+      "ligand": "alpha-MSH",
+      "method": "cryo-EM",
+      "resolution": 3.0,
+      "receptor_chain": "R",
+      "peptide_chain": "L",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 13,
+      "n_receptor_interface_residues": 77,
+      "hbond_candidates": 20,
+      "hbond_min_distance_a": 2.2612736225128174,
+      "salt_bridges": 2,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG8:CZ",
+            "ARG8:NH2",
+            "ARG8:NE",
+            "ARG8:NH1"
+          ],
+          "distance_a": 3.7
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG8:CZ",
+            "ARG8:NH2",
+            "ARG8:NE",
+            "ARG8:NH1"
+          ],
+          "distance_a": 2.28
+        }
+      ],
+      "hydrophobic_contacts": 57,
+      "aromatic_stacked": 1,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 1,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 15646.511968919198,
+        "sasa_peptide_alone_a2": 1897.4705034805693,
+        "sasa_peptide_in_complex_a2": 851.9338913759733,
+        "buried_peptide_a2": 1045.5366121045959,
+        "buried_receptor_a2": 884.8742317647211,
+        "interface_area_a2": 965.2054219346585,
+        "buried_surface_area_a2": 1930.410843869317,
+        "peptide_fraction_buried": 0.5510160027187493
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 6.3076923076923075,
+        "centroid_separation_a": 5.3317036628723145,
+        "peptide_heavy_atoms": 114.0,
+        "peptide_rings_found": 6.0,
+        "peptide_cationic_groups": 3.0,
+        "peptide_anionic_groups": 1.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 2,
+          "4.5": 2,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 18,
+          "3.5": 20,
+          "3.9": 34
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.280245304107666,
+        "cation_to_ring_centroid_a": 6.778642654418945,
+        "donor_acceptor_a": 2.2612736225128174
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "7F54",
+      "ligand": "afamelanotide",
+      "method": "cryo-EM",
+      "resolution": 3.0,
+      "receptor_chain": "R",
+      "peptide_chain": "L",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 13,
+      "n_receptor_interface_residues": 74,
+      "hbond_candidates": 14,
+      "hbond_min_distance_a": 2.9640564918518066,
+      "salt_bridges": 1,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG8:CZ",
+            "ARG8:NH2",
+            "ARG8:NE",
+            "ARG8:NH1"
+          ],
+          "distance_a": 2.99
+        }
+      ],
+      "hydrophobic_contacts": 59,
+      "aromatic_stacked": 1,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 2,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 15801.382647272989,
+        "sasa_peptide_alone_a2": 1975.2190657282101,
+        "sasa_peptide_in_complex_a2": 953.918307848845,
+        "buried_peptide_a2": 1021.3007578793652,
+        "buried_receptor_a2": 862.650002147444,
+        "interface_area_a2": 941.9753800134046,
+        "buried_surface_area_a2": 1883.9507600268091,
+        "peptide_fraction_buried": 0.5170569561623987
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 6.0,
+        "centroid_separation_a": 5.26798152923584,
+        "peptide_heavy_atoms": 114.0,
+        "peptide_rings_found": 6.0,
+        "peptide_cationic_groups": 3.0,
+        "peptide_anionic_groups": 1.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 1,
+          "4.5": 1,
+          "5.0": 1
+        },
+        "hbond_candidates": {
+          "3.2": 8,
+          "3.5": 14,
+          "3.9": 24
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.9867777824401855,
+        "cation_to_ring_centroid_a": 7.052577972412109,
+        "donor_acceptor_a": 2.9640564918518066
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "7F55",
+      "ligand": "bremelanotide",
+      "method": "cryo-EM",
+      "resolution": 3.1,
+      "receptor_chain": "R",
+      "peptide_chain": "L",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 7,
+      "n_receptor_interface_residues": 62,
+      "hbond_candidates": 18,
+      "hbond_min_distance_a": 2.657405376434326,
+      "salt_bridges": 3,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "E100:OE1",
+            "E100:OE2"
+          ],
+          "peptide_atoms": [
+            "NLE1:N"
+          ],
+          "distance_a": 3.6
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "NLE1:N"
+          ],
+          "distance_a": 3.06
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG5:CZ",
+            "ARG5:NE",
+            "ARG5:NH1",
+            "ARG5:NH2"
+          ],
+          "distance_a": 3.49
+        }
+      ],
+      "hydrophobic_contacts": 49,
+      "aromatic_stacked": 1,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 1,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 15762.319053775871,
+        "sasa_peptide_alone_a2": 1167.014347099209,
+        "sasa_peptide_in_complex_a2": 355.1744664779975,
+        "buried_peptide_a2": 811.8398806212116,
+        "buried_receptor_a2": 658.4648265652104,
+        "interface_area_a2": 735.152353593211,
+        "buried_surface_area_a2": 1470.304707186422,
+        "peptide_fraction_buried": 0.6956554412884148
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 10.428571428571429,
+        "centroid_separation_a": 3.2176897525787354,
+        "peptide_heavy_atoms": 70.0,
+        "peptide_rings_found": 4.0,
+        "peptide_cationic_groups": 2.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 3,
+          "4.5": 3,
+          "5.0": 5
+        },
+        "hbond_candidates": {
+          "3.2": 12,
+          "3.5": 18,
+          "3.9": 30
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 3.062371253967285,
+        "cation_to_ring_centroid_a": 7.789395809173584,
+        "donor_acceptor_a": 2.657405376434326
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "21LT",
+      "ligand": "setmelanotide",
+      "method": "cryo-EM",
+      "resolution": 3.11,
+      "receptor_chain": "R",
+      "peptide_chain": "P",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 8,
+      "n_receptor_interface_residues": 69,
+      "hbond_candidates": 22,
+      "hbond_min_distance_a": 2.7217698097229004,
+      "salt_bridges": 0,
+      "salt_bridge_details": [],
+      "hydrophobic_contacts": 32,
+      "aromatic_stacked": 2,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 0,
+      "cation_pi": 0,
+      "sasa": {
+        "sasa_receptor_alone_a2": 14014.608498286583,
+        "sasa_peptide_alone_a2": 1179.2770011021896,
+        "sasa_peptide_in_complex_a2": 381.31912726680787,
+        "buried_peptide_a2": 797.9578738353817,
+        "buried_receptor_a2": 674.4601701627325,
+        "interface_area_a2": 736.2090219990571,
+        "buried_surface_area_a2": 1472.4180439981142,
+        "peptide_fraction_buried": 0.6766500771994918
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 7.125,
+        "centroid_separation_a": 4.231997013092041,
+        "peptide_heavy_atoms": 74.0,
+        "peptide_rings_found": 4.0,
+        "peptide_cationic_groups": 3.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 0,
+          "4.5": 2,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 20,
+          "3.5": 22,
+          "3.9": 27
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 4.244717597961426,
+        "cation_to_ring_centroid_a": 8.113484382629395,
+        "donor_acceptor_a": 2.7217698097229004
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    },
+    {
+      "pdb_id": "8WKZ",
+      "ligand": "S31",
+      "method": "X-ray",
+      "resolution": 3.3,
+      "receptor_chain": "A",
+      "peptide_chain": "B",
+      "mode": "retrospective_structure",
+      "n_peptide_residues": 10,
+      "n_receptor_interface_residues": 62,
+      "hbond_candidates": 26,
+      "hbond_min_distance_a": 2.7146542072296143,
+      "salt_bridges": 2,
+      "salt_bridge_details": [
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D122:OD2",
+            "D122:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG6:CZ",
+            "ARG6:NH1",
+            "ARG6:NH2",
+            "ARG6:NE"
+          ],
+          "distance_a": 3.02
+        },
+        {
+          "kind": "receptor_anionic",
+          "receptor_atoms": [
+            "D126:OD2",
+            "D126:OD1"
+          ],
+          "peptide_atoms": [
+            "ARG6:CZ",
+            "ARG6:NH1",
+            "ARG6:NH2",
+            "ARG6:NE"
+          ],
+          "distance_a": 2.71
+        }
+      ],
+      "hydrophobic_contacts": 72,
+      "aromatic_stacked": 2,
+      "aromatic_tshaped": 1,
+      "aromatic_oblique": 1,
+      "cation_pi": 1,
+      "sasa": {
+        "sasa_receptor_alone_a2": 22745.28211109235,
+        "sasa_peptide_alone_a2": 1307.0028486635977,
+        "sasa_peptide_in_complex_a2": 401.6573080176942,
+        "buried_peptide_a2": 905.3455406459034,
+        "buried_receptor_a2": 699.3751990205819,
+        "interface_area_a2": 802.3603698332427,
+        "buried_surface_area_a2": 1604.7207396664853,
+        "peptide_fraction_buried": 0.692688268867672
+      },
+      "interface_geometry": {
+        "contacts_per_peptide_residue": 10.5,
+        "centroid_separation_a": 4.020934104919434,
+        "peptide_heavy_atoms": 86.0,
+        "peptide_rings_found": 5.0,
+        "peptide_cationic_groups": 2.0,
+        "peptide_anionic_groups": 0.0
+      },
+      "cutoff_sensitivity": {
+        "salt_bridges": {
+          "4.0": 2,
+          "4.5": 2,
+          "5.0": 2
+        },
+        "hbond_candidates": {
+          "3.2": 18,
+          "3.5": 26,
+          "3.9": 46
+        }
+      },
+      "nearest_distances": {
+        "charged_pair_a": 2.7146542072296143,
+        "cation_to_ring_centroid_a": 4.1154656410217285,
+        "donor_acceptor_a": 2.7146542072296143
+      },
+      "caveats": [
+        "Hydrogen bonds are reported as candidates: at 2.58-3.30 A these structures carry no hydrogens, so the donor-hydrogen-acceptor angle cannot be checked and a heavy-atom distance alone over-counts.",
+        "Peptide chemistry is typed from element and distance-inferred bonds, not from residue names, because these ligands are largely non-canonical. Charged-group and ring assignments on the peptide side are therefore inferences from geometry."
+      ]
+    }
+  ],
+  "built_at": "2026-10-19T14:42:24.543715+00:00",
+  "restriction": "Every descriptor here is computed from an experimentally determined bound complex and does not exist for an unsolved peptide-target pair. These features must not enter a prospective prediction pathway; assert_retrospective_only() enforces it."
+}
