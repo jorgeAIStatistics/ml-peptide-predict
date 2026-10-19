@@ -15,6 +15,22 @@ Two deliberate restrictions keep the endpoint physically homogeneous:
   2,800 records at the cost of mixing different quantities under one label.
 * **Binding assays only** (``assay_type == "B"``), for the same reason.
 
+Three further filters were added after inspecting what the raw query returns:
+
+* **Wild-type receptor only.** 67 activities (2.4%) measure binding to *mutant*
+  MC4R -- alanine scans such as I129A and Y268A. A mutant receptor is a
+  different protein, and pooling it into a wild-type affinity label is a silent
+  error. ChEMBL's structured ``assay_variant_mutation`` field is authoritative
+  here and agreed with a description-text heuristic on all 67 records.
+* **ChEMBL's own validity flags respected.** 32 records carry a
+  ``data_validity_comment`` ("Outside typical range", "Potential transcription
+  error") and are dropped rather than silently averaged in.
+* **Duplicate records collapsed before aggregation.** 455 activities are
+  flagged ``potential_duplicate``. Counting them as independent replicates
+  inflated the apparent replication and drove the median replicate spread to
+  zero. Records are now deduplicated on (document, rounded value) so that the
+  replicate count reflects distinct reported measurements.
+
 Replicate measurements of the same molecule are collapsed to their median, and
 the spread between replicates is retained: it is an estimate of experimental
 noise and therefore a floor on the error any model can achieve. A model whose
@@ -72,6 +88,8 @@ class ActivityRecord:
     molecule_chembl_id: str
     smiles: str
     pki: float
+    pki_min: float
+    pki_max: float
     n_replicates: int
     replicate_spread: float      # max - min across replicates, in log units
     molecule_type: str | None
@@ -81,6 +99,16 @@ class ActivityRecord:
     @property
     def is_replicated(self) -> bool:
         return self.n_replicates > 1
+
+    @property
+    def is_discordant(self) -> bool:
+        """Replicates disagreeing by more than a log unit are not a point value.
+
+        PT-141 is the motivating case: its records span pKi 7.61 to 9.60, a
+        hundredfold range, so reporting the median alone would misrepresent
+        what is known.
+        """
+        return self.replicate_spread > 1.0
 
 
 @dataclass
@@ -165,10 +193,20 @@ def build_dataset(
 
     rejected: dict[str, int] = {
         "no_pchembl": 0, "no_smiles": 0, "out_of_range": 0, "unparseable": 0,
+        "mutant_receptor": 0, "chembl_validity_flag": 0, "duplicate_record": 0,
     }
     by_molecule: dict[str, dict[str, Any]] = {}
+    seen_measurements: set[tuple[str, str, float]] = set()
 
     for act in raw:
+        # Mutant receptors are a different protein from the wild type.
+        if act.get("assay_variant_mutation"):
+            rejected["mutant_receptor"] += 1
+            continue
+        # ChEMBL's curators have already flagged these as suspect.
+        if act.get("data_validity_comment"):
+            rejected["chembl_validity_flag"] += 1
+            continue
         mol_id = act.get("molecule_chembl_id")
         smiles = act.get("canonical_smiles")
         pchembl = act.get("pchembl_value")
@@ -190,6 +228,14 @@ def build_dataset(
         if not (PKI_MIN <= value <= PKI_MAX):
             rejected["out_of_range"] += 1
             continue
+
+        # Collapse duplicate records of one measurement: the same value in the
+        # same document is one experiment, however many rows carry it.
+        fingerprint = (mol_id, act.get("document_chembl_id") or "", round(value, 2))
+        if fingerprint in seen_measurements:
+            rejected["duplicate_record"] += 1
+            continue
+        seen_measurements.add(fingerprint)
 
         slot = by_molecule.setdefault(
             mol_id,
@@ -213,6 +259,8 @@ def build_dataset(
                 molecule_chembl_id=mol_id,
                 smiles=slot["smiles"],
                 pki=float(statistics.median(values)),
+                pki_min=float(min(values)),
+                pki_max=float(max(values)),
                 n_replicates=len(values),
                 replicate_spread=float(spread),
                 molecule_type=slot["type"],
@@ -243,10 +291,12 @@ def build_dataset(
         "implied_mae_floor_log": (
             float(statistics.median(differing)) / 2.0 if differing else 0.0
         ),
+        "n_discordant_molecules": sum(1 for r in records if r.is_discordant),
         "caveat": (
-            "Exact duplicates dominate the replicate set, so this floor is "
-            "almost certainly optimistic: it reflects agreement within curated "
-            "records rather than independent inter-laboratory reproducibility."
+            "Computed after collapsing duplicate records, so it reflects "
+            "distinct reported measurements. It still understates true "
+            "inter-laboratory variation, since agreement within a curated "
+            "database is not independent replication."
         ),
     }
 
@@ -260,7 +310,16 @@ def build_dataset(
             "standard_relation": "=",
             "assay_type": "B (binding)",
             "pki_range": [PKI_MIN, PKI_MAX],
-            "aggregation": "median across replicate measurements",
+            "aggregation": "median across distinct replicate measurements",
+            "wild_type_only": (
+                "Activities with assay_variant_mutation set were excluded: a "
+                "mutant receptor is a different protein."
+            ),
+            "validity": "Records carrying a ChEMBL data_validity_comment were excluded.",
+            "deduplication": (
+                "Records sharing (molecule, document, rounded pChEMBL) were "
+                "collapsed to one measurement."
+            ),
             "excluded": (
                 "IC50 and EC50 were excluded: IC50 depends on radioligand "
                 "concentration via Cheng-Prusoff, and EC50 is a functional "

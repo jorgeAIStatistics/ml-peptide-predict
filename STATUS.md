@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-18 · 271 tests passing
+Last updated: 2026-10-18 · 325 tests passing
 
 ## What this is
 
@@ -160,7 +160,61 @@ never tested against an independent external dataset or prospectively.
 ```bash
 PYTHONPATH=. python3 -m atlas.ml.dataset   # build dataset from ChEMBL
 PYTHONPATH=. python3 -m atlas.ml.train     # train, evaluate, write registry
+PYTHONPATH=. python3 -m atlas.ml.peptide_train   # peptide experiment
 ```
+
+### Peptide ligands — served by measurement, not by a model
+
+The small-molecule model refused peptides, leaving the registry's melanocortin
+compounds unserved. Investigating produced a better answer than a model:
+**PT-141, melanotan I and melanotan II all have exact structural matches in
+ChEMBL with measured MC4R affinities.** They are now answered with the
+measurement (evidence class A) rather than a prediction. Returning an inference
+for a molecule whose affinity has been measured — and which sits in the model's
+own training set — would substitute class C for class A.
+
+| compound | median pKi | reported range | studies |
+|---|---|---|---|
+| PT-141 | 7.68 | 7.61 – 9.60 (98-fold) | 4 |
+| melanotan I | 9.33 | 7.72 – 9.57 (71-fold) | 7 |
+| melanotan II | 8.90 | 8.90 – 10.47 (37-fold) | 5 |
+
+All three are **discordant**: independent records disagree by 37- to 98-fold.
+The interface reports the median together with the range and an explicit
+warning that it summarises disagreeing measurements rather than a settled value.
+
+A peptide-specific model was built and evaluated, and is **not deployed**. On a
+Taylor-Butina cluster split it reached MAE 1.208 against a mean-predictor
+baseline of 1.324 — 8.8% better, R² 0.073, and 90% intervals covering 57% of
+cases. Error did not fall with similarity to training, so no sub-domain is
+trustworthy. It is clearly better than applying the small-molecule model (1.675),
+which confirms modality-specific modelling is the right direction without making
+this model good enough to serve numbers.
+
+Two further findings:
+
+- **Peptide-specific features did not help.** Residue composition, macrocyclisation
+  and terminal state were built and validated at **94.8% against HELM sequences**
+  (146/154 residue counts over 22 molecules), yet Morgan fingerprints beat them on
+  every split, and ridge-on-peptide-features was worse than the mean on the
+  cluster split.
+- **A scaffold split is misleading for peptides.** It reports zero shared
+  scaffolds while leaving 100% of test peptides with a >0.7-Tanimoto training
+  neighbour, because changing one residue in a macrocycle changes the whole
+  Murcko scaffold. The cluster split drops that to 49%.
+
+### Dataset quality filters
+
+Inspecting the raw ChEMBL query surfaced three defects, all now filtered:
+
+- **67 activities measured mutant MC4R** (alanine scans such as I129A, Y268A)
+  and were being pooled into a wild-type affinity label. Removing them moved
+  melanotan I's median from 9.20 to 9.33 — the mutant data was biasing it.
+- **31 records carry a ChEMBL `data_validity_comment`** ("Outside typical
+  range", "Potential transcription error") and are dropped.
+- **80 duplicate records** inflated apparent replication, which is why the
+  median replicate spread read as exactly zero. Records are deduplicated on
+  (molecule, document, rounded value) before aggregation.
 
 ## Verification vs validation
 
@@ -187,9 +241,9 @@ prospective evaluation.
    units, uncertainty and verification against source text.
 2. **External validation of the ML model** — needs an independent affinity set
    for MC4R not drawn from the same ChEMBL extraction.
-3. **A peptide-ligand affinity model** — the current model refuses peptides,
-   which is correct but leaves the registry's own melanocortin compounds
-   unserved. Needs peptide–target affinity data and sequence-aware features.
+3. **Order-aware peptide features** — only 28% of peptide entries carry HELM
+   notation, so composition is recovered but sequence order is not. Features are
+   named for composition and nothing here is a sequence model.
 4. **Knowledge graph** — typed schema and traversal not implemented.
 5. **Evidence ledger database** — provenance is per-record; the append-only
    versioned store is not built.
@@ -219,7 +273,7 @@ prospective evaluation.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 271 tests
+python3 -m pytest -q                              # 325 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

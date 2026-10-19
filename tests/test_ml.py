@@ -48,8 +48,9 @@ HEXAPEPTIDE = (
 
 def rec(mol_id: str, smiles: str, pki: float, n: int = 1, spread: float = 0.0):
     return ActivityRecord(
-        molecule_chembl_id=mol_id, smiles=smiles, pki=pki, n_replicates=n,
-        replicate_spread=spread, molecule_type=None,
+        molecule_chembl_id=mol_id, smiles=smiles, pki=pki,
+        pki_min=pki - spread / 2, pki_max=pki + spread / 2,
+        n_replicates=n, replicate_spread=spread, molecule_type=None,
         document_ids=("DOC1",), assay_ids=("A1",),
     )
 
@@ -368,3 +369,73 @@ class TestGatedPrediction:
         from atlas.ml.predict import MODEL_CARD
         assert MODEL_CARD["quality_tier"] == "internally_validated"
         assert "not externally validated" in MODEL_CARD["quality_tier_meaning"]
+
+
+@pytest.mark.skipif(not REGISTRY.exists(), reason="model registry not built")
+class TestCardsMatchRegistries:
+    """The published cards must agree with the registries they describe.
+
+    Hard-coded performance figures rot the moment anything is retrained, and a
+    stale number in a model card is a false claim about measured performance.
+    These tests fail loudly if a retrain moves the numbers without the cards
+    being updated.
+    """
+
+    TOL = 0.002
+
+    @staticmethod
+    def _best(rows, split, exclude=("baseline_mean", "small_molecule_model_applied")):
+        return min((r for r in rows if r["split"] == split and r["model"] not in exclude),
+                   key=lambda r: r["mae"])
+
+    @staticmethod
+    def _baseline(rows, split):
+        return next(r for r in rows
+                    if r["split"] == split and r["model"] == "baseline_mean")
+
+    def test_small_molecule_card_matches_scaffold_result(self):
+        from atlas.ml.predict import MODEL_CARD
+        reg = json.loads(REGISTRY.read_text())
+        knn = next(r for r in reg["results"]
+                   if r["split"] == "scaffold" and r["model"] == "fingerprint_knn")
+        hp = MODEL_CARD["headline_performance"]
+        assert hp["mae_log_units"] == pytest.approx(knn["mae"], abs=self.TOL)
+        assert hp["r2"] == pytest.approx(knn["r2"], abs=self.TOL)
+        assert hp["spearman"] == pytest.approx(knn["spearman"], abs=self.TOL)
+        assert hp["conformal_coverage_at_90_nominal"] == pytest.approx(
+            knn["conformal_coverage"], abs=self.TOL)
+
+    def test_card_random_comparison_matches_registry(self):
+        from atlas.ml.predict import MODEL_CARD
+        reg = json.loads(REGISTRY.read_text())
+        knn = next(r for r in reg["results"]
+                   if r["split"] == "random" and r["model"] == "fingerprint_knn")
+        rs = MODEL_CARD["random_split_comparison"]
+        assert rs["mae_log_units"] == pytest.approx(knn["mae"], abs=self.TOL)
+        assert rs["r2"] == pytest.approx(knn["r2"], abs=self.TOL)
+
+    def test_card_negative_transfer_matches_registry(self):
+        from atlas.ml.predict import MODEL_CARD
+        reg = json.loads(REGISTRY.read_text())
+        best = self._best(reg["results"], "modality_peptide_holdout")
+        base = self._baseline(reg["results"], "modality_peptide_holdout")
+        nt = MODEL_CARD["negative_transfer"]
+        assert nt["best_model_mae"] == pytest.approx(best["mae"], abs=self.TOL)
+        assert nt["baseline_mean_mae"] == pytest.approx(base["mae"], abs=self.TOL)
+        # The claim the refusal rests on must still hold.
+        assert best["mae"] > base["mae"]
+
+    @pytest.mark.skipif(not (REGISTRY.parent / "peptide_model_registry.json").exists(),
+                        reason="peptide registry not built")
+    def test_peptide_findings_match_registry(self):
+        from atlas.ml.peptide_service import PEPTIDE_MODEL_FINDINGS
+        reg = json.loads((REGISTRY.parent / "peptide_model_registry.json").read_text())
+        best = self._best(reg["results"], "cluster")
+        base = self._baseline(reg["results"], "cluster")
+        cs = PEPTIDE_MODEL_FINDINGS["cluster_split"]
+        assert cs["mae"] == pytest.approx(best["mae"], abs=self.TOL)
+        assert cs["baseline_mae"] == pytest.approx(base["mae"], abs=self.TOL)
+        assert cs["r2"] == pytest.approx(best["r2"], abs=self.TOL)
+        assert cs["conformal_coverage_at_90_nominal"] == pytest.approx(
+            best["conformal_coverage"], abs=self.TOL)
+        assert PEPTIDE_MODEL_FINDINGS["n_peptides"] == reg["n_peptides"]

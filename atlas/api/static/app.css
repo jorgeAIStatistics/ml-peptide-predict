@@ -624,6 +624,8 @@ input:focus-visible, select:focus-visible, button:focus-visible {
   background: var(--surface);
 }
 .evidence-banner.cls-D { border-left-color: var(--amber); background: var(--amber-soft); }
+.evidence-banner.cls-A { border-left-color: var(--teal-deep); background: var(--teal-soft); }
+.evidence-banner.cls-A .evidence-class { color: var(--teal); }
 .evidence-banner.cls-B { border-left-color: var(--teal); background: var(--teal-soft); }
 .evidence-banner.cls-E { border-left-color: var(--oxide); background: var(--oxide-soft); }
 .evidence-class {

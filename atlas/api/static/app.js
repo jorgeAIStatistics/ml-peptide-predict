@@ -920,6 +920,9 @@ async function loadModelLab() {
     state.modelCard = data;
     renderModelCard(data.card, data.report);
     renderSplitCharts(data.report);
+    if (data.peptide_findings) {
+      renderPeptideFindings(data.peptide_findings, data.peptide_report);
+    }
     const sel = $('#ml-compound');
     if (sel.options.length <= 1) {
       for (const r of [...state.rows].sort((a, b) => a.name.localeCompare(b.name))) {
@@ -1057,50 +1060,115 @@ async function runPrediction() {
   }
 }
 
-function renderPrediction(r) {
-  const host = $('#ml-result');
-  host.textContent = '';
-  const name = r.compound_name || r.smiles;
-
-  if (r.abstained) {
-    host.append(el('div', { class: 'evidence-banner cls-E' },
-      el('span', { class: 'evidence-class', text: 'E', 'aria-hidden': 'true' }),
-      el('div', {},
-        el('p', { class: 'evidence-label', text: `No prediction for ${name}` }),
-        el('p', { class: 'evidence-text', text: r.abstention_explanation }),
-        el('div', { class: 'abstention' },
-          el('p', { class: 'abstention-head' },
-            el('span', { text: '⊘', 'aria-hidden': 'true' }),
-            el('span', { text: `abstention · ${r.abstention_reason}` })),
-          r.max_tanimoto_to_training !== null && r.max_tanimoto_to_training !== undefined
-            ? el('p', { text: `Nearest training molecule: Tanimoto ${r.max_tanimoto_to_training.toFixed(3)}.` })
-            : null,
-          (r.what_would_resolve_it || []).length
-            ? (() => { const ul = el('ul', {}); for (const x of r.what_would_resolve_it) ul.append(el('li', { text: x })); return ul; })()
-            : null))));
-    return;
-  }
-
-  const metrics = el('div', { class: 'metric-wrap' });
-  const add = (label, value, unit, note, cls) => metrics.append(
-    el('div', { class: 'metric' },
+function metricGrid() {
+  const grid = el('div', { class: 'metric-wrap' });
+  grid.add = (label, value, unit, note, cls) => {
+    grid.append(el('div', { class: 'metric' },
       el('p', { class: 'metric-label', text: label }),
       el('p', { class: 'metric-value' },
         document.createTextNode(value),
         unit ? el('span', { class: 'u', text: unit }) : null),
       note ? el('p', { class: `metric-note ${cls || ''}`, text: note }) : null));
+    return grid;
+  };
+  return grid;
+}
 
-  add('Predicted pKi', r.predicted_pki.toFixed(2), '',
-    `90% interval ${r.interval_low.toFixed(2)} – ${r.interval_high.toFixed(2)}`);
-  add('≈ Ki', r.predicted_ki_nm < 1000 ? r.predicted_ki_nm.toFixed(0) : (r.predicted_ki_nm / 1000).toFixed(1),
-    r.predicted_ki_nm < 1000 ? 'nM' : 'µM', 'derived from pKi');
-  add('Interval coverage', r.interval_coverage_measured.toFixed(3), '',
-    'measured on the scaffold split at 0.90 nominal — the interval is wider than it looks',
-    'warn');
-  add('Similarity to training', r.max_tanimoto_to_training.toFixed(3), '',
-    r.max_tanimoto_to_training > 0.7 ? 'well inside the domain' : 'near the domain edge',
-    r.max_tanimoto_to_training > 0.7 ? 'good' : 'warn');
+function renderPrediction(r) {
+  const host = $('#ml-result');
+  host.textContent = '';
+  const name = r.compound_name || r.smiles;
 
+  // ---- 1. a measured value outranks any prediction
+  if (r.answer_kind === 'measurement') {
+    const m = r.measurement;
+    host.append(el('div', { class: 'evidence-banner cls-A' },
+      el('span', { class: 'evidence-class', text: 'A', 'aria-hidden': 'true' }),
+      el('div', {},
+        el('p', { class: 'evidence-label', text: `Measured affinity for ${name}` }),
+        el('p', { class: 'evidence-text',
+          text: 'This molecule has a measured binding affinity in ChEMBL, so the '
+            + 'experimental value is reported rather than a model estimate. Direct '
+            + 'experimental evidence outranks any inference.' }))));
+
+    if (m.is_discordant) {
+      host.append(el('div', { class: 'caveat', style: 'margin:14px 18px' },
+        el('span', { class: 'caveat-mark', text: '▲', 'aria-hidden': 'true' }),
+        el('span', {},
+          el('strong', { text: 'Reported values disagree. ' }),
+          document.createTextNode(
+            `Independent records span pKi ${m.pki_min.toFixed(2)} to `
+            + `${m.pki_max.toFixed(2)} — a factor of `
+            + `${Math.round(10 ** (m.pki_max - m.pki_min))} in affinity. The median `
+            + 'below is a summary of disagreeing measurements, not a settled value.'))));
+    }
+
+    const grid = metricGrid();
+    grid.add('Measured pKi', m.pki.toFixed(2),
+      m.pki_max > m.pki_min ? ` (${m.pki_min.toFixed(2)}–${m.pki_max.toFixed(2)})` : '',
+      m.match_kind === 'exact_structure'
+        ? 'median of reported values; exact structural match'
+        : 'same skeleton, different stereochemistry or salt',
+      m.match_kind === 'exact_structure' && !m.is_discordant ? 'good' : 'warn');
+    grid.add('Ki', m.ki_nm < 1000 ? m.ki_nm.toFixed(1) : (m.ki_nm / 1000).toFixed(2),
+      m.ki_nm < 1000 ? 'nM' : 'µM', 'derived from pKi');
+    grid.add('Independent studies', String(m.n_documents), '',
+      `${m.n_replicates} activity records`);
+    grid.add('Replicate spread', m.replicate_spread.toFixed(3), 'log',
+      m.replicate_spread === 0 ? 'records agree exactly' : 'disagreement across records',
+      m.replicate_spread > 0.5 ? 'warn' : 'good');
+    host.append(grid);
+
+    host.append(el('div', { class: 'insp-section' },
+      el('h3', { class: 'insp-heading', text: 'Source' }),
+      el('ul', { class: 'src-list' },
+        el('li', { class: 'src-item' },
+          el('span', { class: 'src-db', text: 'chembl' }),
+          el('a', { href: m.chembl_url, target: '_blank', rel: 'noopener',
+                    text: m.molecule_chembl_id }),
+          el('span', { class: 'src-meta', text: `${r.target} · dataset ${r.dataset_version}` })))));
+    return;
+  }
+
+  // ---- 2. a refusal, with the numbers behind it
+  if (r.answer_kind === 'abstention') {
+    const ab = r.abstention;
+    const box = el('div', {},
+      el('p', { class: 'evidence-label', text: `No value for ${name}` }),
+      el('p', { class: 'evidence-text', text: ab.explanation }),
+      el('div', { class: 'abstention' },
+        el('p', { class: 'abstention-head' },
+          el('span', { text: '⊘', 'aria-hidden': 'true' }),
+          el('span', { text: `abstention · ${ab.reason}` })),
+        r.max_tanimoto_to_training != null
+          ? el('p', { text: `Nearest training molecule: Tanimoto ${r.max_tanimoto_to_training.toFixed(3)}.` })
+          : null,
+        (ab.what_would_resolve_it || []).length
+          ? (() => { const ul = el('ul', {});
+                     for (const x of ab.what_would_resolve_it) ul.append(el('li', { text: x }));
+                     return ul; })()
+          : null));
+
+    host.append(el('div', { class: 'evidence-banner cls-E' },
+      el('span', { class: 'evidence-class', text: 'E', 'aria-hidden': 'true' }), box));
+
+    if (r.peptide_model_findings) {
+      const f = r.peptide_model_findings;
+      const grid = metricGrid();
+      grid.add('Peptide model MAE', f.mae.toFixed(3), 'log',
+        `against a baseline of ${f.baseline_mae.toFixed(3)}`, 'warn');
+      grid.add('Improvement over mean', `${(f.improvement_over_baseline * 100).toFixed(1)}`, '%',
+        'not enough to serve a number', 'warn');
+      grid.add('Variance explained', `${(f.r2 * 100).toFixed(1)}`, '%', 'R² on a cluster split', 'warn');
+      grid.add('Interval coverage', f.conformal_coverage_at_90_nominal.toFixed(3), '',
+        'measured, against 0.90 nominal', 'warn');
+      host.append(grid);
+    }
+    return;
+  }
+
+  // ---- 3. a model prediction
+  const p = r.prediction;
   host.append(el('div', { class: 'evidence-banner cls-B' },
     el('span', { class: 'evidence-class', text: 'C', 'aria-hidden': 'true' }),
     el('div', {},
@@ -1108,12 +1176,24 @@ function renderPrediction(r) {
       el('p', { class: 'evidence-text',
         text: `${r.model_card.endpoint}. Model ${r.model_card.name}, `
           + `${titleCase(r.model_card.quality_tier)}, MAE `
-          + `${r.model_card.headline_performance.mae_log_units.toFixed(3)} log units on a scaffold split.` }))));
-  host.append(metrics);
+          + `${r.model_card.headline_performance.mae_log_units.toFixed(3)} log units `
+          + 'on a scaffold split. No measured value exists for this molecule.' }))));
 
-  if ((r.nearest_neighbours || []).length) {
+  const grid = metricGrid();
+  grid.add('Predicted pKi', p.predicted_pki.toFixed(2), '',
+    `90% interval ${p.interval_low.toFixed(2)} – ${p.interval_high.toFixed(2)}`);
+  grid.add('≈ Ki', p.predicted_ki_nm < 1000 ? p.predicted_ki_nm.toFixed(0) : (p.predicted_ki_nm / 1000).toFixed(1),
+    p.predicted_ki_nm < 1000 ? 'nM' : 'µM', 'derived from pKi');
+  grid.add('Interval coverage', p.interval_coverage_measured.toFixed(3), '',
+    'measured on the scaffold split at 0.90 nominal', 'warn');
+  grid.add('Similarity to training', r.max_tanimoto_to_training.toFixed(3), '',
+    r.max_tanimoto_to_training > 0.7 ? 'well inside the domain' : 'near the domain edge',
+    r.max_tanimoto_to_training > 0.7 ? 'good' : 'warn');
+  host.append(grid);
+
+  if ((p.nearest_neighbours || []).length) {
     const list = el('ul', { class: 'src-list' });
-    for (const n of r.nearest_neighbours) {
+    for (const n of p.nearest_neighbours) {
       list.append(el('li', { class: 'src-item' },
         el('span', { class: 'src-db', text: 'chembl' }),
         el('a', {
@@ -1127,6 +1207,51 @@ function renderPrediction(r) {
       el('h3', { class: 'insp-heading', text: 'Nearest training molecules — this is the explanation' }),
       el('p', { class: 'analysis-why', text: 'A similarity model predicts by analogy. These are the measured molecules the answer is drawn from.' }),
       list));
+  }
+}
+
+function renderPeptideFindings(f, report) {
+  const host = $('#ml-peptide');
+  if (!host) return;
+  host.textContent = '';
+  const cs = f.cluster_split;
+
+  host.append(el('div', { class: 'tier-strip', style: 'background:var(--oxide-soft);border-bottom-color:var(--oxide)' },
+    el('span', { class: 'tier-badge', style: 'background:var(--oxide)', text: 'Not deployed' }),
+    el('p', { class: 'tier-text', text: f.decision })));
+
+  const grid = metricGrid();
+  grid.add('Cluster-split MAE', cs.mae.toFixed(3), 'log',
+    `baseline ${cs.baseline_mae.toFixed(3)} — only ${(cs.improvement_over_baseline * 100).toFixed(1)}% better`, 'warn');
+  grid.add('Variance explained', `${(cs.r2 * 100).toFixed(1)}`, '%', 'R² on the honest split', 'warn');
+  grid.add('Rank correlation', cs.spearman.toFixed(3), '', 'Spearman — weak but non-zero');
+  grid.add('Interval coverage', cs.conformal_coverage_at_90_nominal.toFixed(3), '',
+    'against 0.90 nominal — badly miscalibrated', 'warn');
+  grid.add('vs small-molecule model', f.improvement_over_small_molecule_model.peptide_model_mae.toFixed(3), 'log',
+    `that model scores ${f.improvement_over_small_molecule_model.small_molecule_model_mae_on_peptides.toFixed(3)} here — better, but not good enough`, 'good');
+  grid.add('Residue extractor', `${(f.peptide_features_did_not_help.validated_against_helm * 100).toFixed(1)}`, '%',
+    'agreement with HELM sequences', 'good');
+  host.append(grid);
+
+  host.append(el('div', { class: 'insp-section' },
+    el('h3', { class: 'insp-heading', text: 'Negative result: the peptide features did not help' }),
+    el('p', { class: 'analysis-why', text: f.peptide_features_did_not_help.note }),
+    el('h3', { class: 'insp-heading', style: 'margin-top:14px', text: 'Why the optimistic splits mislead here' }),
+    el('p', { class: 'analysis-why', text: f.optimistic_splits_for_contrast.note }),
+    el('h3', { class: 'insp-heading', style: 'margin-top:14px', text: 'What would change this' }),
+    (() => { const ul = el('ul', { class: 'analysis-resolve' });
+             for (const x of f.what_would_change_this) ul.append(el('li', { text: x }));
+             return ul; })()));
+
+  if (report && report.available) {
+    const rows = report.splits.map((sp) => el('div', { class: 'split-block-head' },
+      el('h3', { class: 'split-block-title', text: sp.kind }),
+      el('span', { class: 'split-block-meta',
+        text: `train ${sp.n_train} · test ${sp.n_test} · median similarity `
+          + `${sp.median_test_similarity.toFixed(3)} · `
+          + `${(sp.fraction_test_with_close_neighbour * 100).toFixed(0)}% have a >0.7 neighbour` })));
+    host.append(el('div', { class: 'insp-section' },
+      el('h3', { class: 'insp-heading', text: 'Split characteristics (628 peptides)' }), ...rows));
   }
 }
 

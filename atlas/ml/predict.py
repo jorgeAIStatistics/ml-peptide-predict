@@ -5,16 +5,16 @@ by its availability. Three findings from :mod:`atlas.ml.train` set the gates:
 
 1. **It must not be applied to peptides.** Trained on small-molecule-like
    ligands and tested on peptide-like ones, every model scored *worse than
-   predicting the training mean* (best MAE 1.46 against a 1.31 baseline, with
+   predicting the training mean* (best MAE 1.42 against a 1.30 baseline, with
    Spearman near zero). That is measured negative transfer, so peptide-like
    input is refused. This matters directly here: PT-141, melanotan I and
    melanotan II are peptides acting at melanocortin receptors, and they fall on
    the wrong side of this boundary.
 
 2. **Its honest accuracy is the scaffold-split figure.** A random split shares
-   51% of its test scaffolds with training and reports MAE 0.478 / R-squared
-   0.699. The scaffold split shares none and reports MAE 0.681 / R-squared
-   0.297. The second number is the one quoted.
+   51% of its test scaffolds with training and reports MAE 0.477 / R-squared
+   0.699. The scaffold split shares none and reports MAE 0.685 / R-squared
+   0.296. The second number is the one quoted.
 
 3. **Conformal intervals lose their guarantee off-distribution.** Coverage is
    0.92 under a random split, 0.79 under a scaffold split and as low as 0.25
@@ -81,14 +81,14 @@ MODEL_CARD: dict[str, Any] = {
     ),
     "headline_performance": {
         "split": "Bemis-Murcko scaffold split (0 shared scaffolds)",
-        "mae_log_units": 0.681,
-        "rmse_log_units": 0.856,
-        "r2": 0.297,
-        "spearman": 0.590,
-        "conformal_coverage_at_90_nominal": 0.794,
+        "mae_log_units": 0.685,
+        "rmse_log_units": 0.858,
+        "r2": 0.296,
+        "spearman": 0.589,
+        "conformal_coverage_at_90_nominal": 0.778,
     },
     "random_split_comparison": {
-        "mae_log_units": 0.478,
+        "mae_log_units": 0.477,
         "r2": 0.699,
         "fraction_test_scaffolds_seen_in_training": 0.511,
         "note": (
@@ -98,7 +98,7 @@ MODEL_CARD: dict[str, Any] = {
     },
     "negative_transfer": {
         "experiment": "trained on small-molecule-like, tested on peptide-like",
-        "best_model_mae": 1.461,
+        "best_model_mae": 1.421,
         "baseline_mean_mae": 1.305,
         "verdict": (
             "Every model scored worse than predicting the training mean. The "
