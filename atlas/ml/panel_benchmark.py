@@ -146,6 +146,19 @@ def receptor_sequence_features(
     return out
 
 
+def receptor_pocket_chemistry(receptor: Sequence[str]) -> np.ndarray | None:
+    """Residue chemistry of the structurally defined binding pocket.
+
+    Returns None when no pocket has been derived, so the arm is skipped rather
+    than silently replaced by zeros.
+    """
+    from atlas.ml.receptor_pocket import POCKET_PATH, load_pocket, pocket_encoding
+
+    if not POCKET_PATH.exists():
+        return None
+    return pocket_encoding(receptor, load_pocket())
+
+
 # ----------------------------------------------------------------- splits ----
 
 def molecule_cluster_labels(
@@ -278,6 +291,8 @@ def run_panel_benchmark(*, endpoint: str = "Ki", save: bool = True) -> PanelBenc
     onehot = receptor_onehot(pp.receptor, vocab)
     seqfeat = receptor_sequence_features(pp.receptor, panel.receptors)
 
+    pocket = receptor_pocket_chemistry(pp.receptor)
+
     arms = {
         "baseline_mean": _fit_score(pep[tr], pp.y[tr], pep[te], pp.y[te], "mean"),
         "peptide_only": _fit_score(pep[tr], pp.y[tr], pep[te], pp.y[te]),
@@ -288,6 +303,10 @@ def run_panel_benchmark(*, endpoint: str = "Ki", save: bool = True) -> PanelBenc
             np.hstack([pep, seqfeat])[tr], pp.y[tr],
             np.hstack([pep, seqfeat])[te], pp.y[te]),
     }
+    if pocket is not None:
+        arms["peptide_plus_receptor_pocket"] = _fit_score(
+            np.hstack([pep, pocket])[tr], pp.y[tr],
+            np.hstack([pep, pocket])[te], pp.y[te])
     receptor_signal = {
         "split": "cluster split, whole molecules grouped, all receptors in both sides",
         "n_train_rows": int(len(tr)), "n_test_rows": int(len(te)),
@@ -308,6 +327,7 @@ def run_panel_benchmark(*, endpoint: str = "Ki", save: bool = True) -> PanelBenc
         vocab_l = sorted(set(pp.receptor[tr_l].tolist()))
         oh_l = receptor_onehot(pp.receptor, vocab_l)
         sq_l = receptor_sequence_features(pp.receptor, panel.receptors)
+        pk_l = receptor_pocket_chemistry(pp.receptor)
         loro[held] = {
             "n_train": int(len(tr_l)), "n_test": int(len(te_l)),
             "baseline_mean": _fit_score(
@@ -322,6 +342,10 @@ def run_panel_benchmark(*, endpoint: str = "Ki", save: bool = True) -> PanelBenc
                 np.hstack([pep_l, sq_l])[te_l], pp.y[te_l]),
             "held_out_receptor_onehot_is_all_zero": bool(
                 oh_l[te_l].sum() == 0),
+            **({"peptide_plus_receptor_pocket": _fit_score(
+                np.hstack([pep_l, pk_l])[tr_l], pp.y[tr_l],
+                np.hstack([pep_l, pk_l])[te_l], pp.y[te_l])}
+               if pk_l is not None else {}),
         }
 
     report = PanelBenchmarkReport(
@@ -418,6 +442,46 @@ def _findings(
             "predicting the mean, so being the better of two inadequate models "
             "is not a result. **A target encoder is not established.**"
         )
+        pocket_arms = {
+            h: v for h, v in usable.items() if "peptide_plus_receptor_pocket" in v
+        }
+        if pocket_arms:
+            pocket_beats_seq = sorted(
+                h for h, v in pocket_arms.items()
+                if v["peptide_plus_receptor_pocket"]["mae"]
+                < v["peptide_plus_receptor_sequence"]["mae"])
+            pocket_beats_base = sorted(
+                h for h, v in pocket_arms.items()
+                if v["peptide_plus_receptor_pocket"]["mae"]
+                < v["baseline_mean"]["mae"])
+            out.append(
+                "A receptor encoder restricted to the structurally defined "
+                "binding pocket does not beat whole-sequence composition. The "
+                "pocket is derived from ten experimental MC4R-peptide complexes "
+                "and localises the receptor to 31 residues a peptide actually "
+                "touches, which is better science than composition over a "
+                "330-residue sequence. It beats the sequence encoding on "
+                f"{len(pocket_beats_seq)} of {len(pocket_arms)} held-out "
+                f"receptors ({', '.join(pocket_beats_seq) or 'none'}) and beats "
+                f"the mean baseline on {len(pocket_beats_base)} "
+                f"({', '.join(pocket_beats_base) or 'none'}) — the same "
+                "receptors the whole-sequence encoding already succeeded on. "
+                f"On the cluster split the three target encodings sit within "
+                f"{max(abs(arms['peptide_plus_receptor_pocket']['mae'] - arms[k]['mae']) for k in ('peptide_plus_receptor_onehot', 'peptide_plus_receptor_sequence')):.3f} "
+                "log units of each other."
+            )
+            out.append(
+                "That negative result localises the bottleneck. With four "
+                "receptors carrying peptide data, every target encoding is four "
+                "points, and leave-one-receptor-out asks a model to reach the "
+                "fourth from three. No amount of chemical detail in describing "
+                "those points overcomes having three of them. **The limiting "
+                "factor is the number of targets, not the quality of their "
+                "representation** — so the pocket encoder should be preferred "
+                "on interpretability and re-tested if more receptors become "
+                "available, not adopted on performance it has not shown."
+            )
+
         out.append(
             "Two reasons to hold that conclusion loosely in both directions. "
             "With five receptors a sequence encoding is five points in a "

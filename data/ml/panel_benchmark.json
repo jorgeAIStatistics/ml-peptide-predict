@@ -32,24 +32,30 @@
       },
       "peptide_only": {
         "mae": 1.125055175527649,
-        "r2": -0.29123945331263523,
+        "r2": -0.291239453312635,
         "n_train": 811,
         "n_test": 543
       },
       "peptide_plus_receptor_onehot": {
-        "mae": 0.9887283148440477,
-        "r2": -0.08580476144118987,
+        "mae": 0.9887283148440476,
+        "r2": -0.08580476144118965,
         "n_train": 811,
         "n_test": 543
       },
       "peptide_plus_receptor_sequence": {
-        "mae": 0.9921761942763612,
+        "mae": 0.992176194276361,
         "r2": -0.08905642431746053,
+        "n_train": 811,
+        "n_test": 543
+      },
+      "peptide_plus_receptor_pocket": {
+        "mae": 0.9960180266158036,
+        "r2": -0.09192958486647895,
         "n_train": 811,
         "n_test": 543
       }
     },
-    "onehot_gain_over_peptide_only": 0.13632686068360134
+    "onehot_gain_over_peptide_only": 0.13632686068360145
   },
   "leave_one_receptor_out": {
     "MC1R": {
@@ -63,13 +69,13 @@
       },
       "peptide_only": {
         "mae": 1.4471824845933245,
-        "r2": -0.43020381538397645,
+        "r2": -0.43020381538397623,
         "n_train": 995,
         "n_test": 359
       },
       "peptide_plus_receptor_onehot": {
         "mae": 1.4176824802139998,
-        "r2": -0.4163203015607908,
+        "r2": -0.41632030156079103,
         "n_train": 995,
         "n_test": 359
       },
@@ -79,7 +85,13 @@
         "n_train": 995,
         "n_test": 359
       },
-      "held_out_receptor_onehot_is_all_zero": true
+      "held_out_receptor_onehot_is_all_zero": true,
+      "peptide_plus_receptor_pocket": {
+        "mae": 1.4272716461069126,
+        "r2": -0.4166656076463602,
+        "n_train": 995,
+        "n_test": 359
+      }
     },
     "MC3R": {
       "n_train": 1085,
@@ -91,24 +103,30 @@
         "n_test": 269
       },
       "peptide_only": {
-        "mae": 0.7705995645297324,
+        "mae": 0.7705995645297326,
         "r2": 0.40386478088101274,
         "n_train": 1085,
         "n_test": 269
       },
       "peptide_plus_receptor_onehot": {
-        "mae": 0.6969011042760764,
-        "r2": 0.4916716234784698,
+        "mae": 0.6969011042760767,
+        "r2": 0.4916716234784697,
         "n_train": 1085,
         "n_test": 269
       },
       "peptide_plus_receptor_sequence": {
         "mae": 0.6937497959815904,
-        "r2": 0.49589318101772295,
+        "r2": 0.49589318101772284,
         "n_train": 1085,
         "n_test": 269
       },
-      "held_out_receptor_onehot_is_all_zero": true
+      "held_out_receptor_onehot_is_all_zero": true,
+      "peptide_plus_receptor_pocket": {
+        "mae": 0.7378155198068491,
+        "r2": 0.4528966648664654,
+        "n_train": 1085,
+        "n_test": 269
+      }
     },
     "MC4R": {
       "n_train": 724,
@@ -120,24 +138,30 @@
         "n_test": 630
       },
       "peptide_only": {
-        "mae": 1.1921680395526006,
-        "r2": -0.3868692574484174,
+        "mae": 1.192168039552601,
+        "r2": -0.3868692574484176,
         "n_train": 724,
         "n_test": 630
       },
       "peptide_plus_receptor_onehot": {
-        "mae": 1.1868314492315466,
+        "mae": 1.1868314492315464,
         "r2": -0.3378698233138251,
         "n_train": 724,
         "n_test": 630
       },
       "peptide_plus_receptor_sequence": {
-        "mae": 1.1756426396867403,
-        "r2": -0.3127743504192606,
+        "mae": 1.1756426396867405,
+        "r2": -0.31277435041926105,
         "n_train": 724,
         "n_test": 630
       },
-      "held_out_receptor_onehot_is_all_zero": true
+      "held_out_receptor_onehot_is_all_zero": true,
+      "peptide_plus_receptor_pocket": {
+        "mae": 1.1820286102922668,
+        "r2": -0.3316626966165672,
+        "n_train": 724,
+        "n_test": 630
+      }
     },
     "MC5R": {
       "n_train": 1258,
@@ -149,24 +173,30 @@
         "n_test": 96
       },
       "peptide_only": {
-        "mae": 0.6188369842450184,
-        "r2": 0.5490964053731155,
+        "mae": 0.6188369842450183,
+        "r2": 0.549096405373116,
         "n_train": 1258,
         "n_test": 96
       },
       "peptide_plus_receptor_onehot": {
         "mae": 0.6694510147982798,
-        "r2": 0.5390601984443184,
+        "r2": 0.5390601984443186,
         "n_train": 1258,
         "n_test": 96
       },
       "peptide_plus_receptor_sequence": {
-        "mae": 0.6152216315310853,
-        "r2": 0.5696792897658882,
+        "mae": 0.6152216315310851,
+        "r2": 0.5696792897658884,
         "n_train": 1258,
         "n_test": 96
       },
-      "held_out_receptor_onehot_is_all_zero": true
+      "held_out_receptor_onehot_is_all_zero": true,
+      "peptide_plus_receptor_pocket": {
+        "mae": 0.6137800706845237,
+        "r2": 0.5867962094588253,
+        "n_train": 1258,
+        "n_test": 96
+      }
     }
   },
   "findings": [
@@ -176,6 +206,8 @@
     "These numbers are not comparable with the ATLAS 2.4 figures. The panel task is harder in two ways at once: it holds out whole molecule clusters across four receptors rather than one, and its labels carry the across-receptor variance that a single-target dataset does not. A panel MAE and an MC4R-only MAE measure different problems.",
     "Leave-one-receptor-out is the only split that tests a target encoder, because the held-out receptor's one-hot column is necessarily all-zero there (verified per arm). Results: MC1R (359 rows): peptide-only 1.447, +one-hot 1.418, +sequence 1.425, baseline 1.223; MC3R (269 rows): peptide-only 0.771, +one-hot 0.697, +sequence 0.694, baseline 1.171; MC4R (630 rows): peptide-only 1.192, +one-hot 1.187, +sequence 1.176, baseline 1.100; MC5R (96 rows): peptide-only 0.619, +one-hot 0.669, +sequence 0.615, baseline 0.973.",
     "Transfer to an unseen receptor succeeds for 2 of 4 receptors and fails for 2. With a receptor-sequence encoding it beats the mean baseline on MC3R, MC5R and is worse than the baseline on MC1R, MC4R. It beat the peptide-only arm on 4 of 4, but that comparison is the wrong one: on MC1R, MC4R both arms are worse than predicting the mean, so being the better of two inadequate models is not a result. **A target encoder is not established.**",
+    "A receptor encoder restricted to the structurally defined binding pocket does not beat whole-sequence composition. The pocket is derived from ten experimental MC4R-peptide complexes and localises the receptor to 31 residues a peptide actually touches, which is better science than composition over a 330-residue sequence. It beats the sequence encoding on 1 of 4 held-out receptors (MC5R) and beats the mean baseline on 2 (MC3R, MC5R) \u2014 the same receptors the whole-sequence encoding already succeeded on. On the cluster split the three target encodings sit within 0.007 log units of each other.",
+    "That negative result localises the bottleneck. With four receptors carrying peptide data, every target encoding is four points, and leave-one-receptor-out asks a model to reach the fourth from three. No amount of chemical detail in describing those points overcomes having three of them. **The limiting factor is the number of targets, not the quality of their representation** \u2014 so the pocket encoder should be preferred on interpretability and re-tested if more receptors become available, not adopted on performance it has not shown.",
     "Two reasons to hold that conclusion loosely in both directions. With five receptors a sequence encoding is five points in a composition space, so this measures whether their geometry supports reaching a sixth, not whether sequence features have more capacity than one-hot \u2014 on receptors already seen they do not. And four held-out receptors is four trials. The panel makes the question askable, which one target did not; it does not answer it."
   ]
 }

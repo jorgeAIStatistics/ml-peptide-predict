@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 627 tests passing
+Last updated: 2026-10-19 · 651 tests passing
 
 ## What this is
 
@@ -592,6 +592,47 @@ tests assert no molecule or cluster straddles a split.
 MC2R contributes **no peptides at all** (23 molecules, none traced) — the
 abstention case the Stage 1 audit anticipated.
 
+### A binding pocket from structures (encoder works, does not help)
+
+Full findings in `docs/ATLAS_2.5_POCKET_ENCODER.md`; definition in
+`data/ml/receptor_pocket.json`; reproduce with
+`python3 -m atlas.ml.receptor_pocket`.
+
+Whole-sequence composition is a poor description of a binding site, so the
+receptor encoder was rebuilt from observed geometry. All ten experimental
+MC4R–peptide complexes were parsed; receptor residues within 4.5 Å of any
+peptide heavy atom are contacts, and a position joins the consensus pocket if
+it contacts in ≥3 structures. **31 positions, 17 of them contacting in all
+ten** (25 positions at 4.0 Å, 36 at 5.0 Å, so the cutoff is not doing the
+work).
+
+Numbering is never trusted: author numbers match UniProt in the eight cryo-EM
+entries but not in the three X-ray fusion constructs, which carry a
+glycogen-synthase partner and 12 engineered mutations each. Positions come
+from local alignment to P32245 and are verified letter by letter; contacts are
+located from the structure and **named from UniProt**, so a mutated construct
+residue does not enter the encoding.
+
+Pocket transfer across the family is far more discriminating than whole-sequence
+identity: MC3R 25/31 pocket residues identical to MC4R, MC5R 24/31, MC1R 21/31,
+MC2R 12/31 — against 50–63% whole-sequence identity.
+
+**The encoder does not improve prediction.** On the cluster split the three
+target encodings (one-hot 0.989, sequence 0.992, pocket 0.996) sit within 0.007
+log units — that split cannot distinguish them, since four receptors give four
+vectors under any encoding. Under leave-one-receptor-out the pocket beats
+whole-sequence on 1 of 4 and beats the mean baseline on 2 of 4, the same two
+the crude encoding already managed.
+
+**That localises the bottleneck: the limiting factor is the number of targets,
+not the quality of their representation.** With four receptors every encoding
+is four points and LORO asks a model to reach the fourth from three. The pocket
+encoder is kept for interpretability — a SHAP attribution over
+`D122 estimated_charge` is readable where fingerprint bit 1,473 is not — and
+for the residue-level interface data a structural viewer needs. It should be
+re-tested if more receptors become available, not adopted on performance it
+has not shown.
+
 **Deferred with a reason:** protein language model embeddings — no PyTorch or
 transformers installed.
 
@@ -635,7 +676,7 @@ transformers installed.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 627 tests
+python3 -m pytest -q                              # 651 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
