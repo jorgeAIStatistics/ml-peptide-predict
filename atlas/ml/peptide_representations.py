@@ -223,12 +223,21 @@ def build_representations(
     onehot = positional_onehot(analyses, vocab)
     fragfp = positional_fragment_fingerprint(analyses)
 
+    # Imported here rather than at module scope: residue_chemistry needs
+    # oriented_keys from this module, and a top-level import either way round
+    # would be circular.
+    from atlas.ml.residue_chemistry import positional_chemistry
+
+    chem = positional_chemistry(analyses)
+
     mats: dict[str, np.ndarray] = {
         "topology": topo,
         "positional_onehot": onehot,
         "positional_fragment_fp": fragfp,
+        "residue_chemistry": chem,
         "positional_onehot+topology": np.hstack([onehot, topo]),
         "positional_fragment_fp+topology": np.hstack([fragfp, topo]),
+        "residue_chemistry+positional_fragment_fp": np.hstack([chem, fragfp]),
     }
     for name, mat in (extra or {}).items():
         mats[name] = mat

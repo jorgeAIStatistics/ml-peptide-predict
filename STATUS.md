@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 569 tests passing
+Last updated: 2026-10-19 · 595 tests passing
 
 ## What this is
 
@@ -464,13 +464,14 @@ conceals two capabilities:
 
 | | Cross-series | Within-series |
 |---|---|---|
-| Best MAE | 0.877 | 0.513 |
-| Best R² | +0.264 | +0.701 |
+| Best MAE | 0.870 | 0.513 |
+| Best R² | +0.276 | +0.701 |
 | Median neighbour similarity | 0.600 | 0.941 |
 
 The peptide-native representation (`positional_fragment_fp`: a Morgan
 fingerprint of each side-chain fragment, indexed by position) roughly **doubles
-cross-series R² over the whole-molecule fingerprint, +0.131 to +0.264**. The
+cross-series R² over the whole-molecule fingerprint, +0.131 to +0.240**
+(random forest, the scale-invariant comparator). The
 mechanism is measured: 38.7% of held-out molecules carry a side chain absent
 from the training vocabulary, which a one-hot index cannot encode and a
 fragment fingerprint can.
@@ -490,14 +491,61 @@ sequences collapse 630 peptides to 205 strings; the worst group is 10 molecules
 reading `XRWX` that span 4.01 log units of pKi, a 10,233-fold affinity range
 rendered as one string.
 
-**Deployment gate FAILS:** cross-series MAE 0.877 against ≤0.70 required, R²
-0.264 against ≥0.30. Within-series beats a series-mean lookup (0.513 vs 0.845)
+**Deployment gate FAILS:** cross-series MAE 0.870 against ≤0.70 required, R²
+0.276 against ≥0.30. Within-series beats a series-mean lookup (0.513 vs 0.845)
 but its median neighbour similarity of 0.941 makes that interpolation, not
 generalisation. The model publishes no numeric affinity estimates.
 
 Stereochemistry remains unresolved: D-Phe⁷ and L-Phe⁷ encode identically,
 which in a melanocortin dataset is a material omission and the most likely
 source of cheap improvement.
+
+## ATLAS 2.5: biophysics-aware interaction intelligence
+
+Stage 1 audit and Stage 2 chemistry layer delivered. Full audit in
+`docs/ATLAS_2.5_STAGE_1_AUDIT.md`.
+
+**The primary reference studied** is Feng et al., *ACS Omega* 2026;11(10):16501
+([DOI](https://doi.org/10.1021/acsomega.5c12511)), which benchmarked 25
+algorithms on noncovalent interaction descriptors from 44,848 protein
+complexes. Its taxonomy of nine interaction classes and its correlation-based
+model de-duplication (drop candidates correlating above 0.75) are adopted. Its
+task is **not** adopted: it is binary interaction classification with
+ZDOCK-docked decoys as negatives, on a random 80:20 split with no similarity
+clustering, using features computed from the bound complex. None of its
+performance figures are imported.
+
+**Two measured constraints reorder the brief's milestones:**
+
+1. **ATLAS has exactly one target** (MC4R, `CHEMBL259`). A dual encoder cannot
+   be evaluated with zero target variance, so multi-target data must come
+   first. The melanocortin family is the natural expansion — MC1R 599, MC3R
+   1,634, MC5R 1,387 Ki records, and these peptides are routinely profiled
+   across the family because subtype selectivity is the question that matters.
+2. **Structural coverage is ~1%.** RCSB holds 13 experimental MC4R structures
+   (UniProt P32245), 10 with peptide ligands but only **7 unique peptides**
+   (setmelanotide ×3, afamelanotide ×2), at 2.58–3.30 Å. Against 630 peptides
+   with measured affinity, interface geometry cannot be a training
+   representation; it is reframed as extractor validation and per-ligand
+   explanation.
+
+**Stage 2 — `atlas/ml/residue_chemistry.py`.** Residue descriptors computed
+from side-chain fragment structure rather than tabulated, because no published
+amino-acid scale has a row for 2,4-dichlorophenylalanine. Typed provenance
+(COMPUTED / ESTIMATED / UNAVAILABLE; nothing is MEASURED). Ionisation by
+Henderson-Hasselbalch at a parameterised pH, so histidine's condition
+sensitivity is measurable rather than assumed away.
+
+**Its measured contribution is negative on the harder question**: cross-series
+MAE 0.936 against 0.894 for a fingerprint of the same side chains, and adding
+it makes that slightly worse (0.908). It beats the mean baseline (1.189) and
+one-hot indices (1.009), so it carries real signal, but a side-chain
+fingerprint already encodes this chemistry more richly than 22 hand-chosen
+descriptors. It is retained for **explanation**, where named descriptors are
+interpretable and fingerprint bit 1,473 is not.
+
+**Deferred with a reason:** protein language model embeddings — no PyTorch or
+transformers installed.
 
 ## Not built yet
 
@@ -539,7 +587,7 @@ source of cheap improvement.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 569 tests
+python3 -m pytest -q                              # 595 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

@@ -221,7 +221,16 @@ def _fit_predict(xtr, ytr, xte, kind: str) -> np.ndarray:
     if kind == "mean":
         return np.full(len(xte), ytr.mean())
     if kind == "ridge":
-        m = RidgeCV(alphas=np.logspace(-3, 4, 15))
+        from sklearn.pipeline import make_pipeline
+        from sklearn.preprocessing import StandardScaler
+
+        # Ridge penalises coefficients on the features' own scale, so a
+        # representation whose columns span orders of magnitude is handicapped
+        # against one of binary bits. The residue-chemistry descriptors mix
+        # surface areas near 60 with charges near 1 and scored R2 -3.55
+        # unscaled; standardising first is what makes the comparison a
+        # comparison of representations rather than of their units.
+        m = make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-3, 4, 15)))
     elif kind == "forest":
         m = RandomForestRegressor(n_estimators=300, random_state=SEED, n_jobs=-1)
     elif kind == "knn":
@@ -564,13 +573,22 @@ def run_benchmark(*, save: bool = True) -> BenchmarkReport:
 
     # The contrasts Stage B exists to settle, each a like-for-like comparison
     # on one test set.
+    # Contrasts are read off the random forest alone, not off whichever model
+    # happened to do best. A forest is invariant to monotone transforms of each
+    # feature, so a difference between two representations under it is a
+    # difference between the representations. Ridge is not: standardising helps
+    # the dense residue-chemistry descriptors and hurts the sparse binary
+    # fingerprint, whose rare bits get amplified by division by a tiny standard
+    # deviation. Mixing the two models would let a scaling artefact decide a
+    # representation question.
+    CONTRAST_MODEL = "forest"
+
     def pair(res: dict[str, Any], a: str, b: str) -> dict[str, Any]:
-        best_a = min((v["mae"] for k, v in res.items() if k.split("__")[0] == a),
-                     default=float("nan"))
-        best_b = min((v["mae"] for k, v in res.items() if k.split("__")[0] == b),
-                     default=float("nan"))
-        return {"a": a, "b": b, "best_mae_a": best_a, "best_mae_b": best_b,
-                "a_minus_b": best_a - best_b, "a_better": bool(best_a < best_b)}
+        mae_a = res.get(f"{a}__{CONTRAST_MODEL}", {}).get("mae", float("nan"))
+        mae_b = res.get(f"{b}__{CONTRAST_MODEL}", {}).get("mae", float("nan"))
+        return {"a": a, "b": b, "model": CONTRAST_MODEL,
+                "best_mae_a": mae_a, "best_mae_b": mae_b,
+                "a_minus_b": mae_a - mae_b, "a_better": bool(mae_a < mae_b)}
 
     contrasts = {
         ev: {
@@ -580,6 +598,11 @@ def run_benchmark(*, save: bool = True) -> BenchmarkReport:
                 d["results"], "positional_fragment_fp", "morgan_fp"),
             "topology_added_to_fragment_fp": pair(
                 d["results"], "positional_fragment_fp+topology",
+                "positional_fragment_fp"),
+            "residue_chemistry_vs_fragment_fp": pair(
+                d["results"], "residue_chemistry", "positional_fragment_fp"),
+            "residue_chemistry_added_to_fragment_fp": pair(
+                d["results"], "residue_chemistry+positional_fragment_fp",
                 "positional_fragment_fp"),
         }
         for ev, d in (("cross_series", cross), ("within_series", within))

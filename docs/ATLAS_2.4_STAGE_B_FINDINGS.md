@@ -4,7 +4,17 @@
 **Code:** `atlas/ml/peptide_representations.py`, `atlas/ml/peptide_benchmark.py`
 **Report:** `data/ml/peptide_benchmark.json` · reproduce with
 `python3 -m atlas.ml.peptide_benchmark`
-**Tests:** 33 new (569 total)
+**Tests:** 33 new (569 at the time; 595 after ATLAS 2.5 Stage 2)
+
+> **Correction applied 2026-10-19.** Two unfairnesses in this benchmark were
+> found while adding the ATLAS 2.5 residue-chemistry representation and are
+> now fixed: ridge was fitted on unscaled features, and representation
+> contrasts were taken as best-of-model, which let a scaling artefact decide a
+> representation question. Contrasts are now read off the random forest, which
+> is invariant to monotone feature transforms. Numbers below are the corrected
+> ones; see `docs/ATLAS_2.5_STAGE_1_AUDIT.md` §7 for the detail. The headline
+> finding strengthened: **all five** contrasts now reverse between the two
+> evaluations, where three of three did before.
 
 Stage A specified what to build. Stage B built it and measured it — including
 where Stage A's own predictions turned out to be wrong.
@@ -25,8 +35,8 @@ capabilities. Both are now reported:
 
 | | Cross-series | Within-series |
 |---|---|---|
-| Best MAE | **0.877** | **0.513** |
-| Best R² | **+0.264** | **+0.701** |
+| Best MAE | **0.870** | **0.513** |
+| Best R² | **+0.276** | **+0.701** |
 | Best Spearman ρ | +0.518 | +0.825 |
 | Mean-predictor baseline | 1.189 | 1.040 |
 | Series-mean lookup | — | 0.845 |
@@ -38,15 +48,18 @@ ridge regression.
 
 All three design contrasts flip sign between the two evaluations:
 
-| Contrast | Cross-series winner | Within-series winner |
+| Contrast (random forest) | Cross-series winner | Within-series winner |
 |---|---|---|
-| fragment fingerprint vs one-hot | **fragment** (0.894 vs 1.009) | one-hot (0.589 vs 0.612) |
-| peptide-native vs whole-molecule FP | **fragment** (0.894 vs 0.905) | morgan (0.548 vs 0.612) |
-| adding explicit topology | **without** (0.894 vs 0.905) | with (0.546 vs 0.612) |
+| fragment fingerprint vs one-hot | **fragment** (0.894 vs 1.009) | one-hot (0.589 vs 0.613) |
+| peptide-native vs whole-molecule FP | **fragment** (0.894 vs 0.905) | morgan (0.548 vs 0.613) |
+| adding explicit topology | **without** (0.894 vs 1.168) | with (0.546 vs 0.613) |
+| residue chemistry vs fragment FP | **fragment** (0.894 vs 0.936) | chemistry (0.602 vs 0.613) |
+| adding residue chemistry | **without** (0.894 vs 0.908) | with (0.606 vs 0.613) |
 
 A programme that benchmarked only within-series — the evaluation most readily
 reported — would have selected one-hot residue indices, explicit topology
-features and whole-molecule fingerprints. Each is the choice that generalises
+features, whole-molecule fingerprints and hand-engineered biophysical
+descriptors. Each is the choice that generalises
 *worst* to an unseen series. This is the clearest vindication of Stage A's
 requirement to report the two separately, and it is a caution that applies well
 beyond this dataset.
@@ -86,7 +99,7 @@ composition representation scored below the mean baseline.
 Stage A predicted that vocabulary collapse would make frozen ESM-2 or ProtT5
 embeddings fail, and recommended benchmarking them as a *predicted-to-fail*
 control. The collapse is confirmed — but its floor of **MAE 0.382 is better
-than the best model measured here (0.877)**. At current performance the
+than the best model measured here (0.870)**. At current performance the
 vocabulary collapse is therefore **not yet the binding constraint**; it would
 become binding only for a model already below 0.382.
 
@@ -107,7 +120,7 @@ was designed to do.
 
 | Representation + model | MAE | R² | ρ |
 |---|---|---|---|
-| positional_fragment_fp + morgan_fp, ridge | **0.877** | +0.264 | +0.518 |
+| positional_fragment_fp + morgan_fp, ridge | **0.870** | **+0.276** | +0.518 |
 | positional_fragment_fp + morgan_fp, forest | 0.880 | +0.263 | +0.478 |
 | positional_fragment_fp, forest | 0.894 | +0.240 | +0.491 |
 | positional_fragment_fp + topology, ridge | 0.905 | **+0.272** | +0.533 |
@@ -187,8 +200,8 @@ mean-predictor baseline 1.343 — not from convention.
 
 | Criterion | Required | Actual | Met |
 |---|---|---|---|
-| cross-series MAE | ≤ 0.70 | 0.877 | **no** |
-| cross-series R² | ≥ 0.30 | 0.264 | **no** |
+| cross-series MAE | ≤ 0.70 | 0.870 | **no** |
+| cross-series R² | ≥ 0.30 | 0.276 | **no** |
 | within-series beats series-mean lookup | < 0.845 | 0.513 | yes |
 
 **The peptide affinity model remains undeployed.** It must not publish numeric
@@ -197,8 +210,8 @@ knowledge-graph edges. The existing behaviour is unchanged: measurement
 outranks prediction, and PT-141, melanotan I and melanotan II already have
 measured values in the registry.
 
-Two criteria are close to met rather than far from it — R² 0.264 against 0.30,
-MAE 0.877 against 0.70 — which is a material change from Stage A's R² 0.123.
+Two criteria are close to met rather than far from it — R² 0.276 against 0.30,
+MAE 0.870 against 0.70 — which is a material change from Stage A's R² 0.123.
 The gap is no longer a gulf, but a gate that is nearly met is not met.
 
 ---
@@ -215,7 +228,7 @@ Supported by measurement:
 - **Report both evaluations always.** Three of three design conclusions reverse
   between them; a single number selects the wrong architecture.
 - **Target the remaining gap with learnability, not representation.** The
-  ceiling for the current encoding is MAE 0.186 and the model sits at 0.877, so
+  ceiling for the current encoding is MAE 0.186 and the model sits at 0.870, so
   there is a large gap that is not representational. Stage A's finding that the
   effective sample size is ~30 series points at the likely cause.
 - **A within-series deployment mode is defensible before a general one.** It
@@ -228,7 +241,7 @@ Not supported:
 
 - Frozen protein language model embeddings are **not** ruled out by vocabulary
   collapse, contrary to Stage A. Their ceiling (0.382) is better than current
-  performance. They remain untested here for want of PyTorch, and that is a
+  performance (0.870). They remain untested here for want of PyTorch, and that is a
   gap rather than a conclusion.
 - Adding more small-molecule data. Stage A measured non-peptide-only training
   at R² −0.791.
