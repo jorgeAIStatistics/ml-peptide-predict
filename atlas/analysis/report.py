@@ -21,6 +21,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from atlas.analysis.feasibility import AnalysisKind, FeasibilityEngine
+from atlas.mechanistic.pk_store import parameters_for
 from atlas.core.evidence import utc_now
 from atlas.registry.resolve import IdentityResolver
 from atlas.registry.seed import SEED_REGISTRY
@@ -61,7 +62,11 @@ def main(argv: list[str] | None = None) -> int:
             declared_modality=entry.declared_modality,
             is_mixture=entry.is_mixture, supplier_defined=entry.supplier_defined,
         )
-        assessment = engine.assess(entry, identity)
+        pk = parameters_for(entry.key)
+        assessment = engine.assess(
+            entry, identity,
+            pk_parameters=(pk or {}).get('parameters'),
+        )
         rows.append(
             {
                 "key": entry.key,
@@ -82,6 +87,8 @@ def main(argv: list[str] | None = None) -> int:
                 "refused": {
                     k.value: a.reason.value for k, a in assessment.refusals.items()
                 },
+                "pk_parameters": (pk or {}).get("parameters"),
+                "pk_validation": (pk or {}).get("validation"),
             }
         )
 

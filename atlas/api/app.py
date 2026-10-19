@@ -34,6 +34,7 @@ from atlas.ml.predict import MODEL_CARD, get_predictor
 from atlas.ml.peptide_service import PEPTIDE_MODEL_FINDINGS
 from atlas.ml.affinity_service import CALIBRATION_CARD, get_affinity_service
 from atlas.registry.seed import by_key as seed_by_key
+from atlas.mechanistic.pk_store import load_store, parameters_for
 from atlas.registry.seed import RESEARCH_AREAS, SEED_REGISTRY
 
 logger = logging.getLogger(__name__)
@@ -499,6 +500,19 @@ def create_app() -> Flask:
             }
         return jsonify(payload)
 
+    @app.get("/api/pk-parameters")
+    def pk_parameters():
+        """Source-backed PK parameters and their validation against the label."""
+        store = load_store()
+        return jsonify({
+            "n_attempted": store.get("n_attempted", 0),
+            "n_with_label": store.get("n_with_label", 0),
+            "n_usable": store.get("n_usable", 0),
+            "usable_keys": store.get("usable_keys", []),
+            "note": store.get("note"),
+            "entries": store.get("entries", {}),
+        })
+
     @app.get("/api/calibration")
     def calibration():
         return jsonify({
@@ -667,14 +681,18 @@ def _label_simulation(compound_key: str | None) -> tuple[dict[str, str], dict | 
     if row is None:
         return exploratory, None
 
-    if AnalysisKind.HUMAN_PK_SIMULATION.value in row["permitted"]:
+    pk = parameters_for(compound_key)
+    if pk and AnalysisKind.HUMAN_PK_SIMULATION.value in row["permitted"]:
+        v = pk.get("validation") or {}
         return (
             {
                 "evidence_class": EvidenceClass.REPRODUCED_MODEL.value,
                 "evidence_label": EvidenceClass.REPRODUCED_MODEL.label,
                 "interpretation": (
-                    "Parameters for this compound are source-backed, so this run "
-                    "reproduces a parameterised model."
+                    "Parameters come from the FDA label for "
+                    f"{pk.get('brand_name') or pk.get('generic_name')}, each with "
+                    "the sentence that states it. Against the quantities that "
+                    f"label reports independently, the model {v.get('verdict', '')}."
                 ),
             },
             None,

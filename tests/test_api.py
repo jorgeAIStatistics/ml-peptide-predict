@@ -36,11 +36,22 @@ class TestMeta:
         note = client.get("/api/meta").get_json()["scope_note"].lower()
         assert "does not provide dosing" in note
 
-    def test_human_pk_is_not_permitted_for_any_entry(self, client):
-        """No PK parameters have been extracted, so the honest count is zero."""
+    def test_human_pk_is_permitted_only_where_parameters_exist(self, client):
+        """Permitted exactly where a label supplied a usable parameter set.
+
+        This was 0/46 before extraction existed. It must never exceed the
+        number of compounds with source-backed parameters, since that is the
+        only thing that justifies it.
+        """
         counts = client.get("/api/meta").get_json()["permitted_counts"]
-        assert counts["human_pk_simulation"] == 0
+        n_usable = client.get("/api/pk-parameters").get_json()["n_usable"]
+        assert counts["human_pk_simulation"] == n_usable
         assert counts["quantitative_safety_prediction"] == 0
+
+    def test_human_pk_remains_a_small_minority(self, client):
+        meta = client.get("/api/meta").get_json()
+        counts = meta["permitted_counts"]
+        assert counts["human_pk_simulation"] < meta["n_entries"] / 2
 
 
 class TestRegistry:

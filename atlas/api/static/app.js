@@ -17,6 +17,7 @@ const state = {
   lastRun: null,
   logY: false,
   modelCard: null,
+  pkStore: null,
 };
 
 /* ---------------- utilities ---------------- */
@@ -629,6 +630,47 @@ function renderParamInputs() {
   const eqs = $('#studio-equations');
   eqs.textContent = '';
   for (const e of m.equations) eqs.append(el('li', { text: e }));
+}
+
+/** Offer the source-backed parameter set when the chosen compound has one. */
+async function offerValidatedParameters() {
+  const host = $('#studio-pk');
+  const key = $('#studio-compound').value;
+  host.textContent = '';
+  if (!key) return;
+  if (!state.pkStore) {
+    try { state.pkStore = await getJSON('/api/pk-parameters'); }
+    catch { return; }
+  }
+  const entry = (state.pkStore.entries || {})[key];
+  if (!entry || entry.status !== 'usable') {
+    if (entry && entry.blocked_reason) {
+      host.append(el('p', { class: 'control-hint', text: `No validated parameters: ${entry.blocked_reason}` }));
+    }
+    return;
+  }
+  const v = entry.validation || {};
+  host.append(el('div', { class: 'pk-offer' },
+    el('p', { class: 'pk-offer-head' },
+      el('span', { class: 'src-db', text: 'openfda' }),
+      el('span', { text: `${entry.brand_name || entry.generic_name} — source-backed parameters` })),
+    el('p', { class: 'control-hint', text: v.verdict ? `Against the label's own reported quantities, the model ${v.verdict}.` : '' }),
+    el('button', {
+      class: 'btn', style: 'width:100%;margin-top:8px',
+      text: 'Load validated parameters',
+      onclick: () => {
+        $('#studio-model').value = entry.model;
+        renderParamInputs();
+        for (const [k, val] of Object.entries(entry.parameters)) {
+          const input = $(`#p-${k}`);
+          if (input) input.value = val;
+        }
+        if (entry.dose_mg) $('#studio-dose').value = entry.dose_mg;
+        host.querySelector('.pk-loaded')?.remove();
+        host.append(el('p', { class: 'control-hint pk-loaded',
+          text: `Loaded ${Object.keys(entry.parameters).join(', ')} and a ${entry.dose_mg} mg dose from the label.` }));
+      },
+    })));
 }
 
 async function runSimulation() {
@@ -1537,6 +1579,7 @@ async function boot() {
     });
     $$('.rail-item').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
     $('#studio-run').addEventListener('click', runSimulation);
+    $('#studio-compound').addEventListener('change', offerValidatedParameters);
     $('#ml-predict').addEventListener('click', runPrediction);
     $('#ml-smiles').addEventListener('keydown', (e) => { if (e.key === 'Enter') runPrediction(); });
     $('#ml-compound').addEventListener('change', () => { $('#ml-smiles').value = ''; });

@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-19T01:58:31.363562+00:00",
+  "created_at": "2026-10-19T03:41:46.057586+00:00",
   "n_entries": 46,
   "rows": [
     {
@@ -26,7 +26,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "5-amino-1mq",
@@ -52,7 +54,9 @@
       "refused": {
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "cagrilintide",
@@ -78,7 +82,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "aod-9604",
@@ -104,7 +110,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "retatrutide",
@@ -130,7 +138,9 @@
         "structure_based_prediction": "unresolved_molecular_identity",
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "semaglutide",
@@ -156,7 +166,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "tirzepatide",
@@ -182,7 +194,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "apelin",
@@ -208,7 +222,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "bpc-157",
@@ -234,7 +250,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "tb-500",
@@ -260,7 +278,9 @@
         "structure_based_prediction": "unresolved_molecular_identity",
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "thymosin-beta-4",
@@ -286,7 +306,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "bpc157-tb500-blend",
@@ -313,7 +335,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "kpv",
@@ -339,7 +363,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "glow",
@@ -366,7 +392,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "klow",
@@ -393,7 +421,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "ll-37",
@@ -419,7 +449,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "cartalax",
@@ -445,7 +477,9 @@
       "refused": {
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "ara-290",
@@ -471,7 +505,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "thymosin-alpha-1",
@@ -497,7 +533,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "amino-h2o",
@@ -523,7 +561,9 @@
         "structure_based_prediction": "unresolved_molecular_identity",
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "ghk-cu",
@@ -549,7 +589,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "ahk-cu",
@@ -575,7 +617,9 @@
       "refused": {
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "snap-8",
@@ -601,7 +645,9 @@
         "mechanism_hypothesis": "no_source_evidence_retrieved",
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "collagen-peptides",
@@ -628,7 +674,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "tesamorelin",
@@ -654,7 +702,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "sermorelin",
@@ -680,7 +730,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "ipamorelin",
@@ -706,7 +758,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "cjc-1295-dac",
@@ -732,7 +786,9 @@
         "mechanism_hypothesis": "no_source_evidence_retrieved",
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "cjc-1295-no-dac",
@@ -758,7 +814,9 @@
         "structure_based_prediction": "unresolved_molecular_identity",
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "cjc1295nodac-ipamorelin",
@@ -785,7 +843,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "cjc1295dac-ipamorelin",
@@ -812,7 +872,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "kisspeptin",
@@ -838,7 +900,9 @@
         "structure_based_prediction": "unresolved_molecular_identity",
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "igf-1-lr3",
@@ -864,7 +928,9 @@
         "structure_based_prediction": "unresolved_molecular_identity",
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "semax",
@@ -890,7 +956,9 @@
       "refused": {
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "selank",
@@ -916,7 +984,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "dihexa",
@@ -942,7 +1012,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "pinealon",
@@ -968,7 +1040,9 @@
       "refused": {
         "human_pk_simulation": "no_human_data_for_requested_context",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "vip",
@@ -994,7 +1068,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "nad",
@@ -1020,7 +1096,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "glutathione",
@@ -1046,7 +1124,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "dsip",
@@ -1072,7 +1152,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "epitalon",
@@ -1098,7 +1180,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "epithalamin",
@@ -1125,7 +1209,9 @@
         "human_pk_simulation": "unresolved_molecular_identity",
         "quantitative_safety_prediction": "endpoint_model_not_validated",
         "combination_effect_prediction": "combination_not_directly_studied"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "pt-141",
@@ -1145,12 +1231,68 @@
       "permitted": [
         "literature_summary",
         "mechanism_hypothesis",
-        "exploratory_simulation"
+        "exploratory_simulation",
+        "human_pk_simulation"
       ],
       "refused": {
         "structure_based_prediction": "unresolved_molecular_identity",
-        "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
+      },
+      "pk_parameters": {
+        "CL": 6.5,
+        "V": 25.0,
+        "ka": 2.53874254564389,
+        "F": 1.0
+      },
+      "pk_validation": {
+        "verdict": "reproduces auc, half_life within tolerance; differs on cmax",
+        "n_targets": 3,
+        "n_agreeing": 2,
+        "all_agree": false,
+        "targets": [
+          {
+            "name": "cmax",
+            "observed": 72.8,
+            "unit": "ng/mL",
+            "predicted": 53.973606870375754,
+            "predicted_low": 43.56696449735657,
+            "predicted_high": 82.74075140085051,
+            "relative_error": 0.25860430123110223,
+            "agrees": false,
+            "observed_within_interval": true,
+            "source_quote": "12.3 Pharmacokinetics Following subcutaneous administration of VYLEESI, the mean plasma C max and AUC of bremelanotide are 72.8 ng/mL and 276 hr*ng/mL, respectively."
+          },
+          {
+            "name": "auc",
+            "observed": 276.0,
+            "unit": "ng*h/mL",
+            "predicted": 269.2307692307692,
+            "predicted_low": 215.2678563719636,
+            "predicted_high": 364.0046161199241,
+            "relative_error": 0.024526198439241934,
+            "agrees": true,
+            "observed_within_interval": true,
+            "source_quote": "12.3 Pharmacokinetics Following subcutaneous administration of VYLEESI, the mean plasma C max and AUC of bremelanotide are 72.8 ng/mL and 276 hr*ng/mL, respectively."
+          },
+          {
+            "name": "half_life",
+            "observed": 2.7,
+            "unit": "h",
+            "predicted": 2.665950694461328,
+            "predicted_low": 1.5741830567192,
+            "predicted_high": 4.038411948930221,
+            "relative_error": 0.012610853903211901,
+            "agrees": true,
+            "observed_within_interval": true,
+            "source_quote": "Elimination Following a single subcutaneous administration of VYLEESI, mean terminal half-life of bremelanotide is approximately 2.7 hours (range: 1.9\u2013 4.0 hours) and the mean (\u00b1 SD) clearance (CL/F) is 6.5 \u00b11.0 L/hr."
+          }
+        ],
+        "limitations": [
+          "Parameters and the quantities they are compared against come from the same labelling document, so this is internal consistency plus structural adequacy, not independent external validation.",
+          "A one-compartment model with first-order absorption is the simplest structure that fits the reported parameters. Agreement does not establish that the true disposition is one-compartment.",
+          "The label reports population means; no individual-level data are available, so between-subject variability is represented only by the standard deviations the label states.",
+          "Some parameters were derived rather than read: Absorption rate constant 2.539 /h solved from the reported Tmax of 1 h and ke = CL/V = 0.26 /h. The label does not report ka directly."
+        ]
       }
     },
     {
@@ -1177,7 +1319,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     },
     {
       "key": "melanotan-2",
@@ -1203,7 +1347,9 @@
       "refused": {
         "human_pk_simulation": "model_parameters_unidentifiable",
         "quantitative_safety_prediction": "endpoint_model_not_validated"
-      }
+      },
+      "pk_parameters": null,
+      "pk_validation": null
     }
   ]
 }

@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-18 · 370 tests passing
+Last updated: 2026-10-18 · 418 tests passing
 
 ## What this is
 
@@ -163,6 +163,7 @@ PYTHONPATH=. python3 -m atlas.ml.train     # train, evaluate, write registry
 PYTHONPATH=. python3 -m atlas.ml.peptide_train   # peptide experiment
 PYTHONPATH=. python3 -m atlas.ml.calibrate_experiment  # calibration comparison
 PYTHONPATH=. python3 -m atlas.ml.peptide_v2            # representation comparison
+PYTHONPATH=. python3 -m atlas.mechanistic.pk_store     # extract + validate PK params
 ```
 
 ### Peptide ligands — served by measurement, not by a model
@@ -310,15 +311,65 @@ against HELM sequences. **Multitask sharing across the two endpoints did help**
 for Ki binding: MAE 1.121 vs 1.253, with R² rising from −0.003 to 0.270. That is
 the one representation change that survived an honest split.
 
+### PK parameter extraction and mechanistic validation
+
+The mechanistic engine was verified but never validated: no model had been
+fitted to or tested against observed measurements, and human PK simulation was
+permitted for **0/46** entries because literature *mentioning* pharmacokinetics
+is not the same as holding parameters.
+
+Parameters are now extracted from FDA labelling via openFDA. **Every extracted
+number carries the sentence that states it.** Three distinctions are preserved:
+point values vs bounds (tesamorelin's bioavailability is "less than 4%", a
+censored observation), mean vs median (Tmax is a median), and apparent vs true
+parameters (`CL/F` is confounded with bioavailability and is labelled so).
+
+Coverage is honest and small: **13 registry entries attempted, 5 had a label
+with a PK section, 1 yielded a usable parameter set.** A compound qualifies only
+when the label states clearance, volume of distribution, bioavailability as a
+point estimate, Tmax and a dose. Tirzepatide is blocked for want of a Tmax;
+tesamorelin for want of clearance; semaglutide for want of bioavailability and
+Tmax. None is completed with an assumed value.
+
+**This is where verification becomes validation.** Bremelanotide's label is
+over-determined: it reports CL, V and F, and *separately* reports Cmax, AUC and
+terminal half-life. The first three parameterise the model; the second three are
+independent observations it can be asked to reproduce.
+
+| quantity | predicted | observed | error | within 90% interval |
+|---|---|---|---|---|
+| AUC | 269.2 | 276 ng·h/mL | **2.5%** | yes |
+| terminal half-life | 2.666 | 2.7 h | **1.3%** | yes |
+| Cmax | 53.97 | 72.8 ng/mL | 25.9% | yes |
+
+AUC and half-life are reproduced to within 3%. Cmax is underpredicted by 26% at
+mean parameters, though the observed value falls inside the interval implied by
+the label's own CL ± 1.0 and V ± 5.8. The likely cause is structural: a
+one-compartment model with first-order absorption cannot produce a peak as sharp
+as the data show. That is reported, not smoothed over.
+
+Human PK simulation is now permitted for **1/46** entries — exactly those with
+source-backed parameters — and a simulation attributed to PT-141 returns
+evidence class B citing the label, while every other compound still abstains.
+
+**Limitations.** Parameters and the quantities they are checked against come
+from the same labelling document, so this is internal consistency plus
+structural adequacy, not independent external validation. Agreement does not
+establish that the true disposition is one-compartment. Labels report population
+means; between-subject variability is represented only by the standard
+deviations stated.
+
 ## Verification vs validation
 
 This distinction is load-bearing and currently sits on one side of it.
 
 - **Verified** — the solver solves the equations it claims to solve, to machine
   precision, against closed-form solutions and conservation laws.
-- **Not validated** — the *mechanistic* models have not been shown to describe
-  a real biological system. No PK model has been fitted to or tested against
-  observed measurements.
+- **Partly validated** — one mechanistic model has now been tested against
+  observed human data. The bremelanotide parameter set reproduces the AUC and
+  terminal half-life its label reports independently, to within 3%, and
+  underpredicts Cmax by 26%. Every other compound remains unvalidated for want
+  of parameters.
 
 A solver passing all 63 checks says nothing about any compound's behaviour in
 an organism.
@@ -330,9 +381,10 @@ prospective evaluation.
 
 ## Not built yet
 
-1. **PK parameter extraction** — the gap keeping human PK at 0/46. Needs
-   clearance, volume and bioavailability extracted from identified records with
-   units, uncertainty and verification against source text.
+1. **PK coverage beyond approved products.** Only labelled drugs have a PK
+   section, so 45/46 entries still lack parameters. Extending to published
+   literature needs numeric extraction from papers, with the same verbatim
+   requirement.
 2. **External validation of the ML model** — needs an independent affinity set
    for MC4R not drawn from the same ChEMBL extraction.
 3. **Order-aware peptide features** — only 28% of peptide entries carry HELM
@@ -367,7 +419,7 @@ prospective evaluation.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 370 tests
+python3 -m pytest -q                              # 418 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
