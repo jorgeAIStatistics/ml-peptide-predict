@@ -82,14 +82,25 @@ class ClinicalTrialsClient:
         *,
         page_size: int = 50,
         with_results_only: bool = False,
+        exact_phrase: bool = True,
     ) -> tuple[list[TrialRecord], int]:
-        """Search studies by free-text term.
+        """Search studies by term.
+
+        ``exact_phrase`` quotes the term, which matters more than it sounds.
+        The registry tokenises an unquoted query, so "Amino H2O" matches 23
+        studies on the token "amino" -- among them an infant respiratory
+        infection trial and an ALS trial -- producing phantom evidence for a
+        compound with none. Quoted, it correctly returns zero.
 
         Returns ``(records, total_count)``; the total is the registry's own
         count of matching studies, independent of the page returned.
         """
+        query_term = term
+        if exact_phrase and not (term.startswith('"') and term.endswith('"')):
+            query_term = f'"{term}"'
+
         params: dict[str, Any] = {
-            "query.term": term,
+            "query.term": query_term,
             "pageSize": min(page_size, 1000),
             "countTotal": "true",
             "format": "json",
@@ -161,12 +172,18 @@ class ClinicalTrialsClient:
             )
         return records, total
 
-    def count(self, term: str) -> int:
+    def count(self, term: str, *, exact_phrase: bool = True) -> int:
         """Total registered studies matching ``term``, fetching one record."""
-        _, total = self.search(term, page_size=1)
+        _, total = self.search(term, page_size=1, exact_phrase=exact_phrase)
         return total
 
-    def count_with_results(self, term: str) -> int:
-        """Registered studies that have posted results."""
-        _, total = self.search(term, page_size=1, with_results_only=True)
+    def count_with_results(self, term: str, *, exact_phrase: bool = True) -> int:
+        """Registered studies that have posted results.
+
+        Posted results are evidence; a registered study without them is only
+        evidence of research activity.
+        """
+        _, total = self.search(
+            term, page_size=1, with_results_only=True, exact_phrase=exact_phrase
+        )
         return total

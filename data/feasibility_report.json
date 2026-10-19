@@ -1,0 +1,1209 @@
+{
+  "created_at": "2026-10-19T01:58:31.363562+00:00",
+  "n_entries": 46,
+  "rows": [
+    {
+      "key": "mots-c",
+      "name": "MOTS-c",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 264,
+      "human_publications": 152,
+      "human_pk_publications": 9,
+      "randomized_trials": 4,
+      "registered_trials": 8,
+      "trials_with_results": 0,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "5-amino-1mq",
+      "name": "5-Amino-1MQ",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "small_molecule",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 3,
+      "human_publications": 3,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "very_sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "cagrilintide",
+      "name": "cagrilintide",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "peptide_hormone_analog",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 124,
+      "human_publications": 72,
+      "human_pk_publications": 10,
+      "randomized_trials": 17,
+      "registered_trials": 45,
+      "trials_with_results": 2,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "aod-9604",
+      "name": "AOD-9604",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 22,
+      "human_publications": 18,
+      "human_pk_publications": 1,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "retatrutide",
+      "name": "retatrutide",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.333,
+      "approved": false,
+      "publications": 207,
+      "human_publications": 125,
+      "human_pk_publications": 7,
+      "randomized_trials": 10,
+      "registered_trials": 34,
+      "trials_with_results": 2,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "semaglutide",
+      "name": "semaglutide",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "peptide_hormone_analog",
+      "completeness": 1.0,
+      "approved": true,
+      "publications": 5707,
+      "human_publications": 3252,
+      "human_pk_publications": 174,
+      "randomized_trials": 311,
+      "registered_trials": 813,
+      "trials_with_results": 110,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "tirzepatide",
+      "name": "tirzepatide",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "peptide_hormone_analog",
+      "completeness": 1.0,
+      "approved": true,
+      "publications": 2640,
+      "human_publications": 1438,
+      "human_pk_publications": 59,
+      "randomized_trials": 136,
+      "registered_trials": 319,
+      "trials_with_results": 47,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "apelin",
+      "name": "apelin",
+      "area": "metabolic_and_energy_regulation",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 3123,
+      "human_publications": 1611,
+      "human_pk_publications": 77,
+      "randomized_trials": 42,
+      "registered_trials": 70,
+      "trials_with_results": 2,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "bpc-157",
+      "name": "BPC-157",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 225,
+      "human_publications": 54,
+      "human_pk_publications": 3,
+      "randomized_trials": 0,
+      "registered_trials": 4,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "tb-500",
+      "name": "TB-500",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "supplier_defined_identity_unverified",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 34,
+      "human_publications": 23,
+      "human_pk_publications": 2,
+      "randomized_trials": 0,
+      "registered_trials": 1,
+      "trials_with_results": 0,
+      "density": "sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "thymosin-beta-4",
+      "name": "thymosin beta-4",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 1250,
+      "human_publications": 670,
+      "human_pk_publications": 24,
+      "randomized_trials": 7,
+      "registered_trials": 18,
+      "trials_with_results": 8,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "bpc157-tb500-blend",
+      "name": "BPC-157 / TB-500 blend",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "kpv",
+      "name": "KPV",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 133,
+      "human_publications": 56,
+      "human_pk_publications": 2,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "glow",
+      "name": "GLOW blend",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "klow",
+      "name": "KLOW blend",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "ll-37",
+      "name": "LL-37",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 103251,
+      "human_publications": 42797,
+      "human_pk_publications": 1158,
+      "randomized_trials": 565,
+      "registered_trials": 61,
+      "trials_with_results": 11,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "cartalax",
+      "name": "cartalax",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 4,
+      "human_publications": 3,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 1,
+      "trials_with_results": 0,
+      "density": "very_sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "ara-290",
+      "name": "ARA-290",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 37,
+      "human_publications": 21,
+      "human_pk_publications": 1,
+      "randomized_trials": 3,
+      "registered_trials": 4,
+      "trials_with_results": 1,
+      "density": "sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "thymosin-alpha-1",
+      "name": "thymosin alpha-1",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 1409,
+      "human_publications": 761,
+      "human_pk_publications": 45,
+      "randomized_trials": 74,
+      "registered_trials": 67,
+      "trials_with_results": 2,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "amino-h2o",
+      "name": "Amino H2O",
+      "area": "tissue_repair_and_immune_signaling",
+      "identity_status": "unresolved_no_database_match",
+      "modality": "unknown",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "ghk-cu",
+      "name": "GHK-Cu",
+      "area": "dermal_and_copper_associated",
+      "identity_status": "resolved",
+      "modality": "metal_coordination_complex",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 91,
+      "human_publications": 35,
+      "human_pk_publications": 4,
+      "randomized_trials": 1,
+      "registered_trials": 2,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "ahk-cu",
+      "name": "AHK-Cu",
+      "area": "dermal_and_copper_associated",
+      "identity_status": "resolved",
+      "modality": "metal_coordination_complex",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 1,
+      "human_publications": 1,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "very_sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "snap-8",
+      "name": "SNAP-8",
+      "area": "dermal_and_copper_associated",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "collagen-peptides",
+      "name": "collagen-derived peptides",
+      "area": "dermal_and_copper_associated",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 693,
+      "human_publications": 305,
+      "human_pk_publications": 22,
+      "randomized_trials": 68,
+      "registered_trials": 2,
+      "trials_with_results": 0,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "tesamorelin",
+      "name": "tesamorelin",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide_hormone_analog",
+      "completeness": 1.0,
+      "approved": true,
+      "publications": 105,
+      "human_publications": 84,
+      "human_pk_publications": 4,
+      "randomized_trials": 22,
+      "registered_trials": 24,
+      "trials_with_results": 10,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "sermorelin",
+      "name": "sermorelin",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide_hormone_analog",
+      "completeness": 1.0,
+      "approved": true,
+      "publications": 370,
+      "human_publications": 217,
+      "human_pk_publications": 26,
+      "randomized_trials": 34,
+      "registered_trials": 42,
+      "trials_with_results": 16,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "ipamorelin",
+      "name": "ipamorelin",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 51,
+      "human_publications": 25,
+      "human_pk_publications": 3,
+      "randomized_trials": 2,
+      "registered_trials": 3,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "cjc-1295-dac",
+      "name": "CJC-1295 with DAC",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "cjc-1295-no-dac",
+      "name": "CJC-1295 without DAC",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "unresolved_no_database_match",
+      "modality": "modified_peptide",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 1,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "very_sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "cjc1295nodac-ipamorelin",
+      "name": "CJC-1295 without DAC + ipamorelin",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "cjc1295dac-ipamorelin",
+      "name": "CJC-1295 with DAC + ipamorelin",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 0,
+      "human_publications": 0,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "none",
+      "permitted": [
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "literature_summary": "no_source_evidence_retrieved",
+        "mechanism_hypothesis": "no_source_evidence_retrieved",
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "kisspeptin",
+      "name": "kisspeptin",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "ambiguous_multiple_candidates",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 4018,
+      "human_publications": 1596,
+      "human_pk_publications": 52,
+      "randomized_trials": 34,
+      "registered_trials": 45,
+      "trials_with_results": 8,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "igf-1-lr3",
+      "name": "IGF-1 LR3",
+      "area": "endocrine_and_growth_signaling",
+      "identity_status": "unresolved_no_database_match",
+      "modality": "protein",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 23,
+      "human_publications": 6,
+      "human_pk_publications": 1,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "semax",
+      "name": "Semax",
+      "area": "neurobiology_and_cognition",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 214,
+      "human_publications": 50,
+      "human_pk_publications": 0,
+      "randomized_trials": 1,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "selank",
+      "name": "Selank",
+      "area": "neurobiology_and_cognition",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 69,
+      "human_publications": 15,
+      "human_pk_publications": 2,
+      "randomized_trials": 2,
+      "registered_trials": 10,
+      "trials_with_results": 3,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "dihexa",
+      "name": "Dihexa",
+      "area": "neurobiology_and_cognition",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 18,
+      "human_publications": 8,
+      "human_pk_publications": 2,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "pinealon",
+      "name": "Pinealon",
+      "area": "neurobiology_and_cognition",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 18,
+      "human_publications": 10,
+      "human_pk_publications": 0,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "sparse",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "no_human_data_for_requested_context",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "vip",
+      "name": "vasoactive intestinal peptide",
+      "area": "neurobiology_and_cognition",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 28006,
+      "human_publications": 13516,
+      "human_pk_publications": 423,
+      "randomized_trials": 212,
+      "registered_trials": 56,
+      "trials_with_results": 7,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "nad",
+      "name": "NAD+",
+      "area": "other_molecular_research",
+      "identity_status": "resolved",
+      "modality": "nucleotide_cofactor",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 58455,
+      "human_publications": 18833,
+      "human_pk_publications": 670,
+      "randomized_trials": 176,
+      "registered_trials": 756,
+      "trials_with_results": 165,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "glutathione",
+      "name": "glutathione",
+      "area": "other_molecular_research",
+      "identity_status": "resolved",
+      "modality": "small_molecule",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 198949,
+      "human_publications": 66770,
+      "human_pk_publications": 3796,
+      "randomized_trials": 1999,
+      "registered_trials": 1166,
+      "trials_with_results": 105,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "dsip",
+      "name": "DSIP",
+      "area": "other_molecular_research",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 1.0,
+      "approved": false,
+      "publications": 462,
+      "human_publications": 111,
+      "human_pk_publications": 2,
+      "randomized_trials": 6,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "epitalon",
+      "name": "epitalon",
+      "area": "other_molecular_research",
+      "identity_status": "resolved",
+      "modality": "peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 142,
+      "human_publications": 48,
+      "human_pk_publications": 1,
+      "randomized_trials": 0,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "epithalamin",
+      "name": "epithalamin",
+      "area": "other_molecular_research",
+      "identity_status": "mixture_not_a_single_molecular_entity",
+      "modality": "mixture_or_formulation",
+      "completeness": 0.0,
+      "approved": false,
+      "publications": 97,
+      "human_publications": 39,
+      "human_pk_publications": 1,
+      "randomized_trials": 6,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "formulation_identity_unverified",
+        "human_pk_simulation": "unresolved_molecular_identity",
+        "quantitative_safety_prediction": "endpoint_model_not_validated",
+        "combination_effect_prediction": "combination_not_directly_studied"
+      }
+    },
+    {
+      "key": "pt-141",
+      "name": "PT-141",
+      "area": "other_molecular_research",
+      "identity_status": "ambiguous_multiple_candidates",
+      "modality": "modified_peptide",
+      "completeness": 1.0,
+      "approved": true,
+      "publications": 113,
+      "human_publications": 83,
+      "human_pk_publications": 6,
+      "randomized_trials": 14,
+      "registered_trials": 4,
+      "trials_with_results": 3,
+      "density": "moderate",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "structure_based_prediction": "unresolved_molecular_identity",
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "melanotan-1",
+      "name": "melanotan I",
+      "area": "other_molecular_research",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 1.0,
+      "approved": true,
+      "publications": 1651,
+      "human_publications": 792,
+      "human_pk_publications": 25,
+      "randomized_trials": 30,
+      "registered_trials": 0,
+      "trials_with_results": 0,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    },
+    {
+      "key": "melanotan-2",
+      "name": "melanotan II",
+      "area": "other_molecular_research",
+      "identity_status": "resolved",
+      "modality": "modified_peptide",
+      "completeness": 0.833,
+      "approved": false,
+      "publications": 2728,
+      "human_publications": 1373,
+      "human_pk_publications": 47,
+      "randomized_trials": 40,
+      "registered_trials": 1,
+      "trials_with_results": 0,
+      "density": "substantial",
+      "permitted": [
+        "literature_summary",
+        "mechanism_hypothesis",
+        "structure_based_prediction",
+        "exploratory_simulation"
+      ],
+      "refused": {
+        "human_pk_simulation": "model_parameters_unidentifiable",
+        "quantitative_safety_prediction": "endpoint_model_not_validated"
+      }
+    }
+  ]
+}
