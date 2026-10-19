@@ -1,0 +1,755 @@
+{
+  "dataset_version": "29fe2a249bcd581d",
+  "endpoint": "MC4R binding affinity (pKi, -log10 M)",
+  "target": {
+    "target_chembl_id": "CHEMBL259",
+    "pref_name": "Melanocortin receptor 4",
+    "organism": "Homo sapiens"
+  },
+  "census": {
+    "n_molecules": 1981,
+    "previous_classification": {
+      "small_molecule_like": 1353,
+      "peptide_like": 628
+    },
+    "structural_classification": {
+      "non_peptide_small_molecule": 731,
+      "peptidomimetic": 620,
+      "cyclic_peptide": 422,
+      "modified_linear_peptide": 58,
+      "noncanonical_residue_peptide": 73,
+      "disulfide_constrained_peptide": 77
+    },
+    "cross_tabulation": [
+      {
+        "previous": "small_molecule_like",
+        "structural": "non_peptide_small_molecule",
+        "n": 730
+      },
+      {
+        "previous": "small_molecule_like",
+        "structural": "peptidomimetic",
+        "n": 600
+      },
+      {
+        "previous": "peptide_like",
+        "structural": "cyclic_peptide",
+        "n": 421
+      },
+      {
+        "previous": "peptide_like",
+        "structural": "disulfide_constrained_peptide",
+        "n": 77
+      },
+      {
+        "previous": "peptide_like",
+        "structural": "modified_linear_peptide",
+        "n": 58
+      },
+      {
+        "previous": "peptide_like",
+        "structural": "noncanonical_residue_peptide",
+        "n": 51
+      },
+      {
+        "previous": "small_molecule_like",
+        "structural": "noncanonical_residue_peptide",
+        "n": 22
+      },
+      {
+        "previous": "peptide_like",
+        "structural": "peptidomimetic",
+        "n": 20
+      },
+      {
+        "previous": "peptide_like",
+        "structural": "non_peptide_small_molecule",
+        "n": 1
+      },
+      {
+        "previous": "small_molecule_like",
+        "structural": "cyclic_peptide",
+        "n": 1
+      }
+    ],
+    "previous_peptide_count": 628,
+    "structural_peptide_count": 630,
+    "false_positives_of_previous_label": [
+      25,
+      26,
+      47,
+      123,
+      130,
+      132,
+      134,
+      149,
+      216,
+      244,
+      279,
+      292,
+      343,
+      344,
+      1192,
+      1198,
+      1216,
+      1608,
+      1657,
+      1671,
+      1701
+    ],
+    "false_negatives_of_previous_label": [
+      288,
+      355,
+      356,
+      364,
+      375,
+      389,
+      395,
+      414,
+      420,
+      785,
+      1189,
+      1225,
+      1296,
+      1698,
+      1702,
+      1712,
+      1717,
+      1739,
+      1740,
+      1741,
+      1755,
+      1761,
+      1850
+    ],
+    "n_false_positives": 21,
+    "n_false_negatives": 23,
+    "membership_disagreement": 44,
+    "membership_disagreement_fraction": 0.06984126984126984,
+    "residue_count_histogram": {
+      "3": 32,
+      "4": 65,
+      "5": 22,
+      "6": 35,
+      "7": 314,
+      "8": 7,
+      "9": 19,
+      "10": 4,
+      "12": 29,
+      "13": 11,
+      "14": 37,
+      "15": 20,
+      "16": 1,
+      "17": 1,
+      "18": 1,
+      "20": 1,
+      "22": 3,
+      "23": 2,
+      "24": 1,
+      "25": 22,
+      "28": 1,
+      "29": 1,
+      "34": 1
+    },
+    "topology": {
+      "head_to_tail_cyclic": 58,
+      "side_chain_bridged": 415,
+      "disulfide_containing": 77,
+      "macrocyclic_by_backbone_ring_only": 5,
+      "linear": 131,
+      "categories_overlap": true
+    },
+    "canonical_residue_fraction": {
+      "mean": 0.6603726088726088,
+      "fully_canonical": 123,
+      "any_noncanonical": 507
+    },
+    "noncanonical_fragment_inventory": [
+      {
+        "fragment": "*Cc1ccc(Cl)cc1",
+        "n": 237
+      },
+      {
+        "fragment": "*Cc1ccc(Cl)cc1Cl",
+        "n": 228
+      },
+      {
+        "fragment": "*CCC(=O)NCCC",
+        "n": 151
+      },
+      {
+        "fragment": "*CCCNC(=O)CC",
+        "n": 151
+      },
+      {
+        "fragment": "*CCCC",
+        "n": 122
+      },
+      {
+        "fragment": "*CC(=O)NCCCC",
+        "n": 119
+      },
+      {
+        "fragment": "*CCCCNC(C)=O",
+        "n": 119
+      },
+      {
+        "fragment": "*Cc1ccc2ccccc2c1",
+        "n": 107
+      },
+      {
+        "fragment": "*CCN",
+        "n": 54
+      },
+      {
+        "fragment": "*Cc1ccc(F)cc1",
+        "n": 52
+      },
+      {
+        "fragment": "*CCC(=O)NCC",
+        "n": 43
+      },
+      {
+        "fragment": "*CCNC(=O)CC",
+        "n": 43
+      },
+      {
+        "fragment": "*Cc1ccc(C#N)cc1",
+        "n": 22
+      },
+      {
+        "fragment": "*CCCN",
+        "n": 19
+      },
+      {
+        "fragment": "*CCC",
+        "n": 19
+      },
+      {
+        "fragment": "*Cc1ccccc1Cl",
+        "n": 18
+      },
+      {
+        "fragment": "*CCC(=O)NCCCC",
+        "n": 17
+      },
+      {
+        "fragment": "*CCCCNC(=O)CC",
+        "n": 17
+      },
+      {
+        "fragment": "*CCCNC(N)=O",
+        "n": 13
+      },
+      {
+        "fragment": "*Cc1cccc(Cl)c1",
+        "n": 13
+      },
+      {
+        "fragment": "*CCCC(=O)NCC",
+        "n": 12
+      },
+      {
+        "fragment": "*CCNC(=O)CCC",
+        "n": 12
+      },
+      {
+        "fragment": "*Cc1ccccc1F",
+        "n": 12
+      },
+      {
+        "fragment": "C*C",
+        "n": 10
+      },
+      {
+        "fragment": "*CCCCNC(=O)CCC=O",
+        "n": 9
+      }
+    ],
+    "n_distinct_noncanonical_fragments": 160
+  },
+  "series": {
+    "distance_cutoff": 0.4,
+    "n_molecules": 630,
+    "n_clusters": 30,
+    "effective_sample_size_ratio": 0.047619047619047616,
+    "largest_cluster": 335,
+    "largest_cluster_share": 0.5317460317460317,
+    "top_5_cluster_share": 0.7761904761904762,
+    "singletons": 7,
+    "median_within_cluster_label_sd": 0.8625903140318097,
+    "overall_label_sd": 1.281043892307615,
+    "note": "A cluster split assigns whole clusters to test, so the number of clusters bounds how many independent held-out groups exist. Label variance that lives inside a cluster cannot be predicted from which cluster a molecule belongs to."
+  },
+  "assays": {
+    "peptides": {
+      "n_molecules": 630,
+      "n_distinct_documents": 36,
+      "n_distinct_assays": 38,
+      "molecules_per_document": 17.5,
+      "largest_document_share": 0.20952380952380953,
+      "top_10_document_share": 0.6714285714285714,
+      "top_documents": [
+        {
+          "document": "CHEMBL5726173",
+          "n": 132
+        },
+        {
+          "document": "CHEMBL5727671",
+          "n": 130
+        },
+        {
+          "document": "CHEMBL3638428",
+          "n": 126
+        },
+        {
+          "document": "CHEMBL3886993",
+          "n": 125
+        },
+        {
+          "document": "CHEMBL3639248",
+          "n": 116
+        },
+        {
+          "document": "CHEMBL3886968",
+          "n": 54
+        },
+        {
+          "document": "CHEMBL5104192",
+          "n": 31
+        },
+        {
+          "document": "CHEMBL5113520",
+          "n": 29
+        },
+        {
+          "document": "CHEMBL5034014",
+          "n": 27
+        },
+        {
+          "document": "CHEMBL1140090",
+          "n": 27
+        }
+      ],
+      "multi_document_molecules": 145,
+      "multi_assay_molecules": 156
+    },
+    "non_peptides": {
+      "n_molecules": 1351,
+      "n_distinct_documents": 51,
+      "n_distinct_assays": 56,
+      "molecules_per_document": 26.49019607843137,
+      "largest_document_share": 0.10954848260547742,
+      "top_10_document_share": 0.47372316802368614,
+      "top_documents": [
+        {
+          "document": "CHEMBL1149662",
+          "n": 148
+        },
+        {
+          "document": "CHEMBL1140580",
+          "n": 73
+        },
+        {
+          "document": "CHEMBL1156733",
+          "n": 71
+        },
+        {
+          "document": "CHEMBL1149357",
+          "n": 56
+        },
+        {
+          "document": "CHEMBL1149513",
+          "n": 55
+        },
+        {
+          "document": "CHEMBL1149565",
+          "n": 53
+        },
+        {
+          "document": "CHEMBL1137624",
+          "n": 52
+        },
+        {
+          "document": "CHEMBL1139763",
+          "n": 49
+        },
+        {
+          "document": "CHEMBL1141529",
+          "n": 46
+        },
+        {
+          "document": "CHEMBL1139579",
+          "n": 45
+        }
+      ],
+      "multi_document_molecules": 52,
+      "multi_assay_molecules": 55
+    },
+    "all": {
+      "n_molecules": 1981,
+      "n_distinct_documents": 82,
+      "n_distinct_assays": 89,
+      "molecules_per_document": 24.158536585365855,
+      "largest_document_share": 0.07470974255426552,
+      "top_10_document_share": 0.3331650681474003,
+      "top_documents": [
+        {
+          "document": "CHEMBL1149662",
+          "n": 148
+        },
+        {
+          "document": "CHEMBL5726173",
+          "n": 132
+        },
+        {
+          "document": "CHEMBL5727671",
+          "n": 130
+        },
+        {
+          "document": "CHEMBL3638428",
+          "n": 126
+        },
+        {
+          "document": "CHEMBL3886993",
+          "n": 125
+        },
+        {
+          "document": "CHEMBL3639248",
+          "n": 116
+        },
+        {
+          "document": "CHEMBL1140580",
+          "n": 73
+        },
+        {
+          "document": "CHEMBL1156733",
+          "n": 71
+        },
+        {
+          "document": "CHEMBL1149357",
+          "n": 56
+        },
+        {
+          "document": "CHEMBL1149513",
+          "n": 55
+        }
+      ],
+      "multi_document_molecules": 197,
+      "multi_assay_molecules": 211
+    }
+  },
+  "labels": {
+    "peptides": {
+      "n": 630,
+      "n_replicated": 184,
+      "replicated_fraction": 0.2920634920634921,
+      "n_discordant": 10,
+      "discordant_fraction": 0.015873015873015872,
+      "median_replicate_spread": 0.0,
+      "mean_replicate_spread": 0.15293478260869567,
+      "max_replicate_spread": 1.9899999999999993,
+      "noise_floor_mae_estimate": 0.07646739130434783,
+      "label_range": [
+        4.16,
+        10.82
+      ],
+      "label_sd": 1.281043892307615
+    },
+    "non_peptides": {
+      "n": 1351,
+      "n_replicated": 93,
+      "replicated_fraction": 0.0688378978534419,
+      "n_discordant": 5,
+      "discordant_fraction": 0.003700962250185048,
+      "median_replicate_spread": 0.009999999999999787,
+      "mean_replicate_spread": 0.20451612903225802,
+      "max_replicate_spread": 3.200000000000001,
+      "noise_floor_mae_estimate": 0.10225806451612901,
+      "label_range": [
+        4.0,
+        10.36
+      ],
+      "label_sd": 1.1596923920260667
+    },
+    "all": {
+      "n": 1981,
+      "n_replicated": 277,
+      "replicated_fraction": 0.1398283695103483,
+      "n_discordant": 15,
+      "discordant_fraction": 0.00757193336698637,
+      "median_replicate_spread": 0.0,
+      "mean_replicate_spread": 0.17025270758122743,
+      "max_replicate_spread": 3.200000000000001,
+      "noise_floor_mae_estimate": 0.08512635379061372,
+      "label_range": [
+        4.0,
+        10.82
+      ],
+      "label_sd": 1.2728995030845014
+    },
+    "caveat": "Half the replicate range bounds the error of an optimal point estimate only for molecules that were actually replicated; 29.2% of peptides were. The unreplicated remainder has unmeasured label uncertainty, so the floor quoted here is itself an estimate from a subset."
+  },
+  "shift": {
+    "n_peptides": 630,
+    "n_non_peptides": 1351,
+    "nearest_neighbour_similarity": {
+      "peptide_to_non_peptide": {
+        "min": 0.18518517911434174,
+        "p10": 0.3054964542388916,
+        "median": 0.3720930218696594,
+        "p90": 0.5257731676101685,
+        "max": 0.8529411554336548,
+        "mean": 0.39323222637176514
+      },
+      "non_peptide_to_peptide": {
+        "min": 0.11650485545396805,
+        "p10": 0.17431192100048065,
+        "median": 0.22413793206214905,
+        "p90": 0.3962264060974121,
+        "max": 0.8529411554336548,
+        "mean": 0.2592775821685791
+      },
+      "peptide_to_peptide": {
+        "min": 0.5291005373001099,
+        "p10": 0.8447738885879517,
+        "median": 0.9342708587646484,
+        "p90": 1.0,
+        "max": 1.0,
+        "mean": 0.9233584403991699
+      },
+      "non_peptide_to_non_peptide": {
+        "min": 0.1587301641702652,
+        "p10": 0.7428571581840515,
+        "median": 0.8513513803482056,
+        "p90": 1.0,
+        "max": 1.0,
+        "mean": 0.8449060916900635
+      }
+    },
+    "peptides_with_no_close_non_peptide_neighbour": {
+      "threshold": 0.4,
+      "n": 441,
+      "fraction": 0.7
+    },
+    "descriptor_standardised_mean_difference": {
+      "max": 3.2742300196053398,
+      "median": 1.6235442633476076,
+      "n_descriptors_above_1_sd": 12,
+      "n_descriptors": 15,
+      "most_shifted": [
+        {
+          "descriptor": "clogp",
+          "smd": 3.2742300196053398
+        },
+        {
+          "descriptor": "qed",
+          "smd": 2.974349129836216
+        },
+        {
+          "descriptor": "h_donors",
+          "smd": 2.589093317502844
+        },
+        {
+          "descriptor": "tpsa",
+          "smd": 2.352139080553206
+        },
+        {
+          "descriptor": "amide_bonds",
+          "smd": 2.244278717183065
+        },
+        {
+          "descriptor": "stereocentres",
+          "smd": 1.789717727590072
+        },
+        {
+          "descriptor": "heavy_atoms",
+          "smd": 1.653567748596649
+        },
+        {
+          "descriptor": "h_acceptors",
+          "smd": 1.6235442633476076
+        },
+        {
+          "descriptor": "mol_weight",
+          "smd": 1.6011560938177194
+        },
+        {
+          "descriptor": "molar_refractivity",
+          "smd": 1.56806623625834
+        }
+      ]
+    },
+    "label_distribution": {
+      "peptide_mean_pki": 7.72236507936508,
+      "non_peptide_mean_pki": 6.8083419689119165,
+      "peptide_sd": 1.281043892307615,
+      "non_peptide_sd": 1.1596923920260667,
+      "mean_difference": 0.9140231104531633
+    },
+    "note": "Exchangeability is the assumption conformal calibration rests on. These figures describe how far it is from holding between the two populations; they do not by themselves say the model fails."
+  },
+  "failure": {
+    "split": {
+      "kind": "cluster",
+      "description": "Taylor-Butina clustering at Tanimoto distance 0.4 gave 29 clusters; whole clusters are assigned to one side, so no analogue of a test molecule remains in training.",
+      "n_train": 489,
+      "n_test": 141,
+      "seed": 0
+    },
+    "A_representation": {
+      "results": {
+        "baseline_mean": {
+          "mae": 1.3426010529521823,
+          "rmse": 1.5348181904052285,
+          "r2": -0.0015823361162052851,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "fingerprint__ridge": {
+          "mae": 1.136280537281904,
+          "rmse": 1.436059458276465,
+          "r2": 0.12316550929367531,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "fingerprint__forest": {
+          "mae": 1.2743012279072374,
+          "rmse": 1.5666374519198194,
+          "r2": -0.043541657090450325,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "descriptor__ridge": {
+          "mae": 1.5674827249997403,
+          "rmse": 1.8413106268072132,
+          "r2": -0.4415406729764546,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "descriptor__forest": {
+          "mae": 1.2589221634866348,
+          "rmse": 1.5226160425206052,
+          "r2": 0.014279964977922166,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "composition__ridge": {
+          "mae": 2.212346953995852,
+          "rmse": 3.4676713264429013,
+          "r2": -4.1126802903082265,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "composition__forest": {
+          "mae": 1.356715452885703,
+          "rmse": 1.6817803770800746,
+          "r2": -0.2025727066001206,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "descriptor_plus_composition__ridge": {
+          "mae": 2.105708281983363,
+          "rmse": 2.999794657665159,
+          "r2": -2.8260957648361296,
+          "n_train": 489,
+          "n_test": 141
+        },
+        "descriptor_plus_composition__forest": {
+          "mae": 1.2771616344963173,
+          "rmse": 1.5363008960747195,
+          "r2": -0.0035184209658976062,
+          "n_train": 489,
+          "n_test": 141
+        }
+      },
+      "best": "fingerprint__ridge",
+      "best_mae": 1.136280537281904,
+      "baseline_mae": 1.3426010529521823,
+      "improvement_over_baseline": 0.20632051567027831,
+      "composition_beats_fingerprint": false
+    },
+    "B_domain_shift": {
+      "peptides_only": {
+        "mae": 1.2589221634866352,
+        "rmse": 1.522616042520606,
+        "r2": 0.0142799649779215,
+        "n_train": 489,
+        "n_test": 141
+      },
+      "non_peptides_only": {
+        "mae": 1.7336035869672748,
+        "rmse": 2.052438866137325,
+        "r2": -0.7910728119616415,
+        "n_train": 1351,
+        "n_test": 141
+      },
+      "pooled": {
+        "mae": 1.195096591944269,
+        "rmse": 1.4580463057302138,
+        "r2": 0.09611034704618826,
+        "n_train": 1840,
+        "n_test": 141
+      },
+      "negative_transfer_log_units": -0.06382557154236612,
+      "interpretation": "Pooling helps"
+    },
+    "C_dataset_size": {
+      "learning_curve": [
+        {
+          "fraction": 0.25,
+          "n_train": 122,
+          "mae": 1.2453961292919833
+        },
+        {
+          "fraction": 0.5,
+          "n_train": 244,
+          "mae": 1.2158247254796855
+        },
+        {
+          "fraction": 0.75,
+          "n_train": 367,
+          "mae": 1.171871781606884
+        },
+        {
+          "fraction": 1.0,
+          "n_train": 489,
+          "mae": 1.136280537281904
+        }
+      ],
+      "representation": "fingerprint__ridge",
+      "mae_gain_from_last_quartile": 0.035591244324979954,
+      "still_improving": true,
+      "extrapolation": {
+        "fit": "mae = intercept + slope * ln(n_train)",
+        "slope_per_ln_n": -0.07728071199844572,
+        "intercept": 1.6250942913110125,
+        "r2_of_fit": 0.9381563825679674,
+        "n_peptides_for_mae_0.7": 158034.9572174482,
+        "n_peptides_for_mae_0.5": 2102293.4180832063,
+        "caveat": "A log-linear extrapolation several orders of magnitude beyond 489 observed training peptides. It bounds the quantity hypothesis rather than predicting an outcome."
+      }
+    },
+    "D_irreducible_variability": {
+      "test_set_replicated_molecules": 19,
+      "noise_floor_mae_estimate": 0.2452631578947368,
+      "best_model_mae": 1.136280537281904,
+      "headroom_to_floor": 0.8910173793871672,
+      "caveat": "The floor is estimated from the replicated subset of the test molecules only; molecules measured once contribute no estimate."
+    }
+  },
+  "findings": [
+    "Backbone tracing finds 630 peptides among 1981 molecules, against 628 called peptide-like by the amide-count heuristic. The totals are close, but membership differs on 44 molecules (7.0% of the peptide set): 21 were counted as peptides and are not, 23 are peptides and were missed.",
+    "620 molecules trace one or two residues. They contain peptide bonds but have no sequence to featurise, and counting them as peptides is what made the original peptide population look larger than it is.",
+    "The peptide population is dominated by constrained topologies: 415 side-chain bridged, 77 disulfide-containing, 58 head-to-tail cyclic. These overlap; what partitions is that only 131 of 630 peptides are unconstrained.",
+    "507 of 630 peptides (80.5%) contain at least one residue outside the twenty canonical side chains, across 160 distinct fragments. The commonest are not exotic biology but medicinal chemistry: *Cc1ccc(Cl)cc1 (237x), *Cc1ccc(Cl)cc1Cl (228x), *CCC(=O)NCCC (151x). This bears directly on Stage B: a protein language model's vocabulary has no token for a 4-chloro or 2,4-dichloro phenylalanine, so frozen sequence embeddings would collapse precisely the substitutions this dataset's structure-activity series varies.",
+    "Peptides and non-peptides are far apart but not disjoint: median nearest-neighbour similarity from a peptide to any non-peptide is 0.372, against 0.934 to another peptide. 70.0% of peptides have no non-peptide neighbour above 0.4 Tanimoto.",
+    "12 of 15 descriptors differ between the populations by more than one pooled standard deviation, so the shift is not confined to size.",
+    "The 630 peptides fall into only 30 similarity clusters at 0.4 Tanimoto distance, the largest holding 335 molecules (53.2%) and the top five 77.6% between them. The effective sample size is therefore nearer 30 than 630. Within a cluster the labels still vary (median SD 0.863 against 1.281 overall), so most of the affinity range a model must explain lies *inside* analogue series, where knowing which series a molecule belongs to carries no information.",
+    "Hypothesis A (representation): the best representation is fingerprint__ridge at MAE 1.136 and R2 +0.123, against a mean-predictor baseline of MAE 1.343. That is an improvement of only 0.206 log units, and an R2 of +0.123 means the model accounts for 12% of the variance in held-out peptide affinity. The failure is not marginal underperformance; the model is close to uninformative on this population. Sequence composition does not beat the molecular fingerprint on the same split, and composition alone is worse than the baseline (MAE 1.357, R2 -0.203), which is expected here: the population is largely analogue series of cyclic heptapeptides differing by single substitutions, and a bag of residue counts cannot distinguish positional isomers at all.",
+    "Hypothesis B (domain shift): on the same held-out peptides, training on 489 peptides alone gives MAE 1.259, while training on 1351 non-peptides instead gives 1.734 (R2 -0.791) \u2014 worse than predicting the mean, despite 2.8 times the training data. Non-peptide affinity data does not transfer to peptides. Pooling both reaches 1.195, so the small molecules are not useless once peptides anchor the fit: pooling helps by 0.064 log units.",
+    "Hypothesis C (dataset size): the learning curve falls monotonically from MAE 1.245 at 122 training peptides to 1.136 at 489. Adding the final quartile (from 367 to 489) still reduced MAE by 0.036 log units, so error is still falling and has not saturated. But the rate bounds what quantity alone can buy: fitting MAE against ln(n) gives a slope of -0.077 log units per e-fold (fit R2 0.938), which puts MAE 0.7 at roughly 158,035 training peptides and MAE 0.5 at 2,102,293. Against 630 peptides in the whole of ChEMBL for this target, quantity is a real contributor that cannot be the route to a fix.",
+    "Hypothesis D (irreducible variability): the replicated test molecules (19 of 141) imply a label noise floor near MAE 0.245; the best model sits at 1.136, leaving +0.891 log units of headroom.",
+    "Label quality: 29.2% of peptides have more than one record and 1.6% are discordant by more than one log unit. The peptide label spread (SD 1.281) is wider than the non-peptide spread (SD 1.160)."
+  ]
+}

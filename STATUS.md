@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 462 tests passing
+Last updated: 2026-10-19 · 536 tests passing
 
 ## What this is
 
@@ -414,6 +414,45 @@ sits one tier down from externally validated: held-out scaffold-split
 performance on ChEMBL data, with no independent external test set and no
 prospective evaluation.
 
+## Peptide model: why it is not deployed (ATLAS 2.4 Stage A)
+
+The peptide affinity model remains undeployed, and the Stage A audit
+strengthens that decision rather than weakening it. Full findings in
+`docs/ATLAS_2.4_STAGE_A_FINDINGS.md`; report in `data/ml/peptide_audit.json`;
+reproduce with `python3 -m atlas.ml.peptide_audit`.
+
+The earlier `peptide_like` label counted amide bonds. Replacing it with
+backbone tracing (`atlas/ml/peptide_structure.py`, validated against 14 PubChem
+structures — all 14 residue counts exact, oxytocin recovered as `CYIQNCPLG`,
+somatostatin-14 as `AGCKNFFWKTFTSC`) gives 630 peptides rather than 628, but
+disagrees on membership for 44 molecules, 7.0% of the set. 620 molecules trace
+only one or two residues and have no sequence to featurise.
+
+Measured on one fixed test set of 141 held-out peptides (Taylor-Butina cluster
+split, 489 train):
+
+- Best representation reaches **MAE 1.136, R² 0.123** against a mean-predictor
+  baseline of 1.343. The model accounts for ~12% of held-out variance.
+- The 630 peptides form only **30 similarity clusters**; the largest holds 53%.
+  Effective sample size is nearer 30 than 630, and **two-thirds of the label
+  spread lies within series** (SD 0.863 of 1.281).
+- **80.5% carry non-canonical residues** across 160 distinct fragments, mostly
+  halogenated and naphthyl phenylalanines. A canonical-alphabet protein
+  language model cannot represent them.
+- Training on 1351 non-peptides instead of 489 peptides is **worse than
+  predicting the mean** (R² −0.791); pooling both helps slightly.
+- Label noise is **not** the constraint: noise floor MAE 0.245 on the
+  replicated test subset, leaving 0.891 log units of headroom.
+
+Residue composition — the representation backbone tracing newly enables —
+scores *below* the baseline, because a bag of residue counts cannot
+distinguish positional isomers and this population is single-substitution
+analogue series. That negative result is asserted by a test.
+
+Stereochemistry is **not** resolved by the tracer: D- versus L-residues are
+indistinguishable in the current representation, which matters because D-amino
+acid substitution is central to melanocortin peptide design.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -454,7 +493,7 @@ prospective evaluation.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 462 tests
+python3 -m pytest -q                              # 536 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
