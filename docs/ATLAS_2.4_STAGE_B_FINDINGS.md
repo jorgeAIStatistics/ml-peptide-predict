@@ -6,31 +6,31 @@
 `python3 -m atlas.ml.peptide_benchmark`
 **Tests:** 33 new (569 at the time; 595 after ATLAS 2.5 Stage 2)
 
-> **Correction applied 2026-10-19.** Two unfairnesses in this benchmark were
-> found while adding the ATLAS 2.5 residue-chemistry representation and are
-> now fixed: ridge was fitted on unscaled features, and representation
-> contrasts were taken as best-of-model, which let a scaling artefact decide a
-> representation question. Contrasts are now read off the random forest, which
-> is invariant to monotone feature transforms. Numbers below are the corrected
-> ones; see `docs/ATLAS_2.5_STAGE_1_AUDIT.md` §7 for the detail. The headline
-> finding strengthened: **all five** contrasts now reverse between the two
-> evaluations, where three of three did before.
-
-> **Scope limit established 2026-10-19 (ATLAS 2.5 Stage 3b).** Everything
-> below was measured on **MC4R alone**, and the "all five contrasts reverse"
-> finding does **not** replicate on the rest of the melanocortin family. Re-run
-> per receptor over the Stage 3 panel: MC4R 5/5, MC1R 3/5, MC3R 2/5, MC5R 1/5.
-> All five reverse on MC4R and on no other receptor, so the direction of a
-> representation contrast is partly a property of this receptor's data. The
+> **Two corrections, applied 2026-10-19.** Read them before the findings
+> below; the second withdraws this document's original headline.
+>
+> **(a) Method, corrected.** Two unfairnesses were found while adding the
+> ATLAS 2.5 residue-chemistry representation: ridge was fitted on unscaled
+> features, and representation contrasts were taken as best-of-model, which
+> let a scaling artefact decide a representation question. Contrasts are now
+> read off the random forest, which is invariant to monotone feature
+> transforms. All numbers below are the corrected ones. Detail in
+> `docs/ATLAS_2.5_STAGE_1_AUDIT.md` §7.
+>
+> **(b) Scope, corrected — the headline does not generalise.** Under the
+> fairer comparator the tally rose from three of three contrasts reversing to
+> five of five, and this document originally called that a strengthening. It
+> was not: everything here was measured on **MC4R alone**, and re-running per
+> receptor over the Stage 3 panel gives **MC4R 5/5, MC1R 3/5, MC3R 2/5, MC5R
+> 1/5**. All five reverse on MC4R and on no other receptor, so the *direction*
+> of a contrast is partly a property of this receptor's data. The
 > representation *ranking* does not transfer either — four distinct best
-> representations across four receptors, none winning twice. What survives is
-> the structural point of §1: the cross-series and within-series evaluations
-> can disagree, so reporting one number hides which question was asked. The
-> specific tally of five should not be cited as a general fact about peptide
-> representations. See `docs/ATLAS_2.5_STAGE_3_PANEL.md` §8.3.
-
-Stage A specified what to build. Stage B built it and measured it — including
-where Stage A's own predictions turned out to be wrong.
+> representations across four receptors, none winning twice, and
+> `residue_chemistry`, negative cross-series here, is part of the winner on
+> MC5R. What survives is the structural point: the two evaluations can
+> disagree, so one number hides which question was asked. The tally of five
+> was an n=1 result reported as general and must not be cited as a fact about
+> peptide representations. Detail in `docs/ATLAS_2.5_STAGE_3_PANEL.md` §8.3.
 
 ---
 
@@ -57,9 +57,12 @@ capabilities. Both are now reported:
 The best model in both cases is `positional_fragment_fp + morgan_fp` with
 ridge regression.
 
-### The headline result: every representation choice reverses
+### On MC4R, every representation choice reverses
 
-All three design contrasts flip sign between the two evaluations:
+All five design contrasts flip sign between the two evaluations **on this
+receptor**. Correction (b) above is essential context: only MC4R behaves this
+way, and the per-receptor tallies are 5/5 here against 3/5, 2/5 and 1/5
+elsewhere.
 
 | Contrast (random forest) | Cross-series winner | Within-series winner |
 |---|---|---|
@@ -73,9 +76,12 @@ A programme that benchmarked only within-series — the evaluation most readily
 reported — would have selected one-hot residue indices, explicit topology
 features, whole-molecule fingerprints and hand-engineered biophysical
 descriptors. Each is the choice that generalises
-*worst* to an unseen series. This is the clearest vindication of Stage A's
-requirement to report the two separately, and it is a caution that applies well
-beyond this dataset.
+*worst* to an unseen series — on this receptor. That vindicates Stage A's
+requirement to report the two evaluations separately, which is the part that
+held up when the family was measured. What did not hold up is the strength of
+the effect: the contrasts reverse far less often on MC1R, MC3R and MC5R, so
+this is a reason to report both evaluations rather than evidence that any
+particular representation choice is the right one.
 
 ---
 
@@ -238,8 +244,11 @@ Supported by measurement:
   is understood.
 - **Drop the explicit topology block** from cross-series models. Retain it only
   for an explicitly within-series lead-optimisation mode, if one is built.
-- **Report both evaluations always.** Three of three design conclusions reverse
-  between them; a single number selects the wrong architecture.
+- **Report both evaluations always.** This is the recommendation that
+  survived replication across the family: five of five conclusions reverse on
+  MC4R and between one and three of five elsewhere, so a single number can
+  select the wrong architecture. Do **not** carry a specific contrast's
+  direction to another receptor — the ranking does not transfer.
 - **Target the remaining gap with learnability, not representation.** The
   ceiling for the current encoding is MAE 0.186 and the model sits at 0.870, so
   there is a large gap that is not representational. Stage A's finding that the
@@ -273,9 +282,11 @@ Not supported:
 - Head-to-tail cyclic peptides (58 of 630) have their rotation canonicalised
   lexicographically. This makes position indices comparable but the choice of
   origin is still arbitrary with respect to biology.
-- The cross-series and within-series splits use one seed (0). The reversal in
-  §1 is large relative to the contrasts it reverses, but no seed-variability
-  study was run.
+- The cross-series and within-series splits use one seed (0), and no
+  seed-variability study was run. The §1 reversal is large relative to the
+  contrasts it reverses, but the per-receptor replication shows the effect is
+  receptor-dependent, so single-seed single-receptor results of this kind
+  should be treated as provisional until repeated.
 - `positional_fragment_fp + topology` with ridge attains the highest
   cross-series R² (+0.272) while having worse MAE (0.905) than the selected
   model. Selection was on MAE; a different criterion would have chosen

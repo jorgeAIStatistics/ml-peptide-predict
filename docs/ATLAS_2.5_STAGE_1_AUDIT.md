@@ -389,11 +389,17 @@ benchmark came to light and are now fixed. Both change published numbers.
    1.143). Contrasts are now read off the random forest alone, which is
    invariant to monotone transforms of each feature.
 
-**The Stage B headline survives and strengthens.** With the fairer comparator,
-**all five** representation contrasts reverse between cross-series and
-within-series evaluation, where three of three did before. The deployment gate
-still fails: cross-series MAE 0.870 against ≤0.70 required and R² 0.276
-against ≥0.30.
+**Under the fairer comparator the tally rose** from three of three
+representation contrasts reversing to five of five. This was recorded here as
+the Stage B headline "surviving and strengthening", which was wrong: the
+figure is specific to MC4R. Re-measured per receptor over the Stage 3 panel it
+is MC4R 5/5, MC1R 3/5, MC3R 2/5, MC5R 1/5 — see
+`docs/ATLAS_2.5_STAGE_3_PANEL.md` §8.3. What the fairer comparator did
+establish is the method correction above; the generality of the reversal was an
+n=1 claim and is withdrawn.
+
+The deployment gate still fails: cross-series MAE 0.870 against ≤0.70 required
+and R² 0.276 against ≥0.30.
 
 ---
 
