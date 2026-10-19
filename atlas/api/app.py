@@ -26,6 +26,7 @@ from flask.json.provider import DefaultJSONProvider
 from flask_cors import CORS
 
 from atlas.analysis.feasibility import AnalysisKind
+from atlas.api.interface_payload import interface_detail, interface_index
 from atlas.core.evidence import AbstentionReason, EvidenceClass
 from atlas.mechanistic.metrics import nca
 from atlas.mechanistic.models import MODEL_REGISTRY, ParameterError, get_model
@@ -634,6 +635,32 @@ def create_app() -> Flask:
             "card": CALIBRATION_CARD,
             "report": calibration_report(),
         })
+
+    @app.get("/api/interfaces")
+    def interfaces():
+        """The typed interaction profiles joined to the consensus pocket.
+
+        Everything the structural interface explorer needs before a complex is
+        chosen: the ten profiles with their criteria and caveats, the 31-position
+        pocket with its support counts and its transfer to the other receptors,
+        the residue chemistry at each position, and the affinity model's gate
+        result, which travels with the payload so a binding interface is not
+        read as a binding prediction.
+        """
+        return jsonify(interface_index())
+
+    @app.get("/api/interfaces/<pdb_id>")
+    def interface(pdb_id: str):
+        """One complex: its saved profile, its contacts and its geometry.
+
+        Geometry is read from the cached mmCIF. Coordinate files live outside
+        version control, so a cold cache yields ``geometry: null`` with the
+        reason attached rather than a drawing of something else.
+        """
+        payload = interface_detail(pdb_id.upper())
+        if not payload.get("available"):
+            return jsonify(payload), 404
+        return jsonify(payload)
 
     @app.post("/api/simulate")
     def run_simulation():

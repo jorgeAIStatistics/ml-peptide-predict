@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 760 tests passing
+Last updated: 2026-10-19 · 795 tests passing
 
 ## What this is
 
@@ -81,7 +81,7 @@ Human PK is 0/46 because it requires source-backed *extracted* parameters, and
 none have been extracted yet. That is the truthful state, not a placeholder.
 
 ### Web interface (`atlas/api/`)
-Flask serves a JSON API and a four-workspace frontend from one process. The
+Flask serves a JSON API and a five-workspace frontend from one process. The
 frontend has **no runtime dependencies** — no bundler, no `node_modules`, no
 CDN — so it runs offline and starts instantly. Charts are hand-drawn SVG,
 re-rendered on container resize so axis type stays at its true size.
@@ -96,6 +96,7 @@ PYTHONPATH=. python3 -m atlas.api.app      # http://127.0.0.1:5055
 | Model Studio | runs the real solver; NCA, diagnostics, equations, conservation plot |
 | Evidence & Gaps | compound × analysis matrix, every refusal reason on hover/focus |
 | Verification | all 63 solver checks with metric against tolerance |
+| Interface Explorer | ten solved MC4R–peptide complexes; rotatable structure, consensus pocket, per-residue contacts and chemistry |
 
 The API reads from the versioned snapshots rather than querying external
 databases per request, so responses are fast, reproducible and offline, and
@@ -789,6 +790,54 @@ pooling helps 2 of 4 receptors and hurts 2, mean −0.032 log units. The sign
 tracks existing data volume: MC4R (most rows) is the worst hurt at −0.172,
 while the data-poor MC1R and MC3R gain. Pooling redistributes rather than
 adds.
+### Structural interface explorer (Stage 2 priority 10)
+
+`atlas/ml/interface_geometry.py`, `atlas/api/interface_payload.py`,
+`GET /api/interfaces` and `GET /api/interfaces/<pdb_id>`, and a fifth
+workspace at `#interfaces`.
+
+The typed profiles and the consensus pocket were saved as numbers; this makes
+them inspectable. A complex is chosen from the ten, its interface is drawn,
+and selecting a pocket residue carries that selection across four views at
+once: its place in the structure, the contacts it makes with the peptide by
+type, its side-chain chemistry with per-descriptor provenance, and its
+transfer to MC1R, MC3R and MC5R.
+
+**The viewer is ATLAS's own, not Mol\*.** Mol\* loads from a CDN and the
+frontend currently fetches nothing: making an offline instrument reach the
+network to draw an experimental structure, for a five-megabyte third-party
+bundle, was not worth it. So the structure is drawn in SVG like every other
+figure here — an orthographic projection of the deposited coordinates, with
+the C-alpha trace, the interface side chains, the peptide's heavy atoms and
+the typed contacts, rotatable by drag or arrow key. It is not a
+molecular-graphics package and says so on the figure: no surface, no electron
+density, no secondary-structure fitting, and no occlusion, since depth is cued
+by opacity alone.
+
+**Nothing is recomputed in the browser.** `interface_geometry` re-enumerates
+the pairs behind each saved count using the same typed atom sets, the same
+thresholds and the same chain identification that produced
+`interaction_profiles.json`, then checks its totals against the published
+profile and returns the comparison. All ten agree, and the figure carries the
+result as a chip; a disagreement would announce itself rather than quietly
+replacing the published number.
+
+**The vocabulary is the deliverable.** Every structure here is experimental,
+but the typing laid over it is not uniformly so, and the interface separates
+six classes of mark at the point of use rather than in a footnote:
+experimental coordinates, a geometric consequence of them, a **candidate**
+hydrogen bond (no hydrogens at 2.58-3.30 A, so no D-H...A angle was ever
+checked), an **inferred** peptide-side charged group or ring (these ligands
+are largely non-canonical, so residue names carry no chemistry), an
+illustrative drawing convention, and a position **transferred** by alignment
+to a receptor with no peptide-bound structure at all. The affinity model's
+failing gate travels with every payload, because a drawn salt bridge is the
+thing most likely to be misread as evidence that a peptide binds tightly.
+
+Coordinate files are gitignored, so a fresh checkout cannot draw. That is
+reported as an absent input with the command that restores it, and nothing is
+drawn in its place; the contact map, the measurements and the profile all
+still work, because they never needed the file.
 
 ## Not built yet
 
@@ -830,7 +879,7 @@ adds.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 760 tests
+python3 -m pytest -q                              # 795 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
