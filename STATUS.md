@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 536 tests passing
+Last updated: 2026-10-19 · 569 tests passing
 
 ## What this is
 
@@ -453,6 +453,52 @@ Stereochemistry is **not** resolved by the tracer: D- versus L-residues are
 indistinguishable in the current representation, which matters because D-amino
 acid substitution is central to melanocortin peptide design.
 
+### Stage B: representations benchmarked (gate still FAILS)
+
+Full findings in `docs/ATLAS_2.4_STAGE_B_FINDINGS.md`; report in
+`data/ml/peptide_benchmark.json`; reproduce with
+`python3 -m atlas.ml.peptide_benchmark`.
+
+Evaluation is now split in two, because Stage A found a single aggregate error
+conceals two capabilities:
+
+| | Cross-series | Within-series |
+|---|---|---|
+| Best MAE | 0.877 | 0.513 |
+| Best R² | +0.264 | +0.701 |
+| Median neighbour similarity | 0.600 | 0.941 |
+
+The peptide-native representation (`positional_fragment_fp`: a Morgan
+fingerprint of each side-chain fragment, indexed by position) roughly **doubles
+cross-series R² over the whole-molecule fingerprint, +0.131 to +0.264**. The
+mechanism is measured: 38.7% of held-out molecules carry a side chain absent
+from the training vocabulary, which a one-hot index cannot encode and a
+fragment fingerprint can.
+
+**All three representation contrasts reverse between the two evaluations.**
+Benchmarking only within-series would have selected one-hot indices, explicit
+topology and whole-molecule fingerprints — each the worst choice for
+generalisation. Two Stage A recommendations were refuted by measurement:
+explicit topology features *hurt* cross-series (0.894 → 1.168 with a forest),
+and vocabulary collapse does *not* currently rule out frozen protein language
+models, whose ceiling (MAE 0.382) is better than the best model measured (0.877).
+
+Representational ceilings were computed without running a language model, by
+grouping molecules on representation key and predicting group means — a hard
+lower bound on any model using that representation. Canonical 20-letter
+sequences collapse 630 peptides to 205 strings; the worst group is 10 molecules
+reading `XRWX` that span 4.01 log units of pKi, a 10,233-fold affinity range
+rendered as one string.
+
+**Deployment gate FAILS:** cross-series MAE 0.877 against ≤0.70 required, R²
+0.264 against ≥0.30. Within-series beats a series-mean lookup (0.513 vs 0.845)
+but its median neighbour similarity of 0.941 makes that interpolation, not
+generalisation. The model publishes no numeric affinity estimates.
+
+Stereochemistry remains unresolved: D-Phe⁷ and L-Phe⁷ encode identically,
+which in a melanocortin dataset is a material omission and the most likely
+source of cheap improvement.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -493,7 +539,7 @@ acid substitution is central to melanocortin peptide design.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 536 tests
+python3 -m pytest -q                              # 569 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

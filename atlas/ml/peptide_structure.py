@@ -168,6 +168,9 @@ class PeptideAnalysis:
     n_canonical_side_chains: int = 0
     n_unrecognised_side_chains: int = 0
     sequence: str | None = None          # one-letter where recognised, X otherwise
+    #: Per-position residue identity along the traced chain: the one-letter
+    #: code where canonical, the side-chain fragment SMILES where not.
+    residue_keys: list[str] = field(default_factory=list)
     has_free_n_terminus: bool = False
     has_acylated_n_terminus: bool = False
     has_c_terminal_amide: bool = False
@@ -365,6 +368,15 @@ def analyse_peptide(smiles: str) -> PeptideAnalysis:
     n_canonical = sum(1 for c in codes if c != "X")
     n_unknown = sum(1 for c in codes if c == "X")
     analysis.unmatched_fragments = [r[2] for r in results if r[2]]
+    # Per-position residue identity: the one-letter code where canonical, the
+    # side-chain fragment SMILES otherwise. This is what a chemistry-aware
+    # representation needs and what a one-letter sequence throws away -- the
+    # sequence string renders 4-chlorophenylalanine and 2-naphthylalanine
+    # identically as X.
+    analysis.residue_keys = [
+        (code if code != "X" else (frag or "X"))
+        for code, _bridge, frag in results
+    ]
 
     analysis.n_residues_in_longest_chain = len(longest)
     analysis.is_cyclic_backbone = cyclic

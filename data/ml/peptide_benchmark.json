@@ -1,0 +1,457 @@
+{
+  "dataset_version": "29fe2a249bcd581d",
+  "endpoint": "MC4R binding affinity (pKi, -log10 M)",
+  "n_peptides": 630,
+  "ceilings": {
+    "canonical_sequence_20_letter": {
+      "n_molecules": 630,
+      "n_distinct_keys": 205,
+      "n_colliding_molecules": 490,
+      "colliding_fraction": 0.7777777777777778,
+      "largest_group": 59,
+      "oracle_mae": 0.38222680410469345,
+      "oracle_mae_on_colliding": 0.4914344624203202,
+      "median_group_label_range": 1.2199999999999989,
+      "max_group_label_range": 4.01,
+      "note": "A lower bound, not a prediction: no model on this representation can achieve a smaller mean absolute error on these molecules."
+    },
+    "canonical_sequence_length_only": {
+      "n_molecules": 630,
+      "n_distinct_keys": 23,
+      "n_colliding_molecules": 622,
+      "colliding_fraction": 0.9873015873015873,
+      "largest_group": 314,
+      "oracle_mae": 0.9072139180709832,
+      "oracle_mae_on_colliding": 0.918882264284115,
+      "median_group_label_range": 4.18,
+      "max_group_label_range": 5.82,
+      "note": "A lower bound, not a prediction: no model on this representation can achieve a smaller mean absolute error on these molecules."
+    },
+    "canonical_composition_order_free": {
+      "n_molecules": 630,
+      "n_distinct_keys": 185,
+      "n_colliding_molecules": 515,
+      "colliding_fraction": 0.8174603174603174,
+      "largest_group": 60,
+      "oracle_mae": 0.41842692764305717,
+      "oracle_mae_on_colliding": 0.5118620668254874,
+      "median_group_label_range": 1.1775000000000002,
+      "max_group_label_range": 4.630000000000001,
+      "note": "A lower bound, not a prediction: no model on this representation can achieve a smaller mean absolute error on these molecules."
+    },
+    "chemistry_aware_composition_order_free": {
+      "n_molecules": 630,
+      "n_distinct_keys": 412,
+      "n_colliding_molecules": 308,
+      "colliding_fraction": 0.4888888888888889,
+      "largest_group": 36,
+      "oracle_mae": 0.21238951877047116,
+      "oracle_mae_on_colliding": 0.43443310657596373,
+      "median_group_label_range": 0.9049999999999998,
+      "max_group_label_range": 3.880000000000001,
+      "note": "A lower bound, not a prediction: no model on this representation can achieve a smaller mean absolute error on these molecules."
+    },
+    "chemistry_aware_positional": {
+      "n_molecules": 630,
+      "n_distinct_keys": 449,
+      "n_colliding_molecules": 256,
+      "colliding_fraction": 0.40634920634920635,
+      "largest_group": 36,
+      "oracle_mae": 0.18552568657092464,
+      "oracle_mae_on_colliding": 0.45656711929563487,
+      "median_group_label_range": 1.08,
+      "max_group_label_range": 3.880000000000001,
+      "note": "A lower bound, not a prediction: no model on this representation can achieve a smaller mean absolute error on these molecules."
+    },
+    "worst_canonical_collision": {
+      "sequence": "XRWX",
+      "n_molecules": 10,
+      "pki_min": 5.42,
+      "pki_max": 9.43,
+      "pki_range": 4.01,
+      "distinct_chemistry_aware_keys": 7
+    }
+  },
+  "cross_series": {
+    "evaluation": "whole analogue series held out",
+    "n_clusters": 30,
+    "diagnostics": {
+      "nearest_training_similarity": {
+        "median": 0.6000000238418579,
+        "p10": 0.49659863114356995,
+        "p90": 0.8536585569381714,
+        "mean": 0.631403923034668
+      },
+      "test_molecules_with_close_neighbour_above_0.7": {
+        "n": 51,
+        "fraction": 0.2670157068062827
+      },
+      "training_vocabulary_size": 119,
+      "test_molecules_with_unseen_side_chain": {
+        "n": 74,
+        "fraction": 0.387434554973822
+      },
+      "unseen_side_chain_positions_total": 104
+    },
+    "results": {
+      "baseline_mean": {
+        "mae": 1.18862598242078,
+        "rmse": 1.4348522971868982,
+        "r2": -0.27580348573583,
+        "spearman": NaN,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "topology__ridge": {
+        "mae": 1.2135834745107223,
+        "rmse": 1.5478754756764266,
+        "r2": -0.48470929848288535,
+        "spearman": 0.04040006944070986,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "topology__forest": {
+        "mae": 1.5084844899975938,
+        "rmse": 1.8058936133399186,
+        "r2": -1.0209413679676862,
+        "spearman": -0.03136204819054196,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_onehot__ridge": {
+        "mae": 1.0418118379741004,
+        "rmse": 1.3004232777450275,
+        "r2": -0.04794589142239869,
+        "spearman": 0.2775387494003629,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_onehot__forest": {
+        "mae": 1.0092456141452524,
+        "rmse": 1.2612389042659182,
+        "r2": 0.014256080613163746,
+        "spearman": 0.43097582544080826,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp__ridge": {
+        "mae": 0.9065477103592489,
+        "rmse": 1.0983755116782528,
+        "r2": 0.2523969351791274,
+        "spearman": 0.5727960565338434,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp__forest": {
+        "mae": 0.893728117237711,
+        "rmse": 1.107454537741983,
+        "r2": 0.23998668029473225,
+        "spearman": 0.49055841766457875,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_onehot+topology__ridge": {
+        "mae": 1.1398057514399549,
+        "rmse": 1.3713864913644074,
+        "r2": -0.1654378646681336,
+        "spearman": 0.3036370779432559,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_onehot+topology__forest": {
+        "mae": 1.2903200684575757,
+        "rmse": 1.528682858378766,
+        "r2": -0.4481187645111071,
+        "spearman": 0.06871018988146672,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+topology__ridge": {
+        "mae": 0.9047975749953544,
+        "rmse": 1.0839974394959417,
+        "r2": 0.27184153544377354,
+        "spearman": 0.5325704208157144,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+topology__forest": {
+        "mae": 1.167733259058423,
+        "rmse": 1.3817060122445153,
+        "r2": -0.18304341996337992,
+        "spearman": 0.19405059244011955,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "morgan_fp__ridge": {
+        "mae": 1.5797955804170287,
+        "rmse": 1.9938890684436401,
+        "r2": -1.463606687624385,
+        "spearman": 0.1271668262409504,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "morgan_fp__forest": {
+        "mae": 0.905432262943575,
+        "rmse": 1.1844565450159292,
+        "r2": 0.13062398608477155,
+        "spearman": 0.43028461969690296,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+morgan_fp__ridge": {
+        "mae": 0.8766166729500798,
+        "rmse": 1.0901268749156416,
+        "r2": 0.2635835476554702,
+        "spearman": 0.5183859312784301,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+morgan_fp__forest": {
+        "mae": 0.8803847236765571,
+        "rmse": 1.090678517539314,
+        "r2": 0.26283805371565694,
+        "spearman": 0.4777266630057546,
+        "n_train": 439,
+        "n_test": 191
+      }
+    }
+  },
+  "within_series": {
+    "evaluation": "members held out of series the model otherwise sees",
+    "min_cluster_size": 4,
+    "series_mean_predictor_mae": 0.8445721997105117,
+    "diagnostics": {
+      "nearest_training_similarity": {
+        "median": 0.9414927959442139,
+        "p10": 0.8506757020950317,
+        "p90": 1.0,
+        "mean": 0.9282854795455933
+      },
+      "test_molecules_with_close_neighbour_above_0.7": {
+        "n": 156,
+        "fraction": 1.0
+      },
+      "training_vocabulary_size": 141,
+      "test_molecules_with_unseen_side_chain": {
+        "n": 23,
+        "fraction": 0.14743589743589744
+      },
+      "unseen_side_chain_positions_total": 29
+    },
+    "results": {
+      "baseline_mean": {
+        "mae": 1.0401648544844748,
+        "rmse": 1.2953635733345963,
+        "r2": -0.00038533898872228356,
+        "spearman": NaN,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "topology__ridge": {
+        "mae": 0.8897435117060197,
+        "rmse": 1.20147632334548,
+        "r2": 0.1393741396133411,
+        "spearman": 0.3812154501002122,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "topology__forest": {
+        "mae": 0.5987002284983535,
+        "rmse": 0.7993076439060431,
+        "r2": 0.6190991950601012,
+        "spearman": 0.7561430525563877,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_onehot__ridge": {
+        "mae": 0.6303086223561178,
+        "rmse": 0.8597667804509116,
+        "r2": 0.5592977378305312,
+        "spearman": 0.7020684537407427,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_onehot__forest": {
+        "mae": 0.5885096992896443,
+        "rmse": 0.8313294107987667,
+        "r2": 0.5879686620438647,
+        "spearman": 0.731391548955235,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp__ridge": {
+        "mae": 0.6123548379699142,
+        "rmse": 0.8118634463594022,
+        "r2": 0.6070385623252814,
+        "spearman": 0.7460738713975175,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp__forest": {
+        "mae": 0.6129809737039937,
+        "rmse": 0.8345433676478374,
+        "r2": 0.5847766403729487,
+        "spearman": 0.7346413337765526,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_onehot+topology__ridge": {
+        "mae": 0.603718982665963,
+        "rmse": 0.8461352310706745,
+        "r2": 0.5731615689820189,
+        "spearman": 0.7366454716736358,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_onehot+topology__forest": {
+        "mae": 0.5203152636175588,
+        "rmse": 0.7409131114418335,
+        "r2": 0.6727207143659908,
+        "spearman": 0.7904319418394513,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+topology__ridge": {
+        "mae": 0.58269650133983,
+        "rmse": 0.7860825858101861,
+        "r2": 0.6315994170007861,
+        "spearman": 0.7725767494329896,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+topology__forest": {
+        "mae": 0.54577259818885,
+        "rmse": 0.7532345635241476,
+        "r2": 0.6617448337706754,
+        "spearman": 0.7858279524571172,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "morgan_fp__ridge": {
+        "mae": 0.5683261785628912,
+        "rmse": 0.7838071768979259,
+        "r2": 0.6337290882612776,
+        "spearman": 0.8073156307104143,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "morgan_fp__forest": {
+        "mae": 0.548360159662871,
+        "rmse": 0.7618265324087631,
+        "r2": 0.653984028258923,
+        "spearman": 0.8150111184672812,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+morgan_fp__ridge": {
+        "mae": 0.5131378871460961,
+        "rmse": 0.7077113008637081,
+        "r2": 0.7013955888252745,
+        "spearman": 0.8249798419255401,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+morgan_fp__forest": {
+        "mae": 0.5235364267908043,
+        "rmse": 0.7331578857431519,
+        "r2": 0.6795361999090103,
+        "spearman": 0.7981197741589554,
+        "n_train": 474,
+        "n_test": 156
+      }
+    }
+  },
+  "contrasts": {
+    "cross_series": {
+      "fragment_fp_vs_onehot": {
+        "a": "positional_fragment_fp",
+        "b": "positional_onehot",
+        "best_mae_a": 0.893728117237711,
+        "best_mae_b": 1.0092456141452524,
+        "a_minus_b": -0.11551749690754143,
+        "a_better": true
+      },
+      "fragment_fp_vs_whole_molecule_fp": {
+        "a": "positional_fragment_fp",
+        "b": "morgan_fp",
+        "best_mae_a": 0.893728117237711,
+        "best_mae_b": 0.905432262943575,
+        "a_minus_b": -0.011704145705864089,
+        "a_better": true
+      },
+      "topology_added_to_fragment_fp": {
+        "a": "positional_fragment_fp+topology",
+        "b": "positional_fragment_fp",
+        "best_mae_a": 0.9047975749953544,
+        "best_mae_b": 0.893728117237711,
+        "a_minus_b": 0.011069457757643453,
+        "a_better": false
+      }
+    },
+    "within_series": {
+      "fragment_fp_vs_onehot": {
+        "a": "positional_fragment_fp",
+        "b": "positional_onehot",
+        "best_mae_a": 0.6123548379699142,
+        "best_mae_b": 0.5885096992896443,
+        "a_minus_b": 0.02384513868026994,
+        "a_better": false
+      },
+      "fragment_fp_vs_whole_molecule_fp": {
+        "a": "positional_fragment_fp",
+        "b": "morgan_fp",
+        "best_mae_a": 0.6123548379699142,
+        "best_mae_b": 0.548360159662871,
+        "a_minus_b": 0.0639946783070432,
+        "a_better": false
+      },
+      "topology_added_to_fragment_fp": {
+        "a": "positional_fragment_fp+topology",
+        "b": "positional_fragment_fp",
+        "best_mae_a": 0.54577259818885,
+        "best_mae_b": 0.6123548379699142,
+        "a_minus_b": -0.06658223978106415,
+        "a_better": true
+      }
+    }
+  },
+  "gate": {
+    "criteria": {
+      "cross_series_mae": {
+        "actual": 0.8766166729500798,
+        "required": "<= 0.7",
+        "met": false
+      },
+      "cross_series_r2": {
+        "actual": 0.2635835476554702,
+        "required": ">= 0.3",
+        "met": false
+      },
+      "within_series_beats_series_mean": {
+        "actual": 0.5131378871460961,
+        "required": "< 0.845",
+        "met": true
+      }
+    },
+    "passes": false,
+    "best_cross_series": "positional_fragment_fp+morgan_fp__ridge",
+    "best_within_series": "positional_fragment_fp+morgan_fp__ridge",
+    "rationale": "Thresholds come from Stage A's measurements: a label noise floor of MAE 0.245 and a mean-predictor baseline of 1.343."
+  },
+  "findings": [
+    "A canonical twenty-letter sequence cannot separate these peptides: 630 molecules collapse to 205 distinct sequences, leaving 77.8% of molecules sharing a sequence with at least one other. No model on that representation can beat MAE 0.382, and on the colliding molecules alone it cannot beat 0.491. This is a bound on every frozen sequence embedding, not an estimate for one.",
+    "The worst single collision is instructive: 10 molecules all read as 'XRWX' yet span pKi 5.42 to 9.43, a range of 4.01 log units \u2014 a 10,233-fold difference in affinity rendered as one string. A chemistry-aware encoding distinguishes 7 of them.",
+    "Naming the actual side chains removes most of that loss: the chemistry-aware positional encoding gives 449 distinct keys for 630 molecules (40.6% colliding) and an oracle MAE of 0.186, against 0.382 for the canonical alphabet.",
+    "This corrects a Stage A expectation. Stage A predicted that vocabulary collapse would make a frozen sequence embedding fail, and the collapse is certainly real \u2014 but its floor of MAE 0.382 is *below* the best model measured here (0.877). At current performance the collapse is therefore not yet the binding constraint; it would become binding only for a model already better than MAE 0.382. Learnability, not representational capacity, is what limits every representation tried here.",
+    "Discarding order costs more than discarding chemistry: the order-free chemistry-aware encoding has an oracle MAE of 0.212 against 0.186 positional, confirming by construction why Stage A's composition representation scored below the mean baseline.",
+    "Cross-series (whole analogue series held out, 439 train / 191 test): the best representation is positional_fragment_fp+morgan_fp__ridge at MAE 0.877, R2 +0.264, against a mean-predictor baseline of 1.189.",
+    "Within-series (474 train / 156 test, every held-out molecule having same-series neighbours): the best is positional_fragment_fp+morgan_fp__ridge at MAE 0.513, R2 +0.701, against a baseline of 1.040 and a series-mean predictor at 0.845. The model beats a series lookup, so it resolves substitution effects among close analogues \u2014 see the diagnostics below for how close.",
+    "Splitting the two questions was worth it: the same representations differ by 0.363 log units of MAE between cross-series and within-series evaluation, so a single aggregate number would have described neither.",
+    "The design hypothesis holds, and the mechanism is visible. Encoding each side chain by its fragment fingerprint rather than by a one-hot index improves cross-series MAE from 1.009 to 0.894. The reason is measurable: 38.7% of held-out molecules carry a side chain absent from the 119-entry training vocabulary (104 positions in total). A one-hot index has nothing to say about those; a fragment fingerprint places an unseen chlorophenylalanine near a seen one.",
+    "The peptide-native representation beats the whole-molecule fingerprint on the harder question: cross-series MAE 0.894 against 0.905, and R2 +0.264 against +0.131. Positional residue chemistry is doing work that circular substructure bits over the whole molecule do not.",
+    "Stage A's requirement that the macrocyclic constraint be an explicit feature is **not** supported by measurement. Adding the topology block to the fragment fingerprint changes cross-series MAE from 0.894 to 0.905 at best, and with a random forest it is far worse \u2014 0.894 without topology against 1.168 with it. Topology alone is worse than the mean baseline (1.214 against 1.189). Residue count and molecular weight let a tree split on series identity, which is exactly what does not transfer to an unseen series. The constraint is better carried implicitly by the bridge chemistry already present in the fragment encoding.",
+    "Every representation choice reverses between the two evaluations. 3 of 3 contrasts flip sign: fragment_fp_vs_onehot favours positional_fragment_fp cross-series (0.894 against 1.009) but positional_onehot within-series (0.589 against 0.612); fragment_fp_vs_whole_molecule_fp favours positional_fragment_fp cross-series (0.894 against 0.905) but morgan_fp within-series (0.548 against 0.612); topology_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.905) but positional_fragment_fp+topology within-series (0.546 against 0.612). A programme that benchmarked only within-series \u2014 the evaluation most papers report \u2014 would have selected one-hot residue indices, explicit topology and whole-molecule fingerprints: in each case the choice that generalises worst to an unseen series. This is the clearest vindication of Stage A's requirement to report the two separately.",
+    "The within-series result must be read with its diagnostics: median nearest-training-neighbour similarity is 0.941 and 100.0% of held-out molecules have a training neighbour above 0.7 Tanimoto, against a median of 0.600 cross-series. Within-series performance is therefore interpolation among close analogues \u2014 the lead-optimisation regime \u2014 and not evidence of generalisation. That is a genuinely useful capability, but it is a narrower claim than the R2 alone suggests.",
+    "Deployment gate: FAIL. cross_series_mae = 0.877 against <= 0.7 (not met); cross_series_r2 = 0.264 against >= 0.3 (not met); within_series_beats_series_mean = 0.513 against < 0.845 (met). The peptide affinity model therefore remains undeployed and must not publish numeric affinity estimates, nor propagate them into pharmacokinetic models or knowledge-graph edges."
+  ]
+}
