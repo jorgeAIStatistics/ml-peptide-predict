@@ -60,6 +60,9 @@ __all__ = [
     "load_dataset",
     "DATASET_PATH",
     "MC4R",
+    "ENDPOINT_ASSAY_TYPE",
+    "ENDPOINT_LABEL",
+    "DATA_DIR",
 ]
 
 API = "https://www.ebi.ac.uk/chembl/api/data"
@@ -70,6 +73,9 @@ MC4R = {
     "target_chembl_id": "CHEMBL259",
     "pref_name": "Melanocortin receptor 4",
     "organism": "Homo sapiens",
+    # Keeps the endpoint label stable at "MC4R binding affinity (pKi, ...)"
+    # across a rebuild, matching what the saved dataset already records.
+    "short_name": "MC4R",
 }
 
 LICENSE_NOTE = (
@@ -172,19 +178,45 @@ def _page_activities(
     _page_activities.last_urls = seen_urls  # type: ignore[attr-defined]
 
 
+#: Assay class appropriate to each endpoint. Ki is a binding constant and
+#: belongs to a binding assay; EC50 is a functional response. Fetching an
+#: endpoint under the wrong assay class would mix physical quantities, which is
+#: the error the ``excluded`` filter note below exists to prevent.
+ENDPOINT_ASSAY_TYPE = {"Ki": "B", "Kd": "B", "IC50": "B", "EC50": "F"}
+
+ENDPOINT_LABEL = {
+    "Ki": "binding affinity (pKi, -log10 M)",
+    "Kd": "binding affinity (pKd, -log10 M)",
+    "IC50": "inhibitory concentration (pIC50, -log10 M)",
+    "EC50": "functional potency (pEC50, -log10 M)",
+}
+
+
 def build_dataset(
     *,
     target: dict[str, str] = MC4R,
+    endpoint: str = "Ki",
     http: CachedHttpClient | None = None,
 ) -> DatasetBundle:
-    """Fetch, filter and aggregate MC4R binding affinities from ChEMBL."""
+    """Fetch, filter and aggregate one target's activities for one endpoint.
+
+    ``endpoint`` defaults to Ki, which is what every existing caller wants.
+    Each endpoint is fetched separately and never merged: a pKi and a pEC50
+    are different physical quantities, and a model trained on their union
+    would be predicting neither.
+    """
+    if endpoint not in ENDPOINT_ASSAY_TYPE:
+        raise ValueError(
+            f"unknown endpoint {endpoint!r}; expected one of "
+            f"{sorted(ENDPOINT_ASSAY_TYPE)}"
+        )
     http = http or CachedHttpClient(ttl=timedelta(days=30))
     params = {
         "target_chembl_id": target["target_chembl_id"],
-        "standard_type": "Ki",
+        "standard_type": endpoint,
         "standard_units": "nM",
         "standard_relation": "=",
-        "assay_type": "B",
+        "assay_type": ENDPOINT_ASSAY_TYPE[endpoint],
         "format": "json",
     }
 
@@ -303,12 +335,15 @@ def build_dataset(
     return DatasetBundle(
         records=records,
         target=target,
-        endpoint="MC4R binding affinity (pKi, -log10 M)",
+        endpoint=(
+            f"{target.get('short_name') or target['pref_name']} "
+            f"{ENDPOINT_LABEL[endpoint]}"
+        ),
         filters={
-            "standard_type": "Ki",
+            "standard_type": endpoint,
             "standard_units": "nM",
             "standard_relation": "=",
-            "assay_type": "B (binding)",
+            "assay_type": ENDPOINT_ASSAY_TYPE[endpoint],
             "pki_range": [PKI_MIN, PKI_MAX],
             "aggregation": "median across distinct replicate measurements",
             "wild_type_only": (
@@ -321,9 +356,11 @@ def build_dataset(
                 "collapsed to one measurement."
             ),
             "excluded": (
-                "IC50 and EC50 were excluded: IC50 depends on radioligand "
-                "concentration via Cheng-Prusoff, and EC50 is a functional "
-                "measurement. Pooling them would mix physical quantities."
+                f"Only {endpoint} was fetched. Other endpoints are built as "
+                "separate datasets and never pooled: IC50 depends on "
+                "radioligand concentration via Cheng-Prusoff, and EC50 is a "
+                "functional measurement, so their union with Ki would mix "
+                "physical quantities."
             ),
         },
         counts={

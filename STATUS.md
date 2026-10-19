@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 595 tests passing
+Last updated: 2026-10-19 · 627 tests passing
 
 ## What this is
 
@@ -544,6 +544,54 @@ fingerprint already encodes this chemistry more richly than 22 hand-chosen
 descriptors. It is retained for **explanation**, where named descriptors are
 interpretable and fingerprint bit 1,473 is not.
 
+### Stage 3: the melanocortin panel (target encoder not established)
+
+Full findings in `docs/ATLAS_2.5_STAGE_3_PANEL.md`; data in
+`data/ml/melanocortin_panel.json`; reproduce with
+`python3 -m atlas.ml.multitarget` then `python3 -m atlas.ml.panel_benchmark`.
+
+ATLAS is no longer single-target. `build_dataset` takes an endpoint (Ki/Kd/IC50
+binding, EC50 functional) and `atlas/ml/multitarget.py` builds one dataset per
+(receptor, endpoint) pair. **Endpoints are never merged** — there is
+deliberately no accessor returning several, and a test asserts it. The existing
+`mc4r_pki.json` is untouched.
+
+**3,499 Ki measurements, 2,066 molecules, 5 receptors** (MC1R Q01726, MC2R
+Q01718, MC3R P41968, MC4R P32245, MC5R P33032 — accessions from ChEMBL,
+sequences from UniProt).
+
+The premise holds: **789 of 2,066 molecules (38.2%) are measured on 2+
+receptors**, 105 on all four. **Median selectivity span 1.31 log units**, max
+4.40 — and that median *exceeds* the best cross-series error ATLAS has achieved
+(0.870), so a model ignoring which receptor it is asked about carries a
+systematic error larger than its own accuracy.
+
+Restricted to peptides, the family adds **only 10 new peptides (630 → 640) but
+2.15× the measurements (630 → 1,354)**, because 66.2% of peptides were already
+profiled across receptors. This addresses Stage A's ~30-series ceiling from a
+new angle: not more chemistry, but a second axis.
+
+**Receptor identity carries signal** — peptide-only MAE 1.125 against 0.989
+with a one-hot receptor, a 0.136 gain. But both have **negative R²**: worse
+than predicting the test set's own mean. Only the relative claim holds. Panel
+numbers are **not comparable** with 2.4 figures — harder split, extra
+across-receptor label variance.
+
+**A target encoder is not established.** Leave-one-receptor-out is the only
+split that tests one (the held-out one-hot column is necessarily all-zero).
+Against the mean baseline, transfer succeeds on MC3R and MC5R and **fails on
+MC1R and MC4R**. The sequence encoding beat peptide-only on 4 of 4, but on the
+two failures both arms are worse than the mean, so that comparison is the wrong
+one. Five receptors is five points in a composition space and four held-out
+receptors is four trials.
+
+Leakage guard: a molecule on several receptors contributes several rows, so all
+splits move **whole molecules**, with clusters computed per molecule. Four
+tests assert no molecule or cluster straddles a split.
+
+MC2R contributes **no peptides at all** (23 molecules, none traced) — the
+abstention case the Stage 1 audit anticipated.
+
 **Deferred with a reason:** protein language model embeddings — no PyTorch or
 transformers installed.
 
@@ -587,7 +635,7 @@ transformers installed.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 595 tests
+python3 -m pytest -q                              # 627 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
