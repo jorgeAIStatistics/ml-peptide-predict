@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-18 · commit `9a8c41c` · 182 tests passing
+Last updated: 2026-10-18 · 218 tests passing
 
 ## What this is
 
@@ -80,6 +80,40 @@ Gates six analysis kinds on measured evidence. Across the registry:
 Human PK is 0/46 because it requires source-backed *extracted* parameters, and
 none have been extracted yet. That is the truthful state, not a placeholder.
 
+### Web interface (`atlas/api/`)
+Flask serves a JSON API and a four-workspace frontend from one process. The
+frontend has **no runtime dependencies** — no bundler, no `node_modules`, no
+CDN — so it runs offline and starts instantly. Charts are hand-drawn SVG,
+re-rendered on container resize so axis type stays at its true size.
+
+```bash
+PYTHONPATH=. python3 -m atlas.api.app      # http://127.0.0.1:5055
+```
+
+| workspace | what it does |
+|---|---|
+| Compound Atlas | sortable registry, filters, inspector with per-field provenance |
+| Model Studio | runs the real solver; NCA, diagnostics, equations, conservation plot |
+| Evidence & Gaps | compound × analysis matrix, every refusal reason on hover/focus |
+| Verification | all 63 solver checks with metric against tolerance |
+
+The API reads from the versioned snapshots rather than querying external
+databases per request, so responses are fast, reproducible and offline, and
+each carries the `snapshot_id` its evidence came from. Simulation is the one
+live computation.
+
+**The gate is enforced at the API boundary.** A run attributed to a compound
+without source-backed parameters returns class D with the abstention attached,
+so the interface cannot present a trajectory as a statement about a compound.
+Attributing a run to BPC-157 returns, alongside the chart: *"not a statement
+about BPC-157 in humans … Measured evidence: 3 human PK publications, 0 trials
+with posted results."*
+
+Accessibility: keyboard-navigable table rows and matrix cells, visible focus
+rings, `aria-sort` on sortable headers, a keyboard-resizable inspector divider,
+and `prefers-reduced-motion` honoured. Dark mode is a token-level palette, not
+an inverted sheet.
+
 ## Verification vs validation
 
 This distinction is load-bearing and currently sits on one side of it.
@@ -101,10 +135,12 @@ organism.
    dataset with held-out evaluation; no performance figure should appear until
    it is measured.
 3. **Knowledge graph** — typed schema and traversal not implemented.
-4. **Web interface** — no UI. Backend is library + CLI only.
-5. **Evidence ledger database** — provenance is per-record; the append-only
+4. **Evidence ledger database** — provenance is per-record; the append-only
    versioned store is not built.
-6. **Geroscience module** — hallmark framework not implemented.
+5. **Geroscience module** — hallmark framework not implemented.
+6. **Interface gaps** — no multi-compound comparison view, no pathway/network
+   visualisation, and the Model Studio cannot yet overlay observed data against
+   a simulated curve (which needs item 1).
 
 ## Known limitations
 
@@ -124,10 +160,11 @@ organism.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 182 tests
+python3 -m pytest -q                              # 218 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
+PYTHONPATH=. python3 -m atlas.api.app             # web interface on :5055
 ```
 
 Append `--offline` to the last two to rebuild from the HTTP cache without

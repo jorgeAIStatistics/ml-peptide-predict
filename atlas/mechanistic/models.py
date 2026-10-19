@@ -80,7 +80,10 @@ class PKModel(ABC):
     """A compartmental model expressed as an ODE system plus its exact solution."""
 
     name: str
+    display_name: str
     description: str
+    #: The equations actually integrated, for display alongside results.
+    equations: tuple[str, ...] = ()
     state_names: tuple[str, ...]
     parameters: tuple[ParameterSpec, ...]
     #: index of the state holding drug amount in the sampled (central) compartment
@@ -173,7 +176,14 @@ class OneCompartmentIV(PKModel):
     """
 
     name = "one_compartment_iv"
+    display_name = "One-compartment, IV bolus"
     description = "One-compartment linear disposition after IV bolus administration."
+    equations = (
+        "dAc/dt = -(CL/V) * Ac",
+        "dAe/dt = +(CL/V) * Ac",
+        "C(t) = (D/V) * exp(-(CL/V) * t)",
+        "AUC(0,inf) = D / CL",
+    )
     state_names = ("central_mg", "eliminated_mg")
     central_index = 0
     parameters = (
@@ -224,9 +234,19 @@ class OneCompartmentOral(PKModel):
     """
 
     name = "one_compartment_oral"
+    display_name = "One-compartment, first-order absorption"
     description = (
         "One-compartment linear disposition with first-order absorption from a "
         "depot compartment (subcutaneous or oral)."
+    )
+    equations = (
+        "dAd/dt = -ka * Ad",
+        "dAc/dt = +F * ka * Ad - (CL/V) * Ac",
+        "dAu/dt = +(1 - F) * ka * Ad",
+        "C(t) = (F*D*ka) / (V*(ka - ke)) * (exp(-ke*t) - exp(-ka*t)),  ke = CL/V",
+        "C(t) -> (F*D/V) * ke * t * exp(-ke*t)   as ka -> ke",
+        "tmax = ln(ka/ke) / (ka - ke)",
+        "AUC(0,inf) = F * D / CL",
     )
     state_names = ("depot_mg", "central_mg", "eliminated_mg", "unabsorbed_mg")
     central_index = 1
@@ -324,9 +344,20 @@ class TwoCompartmentIV(PKModel):
     """
 
     name = "two_compartment_iv"
+    display_name = "Two-compartment, IV bolus"
     description = (
         "Two-compartment linear disposition after IV bolus, with a peripheral "
         "distribution compartment."
+    )
+    equations = (
+        "dA1/dt = -k12*A1 + k21*A2 - k10*A1",
+        "dA2/dt = +k12*A1 - k21*A2",
+        "k10 = CL/V1,  k12 = Q/V1,  k21 = Q/V2",
+        "s = k10 + k12 + k21",
+        "alpha, beta = (s +/- sqrt(s^2 - 4*k10*k21)) / 2",
+        "C(t) = (D/V1) * [ (alpha-k21)/(alpha-beta) * exp(-alpha*t)"
+        " + (k21-beta)/(alpha-beta) * exp(-beta*t) ]",
+        "AUC(0,inf) = D / CL",
     )
     state_names = ("central_mg", "peripheral_mg", "eliminated_mg")
     central_index = 0

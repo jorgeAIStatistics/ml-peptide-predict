@@ -161,13 +161,13 @@ class NCAResult:
     c_last_mg_per_l: float
 
     @property
-    def auc_inf_is_reliable(self) -> bool:
+    def auc_inf_is_reliable(self) -> bool:  # noqa: D401
         """Conventional acceptance: under 20% of AUC from extrapolation.
 
         Beyond that, AUC-infinity is driven by the assumed terminal slope
         rather than by observed data.
         """
-        return (
+        return bool(
             self.extrapolated_fraction is not None
             and self.extrapolated_fraction < 0.20
         )
@@ -193,15 +193,18 @@ def nca(
         raise ValueError("at least two samples are required")
 
     cmax, tmax = cmax_tmax(t, c)
-    auc_last = auc_linlog(t, c) if method == "linlog" else auc_linear(t, c)
+    auc_last = float(auc_linlog(t, c) if method == "linlog" else auc_linear(t, c))
     term = terminal_slope(t, c)
 
     auc_inf: float | None = None
     extrap: float | None = None
     if term.is_estimable and c[-1] > 0:
         # Tail area of a mono-exponential beyond the last observation.
-        tail = c[-1] / term.lambda_z_per_h
-        auc_inf = auc_last + tail
+        # Cast to built-in floats: numpy scalars would otherwise propagate into
+        # the dataclass (whose fields are annotated float) and into derived
+        # booleans, which are not JSON serialisable downstream.
+        tail = float(c[-1]) / float(term.lambda_z_per_h)
+        auc_inf = float(auc_last) + tail
         extrap = tail / auc_inf if auc_inf > 0 else None
 
     return NCAResult(

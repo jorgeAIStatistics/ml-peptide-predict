@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "atlas",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "atlas.api.app", "--port", "5055"],
+      "port": 5055
+    }
+  ]
+}
