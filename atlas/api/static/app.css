@@ -861,3 +861,38 @@ button.cell-btn { background: none; border: 0; padding: 2px; cursor: help; line-
   .rail, .instrument-bar, .toolbar, .control-actions { display: none; }
   .workspace { background: none; }
 }
+
+/* ---------------- model lab ---------------- */
+.tier-strip {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 13px 20px;
+  background: var(--teal-soft);
+  border-bottom: 1px solid color-mix(in srgb, var(--teal) 25%, var(--divider));
+}
+.tier-badge {
+  font: 600 10px/1 var(--mono);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 6px 9px; color: #fff; background: var(--teal);
+  white-space: nowrap;
+}
+.tier-text { margin: 0; max-width: 80ch; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); }
+
+.kv dd.wrap {
+  font-family: var(--sans); font-size: 11.5px; line-height: 1.5; color: var(--ink-2);
+}
+
+.split-block { border-bottom: 1px solid var(--divider); padding-bottom: 8px; }
+.split-block:last-child { border-bottom: 0; }
+.split-block-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap; padding: 14px 20px 2px;
+}
+.split-block-title {
+  margin: 0; font: 500 13px/1.2 var(--mono); color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.split-block-meta { font: 400 10.5px/1.4 var(--mono); color: var(--ink-4); }
+.split-block-note {
+  margin: 2px 20px 0; max-width: 84ch;
+  font-size: 11px; line-height: 1.5; color: var(--ink-3);
+}

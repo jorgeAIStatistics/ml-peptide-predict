@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -29,6 +30,7 @@ from atlas.core.evidence import AbstentionReason, EvidenceClass
 from atlas.mechanistic.metrics import nca
 from atlas.mechanistic.models import MODEL_REGISTRY, ParameterError, get_model
 from atlas.mechanistic.solver import DoseEvent, SolverError, SolverSettings, simulate
+from atlas.ml.predict import MODEL_CARD, get_predictor
 from atlas.registry.seed import RESEARCH_AREAS, SEED_REGISTRY
 
 logger = logging.getLogger(__name__)
@@ -123,6 +125,17 @@ def merged_rows() -> list[dict[str, Any]]:
 
 
 @lru_cache(maxsize=1)
+def ml_report() -> dict[str, Any]:
+    """The model registry written by ``atlas.ml.train``."""
+    path = DATA / "ml" / "model_registry.json"
+    if not path.exists():
+        return {"available": False}
+    payload = json.loads(path.read_text())
+    payload["available"] = True
+    return payload
+
+
+@lru_cache(maxsize=1)
 def verification_payload() -> dict[str, Any]:
     """Run the solver verification suite once and cache it in memory."""
     from atlas.mechanistic.verify import verify_all
@@ -166,6 +179,19 @@ def verification_payload() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # app
 # ---------------------------------------------------------------------------
+def _finite_json(obj: Any) -> Any:
+    """Recursively replace non-finite floats with None."""
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, np.generic):
+        return _finite_json(obj.item())
+    if isinstance(obj, dict):
+        return {k: _finite_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_finite_json(v) for v in obj]
+    return obj
+
+
 class NumpyJSONProvider(DefaultJSONProvider):
     """Serialise numpy scalars and arrays.
 
@@ -173,6 +199,12 @@ class NumpyJSONProvider(DefaultJSONProvider):
     than casting at every call site and depending on none being missed, the
     boundary handles them.
     """
+
+    #: Bare NaN and Infinity are not valid JSON and browsers reject them.
+    #: Undefined statistics are emitted as null instead.
+    def dumps(self, obj: Any, **kwargs: Any) -> str:
+        kwargs.setdefault("allow_nan", False)
+        return super().dumps(_finite_json(obj), **kwargs)
 
     @staticmethod
     def default(o: Any) -> Any:
@@ -305,6 +337,78 @@ def create_app() -> Flask:
     @app.get("/api/verification")
     def verification():
         return jsonify(verification_payload())
+
+    @app.get("/api/model-card")
+    def model_card():
+        """The deployed model's card plus the full training comparison."""
+        return jsonify({"card": MODEL_CARD, "report": ml_report()})
+
+    @app.post("/api/predict")
+    def predict():
+        """Gated inference. Returns a prediction or a structured abstention.
+
+        Accepts either a SMILES string or a registry key; the key is resolved
+        to the structure recorded in the snapshot, so a prediction is always
+        tied to an identified molecule.
+        """
+        body = request.get_json(silent=True) or {}
+        smiles = body.get("smiles")
+        key = body.get("compound_key")
+        compound_name = None
+
+        if not smiles and key:
+            row = next((r for r in merged_rows() if r["key"] == key), None)
+            if row is None:
+                return jsonify({"error": f"no registry entry {key!r}"}), 404
+            compound_name = row["name"]
+            smiles = row.get("smiles")
+            if not smiles:
+                # No structure resolved: the identity gate, not the model, is
+                # what stops this.
+                return jsonify({
+                    "smiles": None,
+                    "compound_key": key,
+                    "compound_name": compound_name,
+                    "abstained": True,
+                    "evidence_class": EvidenceClass.INSUFFICIENT.value,
+                    "abstention_reason": (
+                        AbstentionReason.UNRESOLVED_MOLECULAR_IDENTITY.value
+                    ),
+                    "abstention_explanation": (
+                        f"No structure is resolved for {compound_name}, so it "
+                        "cannot be featurised. Identity status: "
+                        f"{row.get('identity_status')}."
+                    ),
+                    "what_would_resolve_it": [
+                        "A SMILES string, InChI or sequence for the intended "
+                        "molecular form.",
+                    ],
+                })
+
+        if not smiles:
+            return jsonify({"error": "supply 'smiles' or 'compound_key'"}), 400
+        if len(smiles) > 5000:
+            return jsonify({"error": "SMILES string is too long"}), 400
+
+        try:
+            result = get_predictor().predict(smiles)
+        except Exception as exc:  # inference must not take the server down
+            logger.exception("prediction failed")
+            return jsonify({"error": f"prediction failed: {exc}"}), 500
+
+        payload = {
+            **result.__dict__,
+            "predicted_ki_nm": result.predicted_ki_nm,
+            "compound_key": key,
+            "compound_name": compound_name,
+            "model_card": {
+                "name": MODEL_CARD["name"],
+                "endpoint": MODEL_CARD["endpoint"],
+                "quality_tier": MODEL_CARD["quality_tier"],
+                "headline_performance": MODEL_CARD["headline_performance"],
+            },
+        }
+        return jsonify(payload)
 
     @app.post("/api/simulate")
     def run_simulation():

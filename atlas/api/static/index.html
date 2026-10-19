@@ -52,6 +52,11 @@
           <span class="rail-label">Verification</span>
           <span class="rail-note">solver correctness</span>
         </button></li>
+        <li><button class="rail-item" data-view="modellab">
+          <span class="rail-num">05</span>
+          <span class="rail-label">Model Lab</span>
+          <span class="rail-note">trained ML &amp; applicability</span>
+        </button></li>
       </ul>
     </div>
 
@@ -255,6 +260,56 @@
         </div>
         <div class="verify-banner" id="verify-banner"></div>
         <div id="verify-body"></div>
+      </div>
+    </section>
+
+    <!-- ============ 05 MODEL LAB ============ -->
+    <section class="view" id="view-modellab" aria-labelledby="ml-title" hidden>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h1 class="panel-title" id="ml-title">Model Lab</h1>
+            <p class="panel-sub">A trained machine-learning endpoint model, its
+              held-out performance under splits of increasing honesty, and the
+              domain it may be used on.</p>
+          </div>
+        </div>
+        <div id="ml-card"></div>
+      </div>
+
+      <div class="panel" style="margin-top:20px">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" style="font-size:19px">Performance by split</h2>
+            <p class="panel-sub">Mean absolute error in log units, lower is
+              better. The dashed line is the mean-predictor baseline: anything
+              to its right is worse than predicting the training average.</p>
+          </div>
+        </div>
+        <div id="ml-splits"></div>
+      </div>
+
+      <div class="panel" style="margin-top:20px">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title" style="font-size:19px">Prediction console</h2>
+            <p class="panel-sub">Enter a structure or choose a registry entry.
+              The model answers only within its measured domain.</p>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="field field-search">
+            <label class="field-label" for="ml-smiles">SMILES</label>
+            <input type="text" id="ml-smiles" placeholder="paste a structure…"
+                   autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label class="field-label" for="ml-compound">or registry entry</label>
+            <select id="ml-compound"><option value="">— choose —</option></select>
+          </div>
+          <button class="btn btn-primary" id="ml-predict" style="flex:0 0 auto">Predict</button>
+        </div>
+        <div id="ml-result"></div>
       </div>
     </section>
 

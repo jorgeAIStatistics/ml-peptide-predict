@@ -16,6 +16,7 @@ const state = {
   sort: { key: 'publications', dir: 'desc' },
   lastRun: null,
   logY: false,
+  modelCard: null,
 };
 
 /* ---------------- utilities ---------------- */
@@ -348,6 +349,7 @@ function setView(name) {
   if (location.hash.slice(1) !== name) location.hash = name;
   if (name === 'verification' && !state.verification) loadVerification();
   if (name === 'gaps') renderGaps();
+  if (name === 'modellab' && !state.modelCard) loadModelLab();
   window.scrollTo(0, 0);
 }
 
@@ -819,6 +821,315 @@ function renderRun(run) {
   });
 }
 
+
+/* ---------------- horizontal bar chart ---------------- */
+
+/**
+ * Bars with an optional dashed reference line. Used for MAE by model, where
+ * the reference is the baseline a model must beat to be worth anything.
+ */
+function barChart(host, { rows, refValue, refLabel, xLabel, height }) {
+  const draw = () => {
+    const width = Math.max(320, host.clientWidth || 640);
+    host.textContent = '';
+    const rowH = 22;
+    const pad = { t: 8, r: 54, b: 34, l: 150 };
+    const ih = rows.length * rowH;
+    const h = height || ih + pad.t + pad.b;
+    const iw = width - pad.l - pad.r;
+
+    const maxV = Math.max(...rows.map((r) => r.value), refValue || 0) * 1.08;
+    const sx = (v) => pad.l + (v / maxV) * iw;
+
+    const root = svg('svg', {
+      class: 'chart', width, height: h, viewBox: `0 0 ${width} ${h}`,
+      role: 'img', 'aria-label': `${xLabel} by model`,
+    });
+
+    for (const v of niceTicks(0, maxV, 6)) {
+      const x = sx(v);
+      root.append(svg('line', { class: 'ax-grid', x1: x, x2: x, y1: pad.t, y2: pad.t + ih }));
+      const t = svg('text', { class: 'ax-text', x, y: pad.t + ih + 15, 'text-anchor': 'middle' });
+      t.textContent = fmt(v, 2);
+      root.append(t);
+    }
+
+    rows.forEach((r, i) => {
+      const y = pad.t + i * rowH + 3;
+      const bh = rowH - 9;
+      root.append(svg('rect', {
+        x: pad.l, y, width: Math.max(1, sx(r.value) - pad.l), height: bh,
+        fill: r.worseThanRef ? 'var(--oxide)' : 'var(--teal)',
+        opacity: r.highlight ? 1 : 0.72,
+      }));
+      const lab = svg('text', {
+        class: 'ax-text', x: pad.l - 9, y: y + bh - 2, 'text-anchor': 'end',
+      });
+      lab.textContent = r.label;
+      root.append(lab);
+      const val = svg('text', {
+        class: 'ax-text', x: sx(r.value) + 6, y: y + bh - 2,
+      });
+      val.textContent = r.value.toFixed(3);
+      root.append(val);
+    });
+
+    if (refValue !== undefined && refValue !== null) {
+      const x = sx(refValue);
+      root.append(svg('line', {
+        x1: x, x2: x, y1: pad.t, y2: pad.t + ih,
+        stroke: 'var(--ink-3)', 'stroke-width': 1.2, 'stroke-dasharray': '3 3',
+      }));
+      const t = svg('text', {
+        class: 'ax-text', x, y: pad.t - 1, 'text-anchor': 'middle',
+      });
+      t.textContent = refLabel || 'baseline';
+      root.append(t);
+    }
+
+    const xt = svg('text', {
+      class: 'ax-title', x: pad.l + iw / 2, y: h - 4, 'text-anchor': 'middle',
+    });
+    xt.textContent = xLabel;
+    root.append(xt);
+    host.append(root);
+  };
+  draw();
+  if (host._ro) host._ro.disconnect();
+  host._ro = new ResizeObserver(() => draw());
+  host._ro.observe(host);
+}
+
+/* ---------------- 05 model lab ---------------- */
+
+const SPLIT_BLURB = {
+  random: 'Random assignment. Analogue series straddle the boundary, so this '
+    + 'flatters the model and is shown only for comparison.',
+  scaffold: 'Bemis-Murcko scaffold split. No scaffold appears on both sides. '
+    + 'This is the figure to quote.',
+  modality_peptide_holdout: 'Trained on small molecules, tested on peptides. '
+    + 'The deployment question for this registry.',
+  modality_smallmol_holdout: 'Trained on peptides, tested on small molecules.',
+};
+
+async function loadModelLab() {
+  const host = $('#ml-card');
+  host.innerHTML = '<div class="empty-state"><p>Loading model…</p></div>';
+  try {
+    const data = await getJSON('/api/model-card');
+    state.modelCard = data;
+    renderModelCard(data.card, data.report);
+    renderSplitCharts(data.report);
+    const sel = $('#ml-compound');
+    if (sel.options.length <= 1) {
+      for (const r of [...state.rows].sort((a, b) => a.name.localeCompare(b.name))) {
+        sel.append(el('option', { value: r.key, text: r.name }));
+      }
+    }
+  } catch (err) {
+    host.innerHTML = '';
+    host.append(el('div', { class: 'empty-state' }, el('p', { text: String(err.message) })));
+  }
+}
+
+function renderModelCard(card, report) {
+  const host = $('#ml-card');
+  host.textContent = '';
+
+  const hp = card.headline_performance;
+  const rs = card.random_split_comparison;
+  const nt = card.negative_transfer;
+
+  host.append(el('div', { class: 'tier-strip' },
+    el('span', { class: 'tier-badge', text: titleCase(card.quality_tier) }),
+    el('p', { class: 'tier-text', text: card.quality_tier_meaning })));
+
+  const metrics = el('div', { class: 'metric-wrap' });
+  const add = (label, value, unit, note, cls) => metrics.append(
+    el('div', { class: 'metric' },
+      el('p', { class: 'metric-label', text: label }),
+      el('p', { class: 'metric-value' },
+        document.createTextNode(value),
+        unit ? el('span', { class: 'u', text: unit }) : null),
+      note ? el('p', { class: `metric-note ${cls || ''}`, text: note }) : null));
+
+  add('MAE (scaffold split)', hp.mae_log_units.toFixed(3), 'log', 'the honest figure', 'good');
+  add('R² (scaffold split)', hp.r2.toFixed(3), '', `Spearman ${hp.spearman.toFixed(3)}`);
+  add('MAE (random split)', rs.mae_log_units.toFixed(3), 'log',
+    `${(rs.fraction_test_scaffolds_seen_in_training * 100).toFixed(0)}% of test scaffolds already seen — inflated`, 'warn');
+  add('Interval coverage', hp.conformal_coverage_at_90_nominal.toFixed(3), '',
+    'measured at 0.90 nominal', 'warn');
+  if (report.available) {
+    const noise = report.noise_estimate;
+    add('Experimental noise floor', noise.implied_mae_floor_log.toFixed(3), 'log',
+      `from ${noise.n_molecules_with_differing_values} molecules with differing replicates`);
+    add('Training molecules', String(report.n_molecules), '',
+      `${report.n_peptide_like} peptide-like, ${report.n_small_molecule_like} small-molecule-like`);
+  }
+  host.append(metrics);
+
+  host.append(el('div', { class: 'insp-section' },
+    el('h3', { class: 'insp-heading', text: 'Negative transfer — measured, not assumed' }),
+    el('div', { class: 'caveat' },
+      el('span', { class: 'caveat-mark', text: '▲', 'aria-hidden': 'true' }),
+      el('span', {}, el('strong', { text: nt.verdict }), document.createTextNode(
+        ` Best model MAE ${nt.best_model_mae.toFixed(2)} against a mean-predictor `
+        + `baseline of ${nt.baseline_mean_mae.toFixed(2)} log units (${nt.experiment}).`)))));
+
+  const dl = el('dl', { class: 'kv' });
+  dl.append(el('dt', { text: 'Endpoint' }), el('dd', { text: card.endpoint }));
+  dl.append(el('dt', { text: 'Target' }), el('dd', { text: card.target }));
+  dl.append(el('dt', { text: 'Family' }), el('dd', { text: card.model_family }));
+  dl.append(el('dt', { text: 'In domain' }), el('dd', { class: 'wrap', text: card.intended_domain }));
+  dl.append(el('dt', { text: 'Out of domain' }), el('dd', { class: 'wrap', text: card.out_of_domain }));
+  if (report.available) {
+    dl.append(el('dt', { text: 'Dataset' }), el('dd', { text: report.dataset_version }));
+  }
+  dl.append(el('dt', { text: 'Licence' }), el('dd', { class: 'wrap', text: card.license }));
+  const lims = el('ul', { class: 'analysis-resolve' });
+  for (const l of card.limitations) lims.append(el('li', { text: l }));
+  host.append(el('div', { class: 'insp-section' },
+    el('h3', { class: 'insp-heading', text: 'Model card' }), dl,
+    el('h3', { class: 'insp-heading', style: 'margin-top:14px', text: 'Limitations' }), lims));
+}
+
+function renderSplitCharts(report) {
+  const host = $('#ml-splits');
+  host.textContent = '';
+  if (!report.available) {
+    host.append(el('div', { class: 'empty-state' },
+      el('p', { text: 'No training report found. Run: python -m atlas.ml.train' })));
+    return;
+  }
+  const bySplit = {};
+  for (const r of report.results) (bySplit[r.split] ||= []).push(r);
+
+  for (const [split, rows] of Object.entries(bySplit)) {
+    const base = rows.find((r) => r.model === 'baseline_mean');
+    const meta = report.splits.find((s) => s.kind === split) || {};
+    const lk = meta.leakage || {};
+
+    const block = el('div', { class: 'split-block' },
+      el('div', { class: 'split-block-head' },
+        el('h3', { class: 'split-block-title', text: titleCase(split) }),
+        el('span', { class: 'split-block-meta',
+          text: `train ${meta.n_train} · test ${meta.n_test} · `
+            + `${(lk.fraction_test_scaffolds_seen * 100 || 0).toFixed(0)}% of test scaffolds seen in training` })),
+      el('p', { class: 'split-block-note', text: SPLIT_BLURB[split] || '' }));
+
+    const chartHost = el('div', { class: 'chart-body' });
+    block.append(chartHost);
+    host.append(block);
+
+    barChart(chartHost, {
+      rows: rows
+        .filter((r) => r.model !== 'baseline_mean')
+        .sort((a, b) => a.mae - b.mae)
+        .map((r) => ({
+          label: r.model,
+          value: r.mae,
+          worseThanRef: base ? r.mae >= base.mae : false,
+          highlight: r.model === 'fingerprint_knn',
+        })),
+      refValue: base ? base.mae : null,
+      refLabel: `baseline ${base ? base.mae.toFixed(2) : ''}`,
+      xLabel: 'mean absolute error (log units)',
+    });
+  }
+}
+
+async function runPrediction() {
+  const host = $('#ml-result');
+  const smiles = $('#ml-smiles').value.trim();
+  const key = $('#ml-compound').value;
+  if (!smiles && !key) {
+    host.innerHTML = '';
+    host.append(el('p', { class: 'control-error', text: 'Enter a SMILES string or choose a registry entry.' }));
+    return;
+  }
+  host.innerHTML = '<div class="empty-state"><p>Predicting…</p></div>';
+  try {
+    const r = await postJSON('/api/predict', smiles ? { smiles } : { compound_key: key });
+    renderPrediction(r);
+  } catch (err) {
+    host.innerHTML = '';
+    host.append(el('p', { class: 'control-error', text: String(err.message) }));
+  }
+}
+
+function renderPrediction(r) {
+  const host = $('#ml-result');
+  host.textContent = '';
+  const name = r.compound_name || r.smiles;
+
+  if (r.abstained) {
+    host.append(el('div', { class: 'evidence-banner cls-E' },
+      el('span', { class: 'evidence-class', text: 'E', 'aria-hidden': 'true' }),
+      el('div', {},
+        el('p', { class: 'evidence-label', text: `No prediction for ${name}` }),
+        el('p', { class: 'evidence-text', text: r.abstention_explanation }),
+        el('div', { class: 'abstention' },
+          el('p', { class: 'abstention-head' },
+            el('span', { text: '⊘', 'aria-hidden': 'true' }),
+            el('span', { text: `abstention · ${r.abstention_reason}` })),
+          r.max_tanimoto_to_training !== null && r.max_tanimoto_to_training !== undefined
+            ? el('p', { text: `Nearest training molecule: Tanimoto ${r.max_tanimoto_to_training.toFixed(3)}.` })
+            : null,
+          (r.what_would_resolve_it || []).length
+            ? (() => { const ul = el('ul', {}); for (const x of r.what_would_resolve_it) ul.append(el('li', { text: x })); return ul; })()
+            : null))));
+    return;
+  }
+
+  const metrics = el('div', { class: 'metric-wrap' });
+  const add = (label, value, unit, note, cls) => metrics.append(
+    el('div', { class: 'metric' },
+      el('p', { class: 'metric-label', text: label }),
+      el('p', { class: 'metric-value' },
+        document.createTextNode(value),
+        unit ? el('span', { class: 'u', text: unit }) : null),
+      note ? el('p', { class: `metric-note ${cls || ''}`, text: note }) : null));
+
+  add('Predicted pKi', r.predicted_pki.toFixed(2), '',
+    `90% interval ${r.interval_low.toFixed(2)} – ${r.interval_high.toFixed(2)}`);
+  add('≈ Ki', r.predicted_ki_nm < 1000 ? r.predicted_ki_nm.toFixed(0) : (r.predicted_ki_nm / 1000).toFixed(1),
+    r.predicted_ki_nm < 1000 ? 'nM' : 'µM', 'derived from pKi');
+  add('Interval coverage', r.interval_coverage_measured.toFixed(3), '',
+    'measured on the scaffold split at 0.90 nominal — the interval is wider than it looks',
+    'warn');
+  add('Similarity to training', r.max_tanimoto_to_training.toFixed(3), '',
+    r.max_tanimoto_to_training > 0.7 ? 'well inside the domain' : 'near the domain edge',
+    r.max_tanimoto_to_training > 0.7 ? 'good' : 'warn');
+
+  host.append(el('div', { class: 'evidence-banner cls-B' },
+    el('span', { class: 'evidence-class', text: 'C', 'aria-hidden': 'true' }),
+    el('div', {},
+      el('p', { class: 'evidence-label', text: 'Independently evaluated computational inference' }),
+      el('p', { class: 'evidence-text',
+        text: `${r.model_card.endpoint}. Model ${r.model_card.name}, `
+          + `${titleCase(r.model_card.quality_tier)}, MAE `
+          + `${r.model_card.headline_performance.mae_log_units.toFixed(3)} log units on a scaffold split.` }))));
+  host.append(metrics);
+
+  if ((r.nearest_neighbours || []).length) {
+    const list = el('ul', { class: 'src-list' });
+    for (const n of r.nearest_neighbours) {
+      list.append(el('li', { class: 'src-item' },
+        el('span', { class: 'src-db', text: 'chembl' }),
+        el('a', {
+          href: `https://www.ebi.ac.uk/chembl/compound_report_card/${n.molecule_chembl_id}/`,
+          target: '_blank', rel: 'noopener', text: n.molecule_chembl_id,
+        }),
+        el('span', { class: 'src-meta',
+          text: `Tanimoto ${n.tanimoto.toFixed(3)} · measured pKi ${n.measured_pki.toFixed(2)}` })));
+    }
+    host.append(el('div', { class: 'insp-section' },
+      el('h3', { class: 'insp-heading', text: 'Nearest training molecules — this is the explanation' }),
+      el('p', { class: 'analysis-why', text: 'A similarity model predicts by analogy. These are the measured molecules the answer is drawn from.' }),
+      list));
+  }
+}
+
 /* ---------------- 03 evidence & gaps ---------------- */
 
 function renderGaps() {
@@ -1030,6 +1341,9 @@ async function boot() {
     });
     $$('.rail-item').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
     $('#studio-run').addEventListener('click', runSimulation);
+    $('#ml-predict').addEventListener('click', runPrediction);
+    $('#ml-smiles').addEventListener('keydown', (e) => { if (e.key === 'Enter') runPrediction(); });
+    $('#ml-compound').addEventListener('change', () => { $('#ml-smiles').value = ''; });
     $('#studio-reset').addEventListener('click', () => {
       renderParamInputs();
       $('#studio-dose').value = 10;

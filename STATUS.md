@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-18 · 218 tests passing
+Last updated: 2026-10-18 · 271 tests passing
 
 ## What this is
 
@@ -114,31 +114,87 @@ rings, `aria-sort` on sortable headers, a keyboard-resizable inspector divider,
 and `prefers-reduced-motion` honoured. Dark mode is a token-level palette, not
 an inverted sheet.
 
+### Trained ML model (`atlas/ml/`)
+**Endpoint:** MC4R binding affinity (pKi), from ChEMBL. 1,981 unique molecules
+after restricting to Ki from binding assays only — IC50 depends on radioligand
+concentration via Cheng-Prusoff and EC50 is functional, so pooling them would
+mix physical quantities under one label. Dataset is content-hashed; a tampered
+file fails to load.
+
+MC4R was chosen because it is directly relevant to this registry (PT-141,
+melanotan I and II act at melanocortin receptors) **and** because ChEMBL holds
+both peptide and small-molecule ligands for it, which makes transfer between
+modalities measurable rather than assumed.
+
+Held-out results (7 model families × 4 splits):
+
+| split | best model | MAE | R² | Spearman | 90% interval coverage |
+|---|---|---|---|---|---|
+| random | fingerprint kNN | 0.478 | 0.699 | 0.818 | 0.924 |
+| **scaffold** | **fingerprint kNN** | **0.681** | **0.297** | **0.590** | 0.794 |
+| peptide holdout | *none beat baseline* | 1.461 | −0.842 | 0.086 | 0.452 |
+| small-molecule holdout | combined RF | 0.930 | −0.007 | 0.130 | 0.815 |
+
+Three findings, all measured:
+
+1. **A random split flatters this model by 42%.** It shares 51% of its test
+   scaffolds with training; the scaffold split shares none. MAE goes 0.478 →
+   0.681 and R² 0.699 → 0.297. The scaffold figure is the one quoted everywhere.
+2. **Negative transfer to peptides is real.** Trained on small molecules and
+   tested on peptides, *every* model scored worse than predicting the training
+   mean (best 1.46 vs 1.31), with rank correlation near zero. The model
+   therefore refuses peptide input — which includes PT-141, melanotan I and II.
+3. **Conformal guarantees collapse off-distribution.** Coverage at 0.90 nominal
+   measures 0.92 (random), 0.79 (scaffold), 0.25–0.46 (modality holdout).
+   Intervals are reported with measured coverage, never the nominal level alone.
+
+Model complexity did not pay off: gradient boosting won the random split and
+lost out-of-scaffold to a Tanimoto nearest-neighbour regressor, which is what
+is deployed.
+
+Inference is gated — peptide-like input, similarity below 0.30 to training, or
+an unparseable structure each return a structured abstention instead of a
+number. Quality tier is `internally_validated`: held-out on the same source,
+never tested against an independent external dataset or prospectively.
+
+```bash
+PYTHONPATH=. python3 -m atlas.ml.dataset   # build dataset from ChEMBL
+PYTHONPATH=. python3 -m atlas.ml.train     # train, evaluate, write registry
+```
+
 ## Verification vs validation
 
 This distinction is load-bearing and currently sits on one side of it.
 
 - **Verified** — the solver solves the equations it claims to solve, to machine
   precision, against closed-form solutions and conservation laws.
-- **Not validated** — nothing here has been shown to describe a real biological
-  system. No model has been fitted to or tested against observed measurements.
+- **Not validated** — the *mechanistic* models have not been shown to describe
+  a real biological system. No PK model has been fitted to or tested against
+  observed measurements.
 
-A model passing all 63 checks says nothing about any compound's behaviour in an
-organism.
+A solver passing all 63 checks says nothing about any compound's behaviour in
+an organism.
+
+The ML model is the one component evaluated against real measurements, and it
+sits one tier down from externally validated: held-out scaffold-split
+performance on ChEMBL data, with no independent external test set and no
+prospective evaluation.
 
 ## Not built yet
 
 1. **PK parameter extraction** — the gap keeping human PK at 0/46. Needs
    clearance, volume and bioavailability extracted from identified records with
    units, uncertainty and verification against source text.
-2. **Trained ML model** — no model trained or evaluated. Requires a legitimate
-   dataset with held-out evaluation; no performance figure should appear until
-   it is measured.
-3. **Knowledge graph** — typed schema and traversal not implemented.
-4. **Evidence ledger database** — provenance is per-record; the append-only
+2. **External validation of the ML model** — needs an independent affinity set
+   for MC4R not drawn from the same ChEMBL extraction.
+3. **A peptide-ligand affinity model** — the current model refuses peptides,
+   which is correct but leaves the registry's own melanocortin compounds
+   unserved. Needs peptide–target affinity data and sequence-aware features.
+4. **Knowledge graph** — typed schema and traversal not implemented.
+5. **Evidence ledger database** — provenance is per-record; the append-only
    versioned store is not built.
-5. **Geroscience module** — hallmark framework not implemented.
-6. **Interface gaps** — no multi-compound comparison view, no pathway/network
+6. **Geroscience module** — hallmark framework not implemented.
+7. **Interface gaps** — no multi-compound comparison view, no pathway/network
    visualisation, and the Model Studio cannot yet overlay observed data against
    a simulated curve (which needs item 1).
 
@@ -152,15 +208,18 @@ organism.
 - Broad names inflate counts: `glutathione` matches ~199k records partly through
   its aliases. Counts measure query recall, not compound-specific evidence.
 - `-1` in a literature count means *not measured* (a failed request), never zero.
-- Python 3.14 is the only interpreter present; `torch` and `rdkit` have cp314
-  candidates but are not installed and are not needed for current functionality.
+- RDKit 2026.09.1 is installed and required by the ML layer. PyTorch is not
+  installed and is not needed: no model tried here benefited from it, and the
+  best scaffold-split model is a nearest-neighbour regressor.
+- The MC4R model covers one target. It says nothing about selectivity over
+  MC1R, MC3R or MC5R, and binding affinity is not efficacy, exposure or safety.
 - Docker daemon is not running; no Postgres/Redis/Neo4j locally. Current code
   needs none of them.
 
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 218 tests
+python3 -m pytest -q                              # 271 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

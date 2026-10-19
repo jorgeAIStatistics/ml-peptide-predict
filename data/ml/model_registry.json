@@ -1,0 +1,1329 @@
+{
+  "created_at": "2026-10-19T02:38:00.782683+00:00",
+  "dataset_version": "cc57e66f140f5363",
+  "dataset_endpoint": "MC4R binding affinity (pKi, -log10 M)",
+  "dataset_counts": {
+    "raw_activities": 2746,
+    "unique_molecules": 1981,
+    "rejected_no_pchembl": 32,
+    "rejected_no_smiles": 2,
+    "rejected_out_of_range": 0,
+    "rejected_unparseable": 0
+  },
+  "noise_estimate": {
+    "n_replicated_molecules": 347,
+    "n_molecules_with_differing_values": 117,
+    "median_spread_all_replicates_log": 0.0,
+    "median_spread_among_differing_log": 0.16999999999999993,
+    "implied_mae_floor_log": 0.08499999999999996,
+    "caveat": "Exact duplicates dominate the replicate set, so this floor is almost certainly optimistic: it reflects agreement within curated records rather than independent inter-laboratory reproducibility."
+  },
+  "seed": 20261018,
+  "n_molecules": 1981,
+  "n_peptide_like": 628,
+  "n_small_molecule_like": 1353,
+  "conformal_alpha": 0.1,
+  "models": [
+    {
+      "name": "baseline_mean",
+      "features": "descriptors",
+      "description": "Predicts the training mean for every molecule. Any useful model must beat this."
+    },
+    {
+      "name": "descriptors_ridge",
+      "features": "descriptors",
+      "description": "Linear ridge regression on 15 interpretable physicochemical descriptors, with alpha chosen by internal cross-validation."
+    },
+    {
+      "name": "descriptors_rf",
+      "features": "descriptors",
+      "description": "Random forest on physicochemical descriptors."
+    },
+    {
+      "name": "fingerprint_knn",
+      "features": "fingerprints",
+      "description": "Nearest-neighbour regression on Morgan fingerprints with Jaccard (Tanimoto) distance -- the classical similarity baseline for QSAR."
+    },
+    {
+      "name": "fingerprint_rf",
+      "features": "fingerprints",
+      "description": "Random forest on 2048-bit Morgan fingerprints."
+    },
+    {
+      "name": "combined_gb",
+      "features": "combined",
+      "description": "Gradient-boosted trees on descriptors concatenated with fingerprints."
+    },
+    {
+      "name": "combined_rf",
+      "features": "combined",
+      "description": "Random forest on descriptors concatenated with fingerprints."
+    }
+  ],
+  "splits": [
+    {
+      "kind": "random",
+      "description": "Uniformly random assignment. Analogue series are split across train and test, so this overestimates generalisation to new chemotypes.",
+      "n_train": 1585,
+      "n_test": 396,
+      "leakage": {
+        "n_train_scaffolds": 661,
+        "n_test_scaffolds": 227,
+        "n_shared_scaffolds": 116,
+        "fraction_test_scaffolds_seen": 0.5110132158590308,
+        "n_identical_molecules": 0
+      }
+    },
+    {
+      "kind": "scaffold",
+      "description": "Bemis-Murcko scaffold split over 772 scaffold groups. No scaffold appears on both sides, so the test set measures transfer to unseen chemotypes.",
+      "n_train": 1558,
+      "n_test": 423,
+      "leakage": {
+        "n_train_scaffolds": 767,
+        "n_test_scaffolds": 5,
+        "n_shared_scaffolds": 0,
+        "fraction_test_scaffolds_seen": 0.0,
+        "n_identical_molecules": 0
+      }
+    },
+    {
+      "kind": "modality_peptide_holdout",
+      "description": "Trained on small_molecule_like molecules only and tested on peptide_like molecules. Measures transfer across chemical modality rather than within it.",
+      "n_train": 1353,
+      "n_test": 628,
+      "leakage": {
+        "n_train_scaffolds": 521,
+        "n_test_scaffolds": 257,
+        "n_shared_scaffolds": 6,
+        "fraction_test_scaffolds_seen": 0.023346303501945526,
+        "n_identical_molecules": 0
+      }
+    },
+    {
+      "kind": "modality_smallmol_holdout",
+      "description": "Trained on peptide_like molecules only and tested on small_molecule_like molecules. Measures transfer across chemical modality rather than within it.",
+      "n_train": 628,
+      "n_test": 1353,
+      "leakage": {
+        "n_train_scaffolds": 257,
+        "n_test_scaffolds": 521,
+        "n_shared_scaffolds": 6,
+        "fraction_test_scaffolds_seen": 0.011516314779270634,
+        "n_identical_molecules": 0
+      }
+    }
+  ],
+  "results": [
+    {
+      "model": "baseline_mean",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 1.0082627461559213,
+      "rmse": 1.241149366384055,
+      "r2": -6.802734723621029e-05,
+      "spearman": null,
+      "pearson": null,
+      "fit_seconds": 0.0023297080770134926,
+      "conformal_coverage": 0.9393939393939394,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 2.243773648098761,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 1.0065059347181018
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 1.6381325869975714
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.9711169561101346
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "descriptors_ridge",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 0.8930721040937107,
+      "rmse": 1.102534959853503,
+      "r2": 0.21083796953392142,
+      "spearman": 0.4193475376068459,
+      "pearson": 0.4594147475185446,
+      "fit_seconds": 0.0036791248712688684,
+      "conformal_coverage": 0.9267676767676768,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.8712074914534162,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 0.7360313106585918
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 0.9759570481181115
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.8886044687717222
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "descriptors_rf",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 0.5856948842835762,
+      "rmse": 0.7781329437752159,
+      "r2": 0.6069126681481306,
+      "spearman": 0.740114168944985,
+      "pearson": 0.7814172927083927,
+      "fit_seconds": 0.27096862508915365,
+      "conformal_coverage": 0.9065656565656566,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.34525866475788,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 1.505814587301586
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 0.6828095064607108
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.5775001352462705
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "fingerprint_knn",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 0.47778416278929625,
+      "rmse": 0.6814137372251736,
+      "r2": 0.698558381881609,
+      "spearman": 0.8183800198532889,
+      "pearson": 0.8369144135101637,
+      "fit_seconds": 0.0005726669915020466,
+      "conformal_coverage": 0.9242424242424242,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.2926252909576272,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 1.3627439355582576
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 0.5571786467989471
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.4707288319019469
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "fingerprint_rf",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 0.5232303617558843,
+      "rmse": 0.6874730901061733,
+      "r2": 0.6931735117614117,
+      "spearman": 0.8184313928105654,
+      "pearson": 0.8412320752804432,
+      "fit_seconds": 0.28658166620880365,
+      "conformal_coverage": 0.9368686868686869,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.2339607559517518,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 1.718112470311489
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 0.5972947431574284
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.5156585159130169
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "combined_gb",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 0.48046991809311823,
+      "rmse": 0.6630127385733977,
+      "r2": 0.7146189126239929,
+      "spearman": 0.8385965706759085,
+      "pearson": 0.846576273815316,
+      "fit_seconds": 4.884989207843319,
+      "conformal_coverage": 0.9368686868686869,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.190693516364924,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 2.040400558687633
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 0.6967608918781519
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.4635306900398602
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "combined_rf",
+      "split": "random",
+      "n_train": 1348,
+      "n_test": 396,
+      "mae": 0.5144215338702349,
+      "rmse": 0.6805720188375436,
+      "r2": 0.6993026352747682,
+      "spearman": 0.8243636910256897,
+      "pearson": 0.8442802359089143,
+      "fit_seconds": 0.4346325830556452,
+      "conformal_coverage": 0.9166666666666666,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.1837508158377126,
+      "applicability": {
+        "median_max_tanimoto": 0.8615384697914124,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 1,
+            "mae": 1.5638444407955134
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 22,
+            "mae": 0.6149263725960445
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 373,
+            "mae": 0.5056801682967951
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "baseline_mean",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.9624587537356709,
+      "rmse": 1.161871001996149,
+      "r2": -0.29620558072317116,
+      "spearman": null,
+      "pearson": null,
+      "fit_seconds": 0.00026291701942682266,
+      "conformal_coverage": 0.9456264775413712,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 2.126366199692283,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 1.4764197064989526
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 0.9202742758437421
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.9674754716981134
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "descriptors_ridge",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.9870431991379636,
+      "rmse": 1.1860236142907319,
+      "r2": -0.35065594273560907,
+      "spearman": 0.1560950673258202,
+      "pearson": 0.15674780184765766,
+      "fit_seconds": 0.006913333898410201,
+      "conformal_coverage": 0.8912529550827423,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.8959005578239885,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 1.4084967968422253
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 1.127195854800146
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.8999301128020507
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "descriptors_rf",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.8462430720011532,
+      "rmse": 1.0242357685960608,
+      "r2": -0.007297922210134367,
+      "spearman": 0.44181440365290764,
+      "pearson": 0.4524122053351256,
+      "fit_seconds": 0.3916320828720927,
+      "conformal_coverage": 0.7635933806146572,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.2963696947308934,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 1.1424540679012383
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 1.0146649706848312
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.7485158345887154
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.764 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "fingerprint_knn",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.6807184115360885,
+      "rmse": 0.8555024784961041,
+      "r2": 0.2972504022449868,
+      "spearman": 0.589834528810709,
+      "pearson": 0.6082918148561227,
+      "fit_seconds": 0.00045712501741945744,
+      "conformal_coverage": 0.7943262411347518,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.0774863497350153,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 0.8454074028172909
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 0.7197226589256909
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.6549066319373592
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.794 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "fingerprint_rf",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.7266967470549711,
+      "rmse": 0.9033423187658716,
+      "r2": 0.21645711086437136,
+      "spearman": 0.5394475417660114,
+      "pearson": 0.52753683317986,
+      "fit_seconds": 0.42181441700086,
+      "conformal_coverage": 0.7943262411347518,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.127584670830939,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 1.3183838062308915
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 0.7732276812461025
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.6828269816589272
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.794 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "combined_gb",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.8026633014962905,
+      "rmse": 0.9889281023548702,
+      "r2": 0.060952635081209405,
+      "spearman": 0.49251303650053785,
+      "pearson": 0.5127278274662821,
+      "fit_seconds": 4.280684917001054,
+      "conformal_coverage": 0.6477541371158393,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 0.9968014530033993,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 1.0803874419016775
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 0.9386704313853933
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.7224701775701836
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.648 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "combined_rf",
+      "split": "scaffold",
+      "n_train": 1325,
+      "n_test": 423,
+      "mae": 0.7596082149902103,
+      "rmse": 0.9268010924335874,
+      "r2": 0.17523326654546534,
+      "spearman": 0.560953761497454,
+      "pearson": 0.5277397340987442,
+      "fit_seconds": 0.2579550000373274,
+      "conformal_coverage": 0.75177304964539,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.1164419404048616,
+      "applicability": {
+        "median_max_tanimoto": 0.7571428418159485,
+        "fraction_below_0.3": 0.0,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 0,
+            "mae": null
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 9,
+            "mae": 1.17673453942126
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 142,
+            "mae": 0.8580719205525735
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 272,
+            "mae": 0.6944023947338313
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.752 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "baseline_mean",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 1.305354448084468,
+      "rmse": 1.5793368762466158,
+      "r2": -0.4959203113662596,
+      "spearman": null,
+      "pearson": null,
+      "fit_seconds": 0.00020224996842443943,
+      "conformal_coverage": 0.7834394904458599,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.8993006081668105,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 1.156180060816681
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 1.3746485780997888
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 1.1672129373667166
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 1.0480601216333623
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.783 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "descriptors_ridge",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 3.0103237073746465,
+      "rmse": 4.62777583661697,
+      "r2": -11.84409577824002,
+      "spearman": 0.09454972645702307,
+      "pearson": -0.08644091217410396,
+      "fit_seconds": 0.0024770000018179417,
+      "conformal_coverage": 0.4554140127388535,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.5176460264871612,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 11.4098445848919
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 3.174831207433223
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 1.720459355664529
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 1.0142297296051617
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.455 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "descriptors_rf",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 1.4612419600653679,
+      "rmse": 1.7525669295280943,
+      "r2": -0.8420784928637346,
+      "spearman": 0.08571688091513506,
+      "pearson": 0.06674991615619622,
+      "fit_seconds": 0.2434670408256352,
+      "conformal_coverage": 0.45222929936305734,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.2179675152622447,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 1.220926328571429
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 1.5756764814889965
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 1.2926431633477626
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 0.9029522534859598
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.452 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "fingerprint_knn",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 1.641499271105764,
+      "rmse": 1.9865557295422045,
+      "r2": -1.3667937464859667,
+      "spearman": -0.01627531988071356,
+      "pearson": 0.040783600711167475,
+      "fit_seconds": 0.00041995802894234657,
+      "conformal_coverage": 0.34554140127388533,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.0420592943034792,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 1.0035923887855305
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 1.808908287788935
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 1.5886077469519042
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 0.5130385876911372
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.346 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "fingerprint_rf",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 1.975407974926048,
+      "rmse": 2.305372242465237,
+      "r2": -2.187432721812292,
+      "spearman": -0.06564225668968782,
+      "pearson": -0.054721298411171786,
+      "fit_seconds": 0.2577128750272095,
+      "conformal_coverage": 0.2515923566878981,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.0233731077207902,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 1.1702136433415595
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 2.1697273063919527
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 1.9097911835529957
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 0.7007414386460498
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.252 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "combined_gb",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 2.128805865513154,
+      "rmse": 2.5019688179176107,
+      "r2": -2.754245706024067,
+      "spearman": -0.07565768511183427,
+      "pearson": -0.07013317386525225,
+      "fit_seconds": 2.910958749940619,
+      "conformal_coverage": 0.28343949044585987,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.1175848438249496,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 0.9412028498231024
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 2.307739258888822
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 2.299968845414413
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 0.6240453113604213
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.283 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "combined_rf",
+      "split": "modality_peptide_holdout",
+      "n_train": 1151,
+      "n_test": 628,
+      "mae": 1.7559712262987202,
+      "rmse": 2.0725020857692176,
+      "r2": -1.576017800791762,
+      "spearman": -0.016017079763390344,
+      "pearson": -0.01040212715811028,
+      "fit_seconds": 0.27551449998281896,
+      "conformal_coverage": 0.2770700636942675,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 0.9853110216944864,
+      "applicability": {
+        "median_max_tanimoto": 0.4354838728904724,
+        "fraction_below_0.3": 0.03184713375796178,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 20,
+            "mae": 1.1636089679603951
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 448,
+            "mae": 1.9243419190923052
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 110,
+            "mae": 1.6700710432936874
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 50,
+            "mae": 0.6732951248145974
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.277 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "baseline_mean",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 1.1568439741343273,
+      "rmse": 1.43926295054122,
+      "r2": -0.5435763670836975,
+      "spearman": null,
+      "pearson": null,
+      "fit_seconds": 0.000376666896045208,
+      "conformal_coverage": 0.9312638580931264,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 2.5994113076739187,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.3411102557828118
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 1.0644356720622452
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 0.8372240291740587
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 1.0502568343309175
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "descriptors_ridge",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 1.108945829122232,
+      "rmse": 1.400548783031461,
+      "r2": -0.4616530925728273,
+      "spearman": -0.17040828913001346,
+      "pearson": -0.19982137960074353,
+      "fit_seconds": 0.0019685421139001846,
+      "conformal_coverage": 0.8928307464892831,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 2.3973561561447494,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.2579174273911933
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 1.0420833390245516
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 0.8834038291224494
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 0.9451658674449392
+          }
+        ]
+      },
+      "notes": []
+    },
+    {
+      "model": "descriptors_rf",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 1.0422165648134818,
+      "rmse": 1.2723568476453302,
+      "r2": -0.20632878720205317,
+      "spearman": 0.15098292150090742,
+      "pearson": 0.1661226502889479,
+      "fit_seconds": 0.20690591703169048,
+      "conformal_coverage": 0.7945306725794531,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.6525298666605255,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.1613065921923404
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 1.0116957553106676
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 0.953279513151567
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 0.6894390799989224
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.795 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "fingerprint_knn",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 1.1179387645452599,
+      "rmse": 1.3986619504133488,
+      "r2": -0.45771743958617206,
+      "spearman": -0.11615922071492137,
+      "pearson": -0.11995416414917213,
+      "fit_seconds": 0.00026695895940065384,
+      "conformal_coverage": 0.7812269031781227,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.8376168311913303,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.1008106919255967
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 1.2020054530083166
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 1.284743893821265
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 0.5719484587409057
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.781 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "fingerprint_rf",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 0.961639661635779,
+      "rmse": 1.2106579244499465,
+      "r2": -0.09217121694260877,
+      "spearman": -0.08283063734931984,
+      "pearson": -0.009264339995175987,
+      "fit_seconds": 0.20762608386576176,
+      "conformal_coverage": 0.7900960827790096,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.6321776847348426,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.0557909761064381
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 0.9299734591981066
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 1.0247544011983556
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 0.581505166615413
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.790 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "combined_gb",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 1.0413184058964733,
+      "rmse": 1.2920641947660367,
+      "r2": -0.2439874874635528,
+      "spearman": 0.16917520853519913,
+      "pearson": 0.1582168109351502,
+      "fit_seconds": 2.047022666083649,
+      "conformal_coverage": 0.6592756836659276,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.2498470648230044,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.227617839879879
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 0.9266712119056694
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 1.103100408266466
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 0.6386631097620968
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.659 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    },
+    {
+      "model": "combined_rf",
+      "split": "modality_smallmol_holdout",
+      "n_train": 534,
+      "n_test": 1353,
+      "mae": 0.92974270471199,
+      "rmse": 1.1624118056934363,
+      "r2": -0.006857137305591232,
+      "spearman": 0.13019635441225222,
+      "pearson": 0.14468324999807178,
+      "fit_seconds": 0.23039808310568333,
+      "conformal_coverage": 0.8152254249815225,
+      "conformal_nominal": 0.9,
+      "conformal_half_width": 1.6175099568256424,
+      "applicability": {
+        "median_max_tanimoto": 0.3298968970775604,
+        "fraction_below_0.3": 0.4072431633407243,
+        "bins": [
+          {
+            "range": "0.0-0.3",
+            "n": 551,
+            "mae": 1.0187549013687687
+          },
+          {
+            "range": "0.3-0.5",
+            "n": 581,
+            "mae": 0.8966031727591498
+          },
+          {
+            "range": "0.5-0.7",
+            "n": 114,
+            "mae": 1.0086077723901534
+          },
+          {
+            "range": "0.7-1.0",
+            "n": 107,
+            "mae": 0.567291583136333
+          }
+        ]
+      },
+      "notes": [
+        "conformal coverage 0.815 falls short of the nominal 0.90; calibration and test are not exchangeable under this split, which is the expected signal of extrapolation"
+      ]
+    }
+  ]
+}
