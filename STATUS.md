@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 815 tests passing
+Last updated: 2026-10-19 · 820 tests passing
 
 ## What this is
 
@@ -864,11 +864,26 @@ clustered 90.6%, **1.4 points overconfident**, since a molecule appearing in 16
 pairs is one observation.
 
 Accuracy rises with the true difference — 61.0% below 0.5 log units (near
-chance, which is why that band is excluded), 83.8%, 93.7%, 98.6% above 2. But
-**the hardest calls are between the most similar molecules**: 86.2% above 0.8
-similarity against 94.7% between 0.6 and 0.8. A near-identical pair with a
-real affinity gap is an activity cliff, and the ranker is worst where a
-chemist most needs it. That is reported with the answer.
+chance, which is why that band is excluded), 83.8%, 93.7%, 98.6% above 2.
+
+**The hardest calls are between the most similar molecules**, and each
+similarity band now carries its own clustered bound:
+
+| Mutual similarity | Pairs | Accuracy | 95% interval | Clears the gate alone |
+|---|---|---|---|---|
+| 0.6–0.8 | 2,192 | **94.7%** | [92.5%, 96.7%] | yes |
+| > 0.8 | 538 | **86.2%** | [79.7%, 91.8%] | **no** |
+
+A near-identical pair with a real affinity gap is an activity cliff, and the
+ranker is worst exactly where a chemist most needs it. The **>0.8 band's lower
+bound of 79.7% falls below the 80% the gate requires** — the gate passed on the
+pooled served domain, which this band is part of and drags down.
+
+So the service quotes **the band the pair falls in**, not the pooled figure,
+and a cliff pair gets a prominent warning in the console saying its accuracy is
+86.2% against 93.0% pooled and that its band does not clear the gate on its own
+evidence. Concealing that would let the pooled number read as though it applied
+uniformly.
 
 **Cross-series fails both criteria** (68.5% [66.1%, 70.8%], Spearman 0.157),
 which is what bounds the claim rather than leaving it open. The ranker is the
@@ -923,7 +938,7 @@ accuracy attached.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 815 tests
+python3 -m pytest -q                              # 820 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

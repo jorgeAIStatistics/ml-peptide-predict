@@ -360,10 +360,34 @@ export class ModelIntelligence {
         ? 'Both have measured affinities, so this compares measurements.'
         : 'A model ordering, not an affinity estimate.' })));
 
+    /* An activity-cliff pair is the case where this ranker is weakest, so the
+       warning goes above the numbers rather than into the footnotes. Its band
+       accuracy is quoted in place of the pooled figure, which would flatter
+       it. */
+    if (r.is_activity_cliff) {
+      frag.append(el('div', { class: 'note note-amber' },
+        el('p', {}, el('strong', { text: 'Least reliable case. ' }),
+          `These structures are ${r.pair_similarity.toFixed(2)} similar — a `
+          + 'near-identical pair with a real affinity gap is an activity '
+          + 'cliff, and measured accuracy here is '
+          + `${(r.confidence * 100).toFixed(1)}% against `
+          + `${(r.pooled_accuracy * 100).toFixed(1)}% pooled. Treat this `
+          + 'ordering with more caution than a less similar pair, not less.'),
+        r.band_meets_gate === false
+          ? el('p', { class: 'fine' },
+            `On its own evidence this band does not clear the ranking gate: its `
+            + `95% lower bound is ${(r.confidence_interval[0] * 100).toFixed(1)}% `
+            + 'against the 80% required. The gate passed on the pooled domain, '
+            + 'which this band is part of and drags down.')
+          : null));
+    }
+
     const readings = el('div', { class: 'readings' });
     if (!measured && r.confidence != null) {
       const ci = r.confidence_interval || [];
-      readings.append(reading('ranking accuracy', r.confidence * 100, '%',
+      readings.append(reading(
+        r.similarity_band ? `accuracy, ${r.similarity_band} band` : 'ranking accuracy',
+        r.confidence * 100, '%',
         ci[0] != null ? `95% interval ${(ci[0] * 100).toFixed(1)}–${(ci[1] * 100).toFixed(1)}%` : null));
     }
     const floor = r.gate?.pair_similarity_min;

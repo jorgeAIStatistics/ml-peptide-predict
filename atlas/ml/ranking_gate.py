@@ -189,13 +189,25 @@ def _evaluate_regime(
                 "n": int(sel.sum()),
                 "accuracy": float(correct[sel].mean()),
             }
+    # Per-band figures get their own clustered bound, because the service
+    # quotes the band a pair actually falls in rather than the pooled figure.
+    # A band accuracy without an interval would be quoted as if it were as
+    # well established as the headline, and the >0.8 band is both the smallest
+    # and the worst.
     by_sim = {}
     for label, sel in _bands(pair_similarity, (0.0, 0.4, 0.6, 0.8)):
         sel = sel & meaningful
         if sel.any():
+            band = bootstrap_over_groups(grouped(sel))
             by_sim[label] = {
                 "n": int(sel.sum()),
                 "accuracy": float(correct[sel].mean()),
+                "lower": band["lower"],
+                "upper": band["upper"],
+                "n_groups": band["n_groups"],
+                "served": bool(
+                    float(label.lstrip(">").split("-")[0])
+                    >= RANKING_GATE["pair_similarity_min"]),
             }
 
     criteria = {
@@ -315,11 +327,22 @@ def evaluate_ranking(*, save: bool = True) -> dict[str, Any]:
         },
         "what_this_licenses": (
             "An ordering of two peptides of the same series, with the measured "
-            "accuracy attached and the applicability condition checked from "
-            "the two queries. It licenses no numeric affinity estimate, makes "
-            "no measurement, and creates no knowledge-graph edge. The affinity "
-            "deployment gate is unchanged and still fails."
+            "accuracy of the similarity band the pair falls in attached, and "
+            "the applicability condition checked from the two queries. It "
+            "licenses no numeric affinity estimate, makes no measurement, and "
+            "creates no knowledge-graph edge. The affinity deployment gate is "
+            "unchanged and still fails."
         ),
+        "cliff_band": {
+            "threshold": 0.8,
+            "note": (
+                "Pairs above 0.8 mutual similarity are the hardest: a "
+                "near-identical pair with a real affinity gap is an activity "
+                "cliff. Their band accuracy is lower than the pooled figure "
+                "and is quoted in its place, with a warning, rather than "
+                "letting the pooled number flatter the answer."
+            ),
+        },
         "built_at": utc_now().isoformat(),
         "findings": _findings(within, cross),
     }

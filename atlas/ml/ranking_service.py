@@ -59,6 +59,17 @@ class RankingAnswer:
     confidence: float | None = None        # measured accuracy of this claim
     confidence_interval: list[float] | None = None
     pair_similarity: float | None = None
+    similarity_band: str | None = None
+    #: True when the pair sits above 0.8 mutual similarity, where measured
+    #: accuracy is *lower* than the pooled figure. A near-identical pair with a
+    #: real affinity gap is an activity cliff.
+    is_activity_cliff: bool = False
+    pooled_accuracy: float | None = None   # the headline, for reference only
+    #: Whether this pair's own similarity band clears the gate criterion on its
+    #: own evidence. The gate passed on the pooled served domain, but the
+    #: >0.8 band's lower bound is 0.797 against a 0.80 requirement, so a cliff
+    #: pair sits in a band that does not independently meet the bar.
+    band_meets_gate: bool | None = None
     margin_log_units: float | None = None  # |difference| behind the ordering
     margin_is_meaningful: bool | None = None
 
@@ -92,6 +103,9 @@ class RankingService:
             self.report = json.loads(RANKING_PATH.read_text())
         self.within = (self.report.get("evaluations", {})
                        .get("within_series_held_out_molecules", {}))
+        self.bands = self.within.get("accuracy_by_similarity_band", {})
+        self.cliff_threshold = float(
+            self.report.get("cliff_band", {}).get("threshold", 0.8))
         self.gate_passed = bool(
             self.report.get("verdict", {}).get("within_series_passes"))
 
@@ -120,6 +134,20 @@ class RankingService:
             what_would_resolve_it=list(resolve),
             gate=self._gate_summary(),
         )
+
+    def _band_for(self, similarity: float) -> dict[str, Any] | None:
+        """The measured band this pair falls in, matching the gate's edges.
+
+        The pair's own band is quoted rather than the pooled figure, because
+        the pooled figure would flatter a cliff pair and understate an easy
+        one.
+        """
+        edges = ((0.8, ">0.8"), (0.6, "0.6-0.8"), (0.4, "0.4-0.6"), (0.0, "0-0.4"))
+        for lo, label in edges:
+            if similarity >= lo:
+                band = self.bands.get(label)
+                return {**band, "label": label} if band else None
+        return None
 
     def _similarity(self, smiles_a: str, smiles_b: str) -> float | None:
         from rdkit import Chem
@@ -209,14 +237,27 @@ class RankingService:
         basis = ("measurement" if kind_a == kind_b == "measurement"
                  else "prediction" if kind_a == kind_b == "prediction" else "mixed")
         c = self.within.get("clustered", {})
+        band = self._band_for(similarity)
+        is_cliff = similarity >= self.cliff_threshold
+        required = self.criteria["within_series_accuracy_lower_bound_min"]
+        band_ok = (None if band is None or band.get("lower") is None
+                   else bool(band["lower"] >= required))
 
         answer = RankingAnswer(
             answer_kind="ranking", basis=basis,
             tighter=("a" if margin > 0 else "b") if meaningful else "indistinguishable",
+            # The band's own figure, not the pooled one.
             confidence=(None if basis == "measurement"
-                        else self.within.get("pair_weighted_accuracy")),
-            confidence_interval=(None if basis == "measurement"
-                                 else [c.get("lower"), c.get("upper")]),
+                        else (band or {}).get("accuracy",
+                                              self.within.get("pair_weighted_accuracy"))),
+            confidence_interval=(None if basis == "measurement" else (
+                [band.get("lower"), band.get("upper")] if band
+                else [c.get("lower"), c.get("upper")])),
+            pooled_accuracy=(None if basis == "measurement"
+                             else self.within.get("pair_weighted_accuracy")),
+            similarity_band=(band or {}).get("label"),
+            band_meets_gate=(None if basis == "measurement" else band_ok),
+            is_activity_cliff=bool(is_cliff and basis != "measurement"),
             pair_similarity=similarity,
             margin_log_units=abs(margin),
             margin_is_meaningful=meaningful,
@@ -234,13 +275,38 @@ class RankingService:
                 "model accuracy applies to it."
             )
         else:
+            where = (f"the {band['label']} similarity band, measured over "
+                     f"{band.get('n_groups', '?')} held-out molecules and "
+                     f"{band.get('n', '?')} pairs" if band
+                     else f"{c.get('n_groups', '?')} held-out molecules")
             answer.limitations.append(
                 "An ordering, not an affinity estimate. The accuracy quoted is "
-                f"the measured within-series figure over "
-                f"{c.get('n_groups', '?')} held-out molecules and applies to "
-                "pairs differing by at least "
+                f"for {where}, and applies to pairs differing by at least "
                 f"{self.criteria['meaningful_delta_log_units']} log units."
             )
+        if answer.is_activity_cliff:
+            pooled = answer.pooled_accuracy
+            answer.limitations.insert(0, (
+                f"These two structures are {similarity:.2f} similar, above "
+                f"{self.cliff_threshold}, which is the band where this ranker "
+                "is **least** reliable: a near-identical pair with a real "
+                "affinity gap is an activity cliff. Measured accuracy here is "
+                + (f"{answer.confidence:.1%}" if answer.confidence else "lower")
+                + (f" against {pooled:.1%} pooled across all served pairs"
+                   if pooled else "")
+                + ". Treat this ordering with more caution than a less similar "
+                "pair, not less."
+            ))
+            if band_ok is False:
+                answer.limitations.insert(1, (
+                    f"On its own evidence this band does not clear the gate: "
+                    f"its 95% lower bound is {band['lower']:.1%} against the "
+                    f"{required:.0%} required. The gate passed on the pooled "
+                    "served domain, which this band is part of and drags down. "
+                    "The ordering is still offered, with that stated, because "
+                    "concealing it would make the pooled figure read as though "
+                    "it applied uniformly."
+                ))
         if not meaningful:
             answer.limitations.append(
                 f"The internal difference behind this pair is "

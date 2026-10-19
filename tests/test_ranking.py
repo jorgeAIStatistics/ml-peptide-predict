@@ -243,3 +243,101 @@ def test_gate_summary_always_states_the_affinity_gate_fails(service):
     assert "still failing" in r.gate["affinity_gate"]
     assert r.gate["within_series_ranking_passes"] is True
     assert r.gate["pair_similarity_min"] == RANKING_GATE["pair_similarity_min"]
+
+
+# ------------------------------------------------- the activity-cliff band ----
+
+def test_every_similarity_band_has_its_own_clustered_bound(report):
+    """The service quotes a band figure, so each band needs its own interval.
+
+    A band accuracy without one would be presented as though it were as well
+    established as the pooled headline.
+    """
+    bands = report["evaluations"]["within_series_held_out_molecules"][
+        "accuracy_by_similarity_band"]
+    for label, v in bands.items():
+        assert v["lower"] <= v["accuracy"] <= v["upper"], label
+        assert v["n_groups"] >= 1, label
+        assert isinstance(v["served"], bool)
+
+
+def test_the_cliff_band_does_not_clear_the_gate_on_its_own(report):
+    """Measured: the >0.8 band's lower bound is 0.797 against 0.80 required.
+
+    The gate passed on the pooled served domain, which this band is part of
+    and drags down. Pinned because it is the justification for warning rather
+    than quoting the pooled figure.
+    """
+    bands = report["evaluations"]["within_series_held_out_molecules"][
+        "accuracy_by_similarity_band"]
+    cliff = bands[">0.8"]
+    good = bands["0.6-0.8"]
+    assert cliff["accuracy"] < good["accuracy"]
+    assert cliff["lower"] < RANKING_GATE["within_series_accuracy_lower_bound_min"]
+    assert good["lower"] >= RANKING_GATE["within_series_accuracy_lower_bound_min"]
+
+
+def test_report_records_the_cliff_band(report):
+    assert report["cliff_band"]["threshold"] == 0.8
+    assert "activity" in report["cliff_band"]["note"].lower()
+
+
+def _novel_similar_pair():
+    """Two novel analogues similar enough to land in the cliff band."""
+    from rdkit import Chem, DataStructs
+    from rdkit.Chem import rdFingerprintGenerator
+
+    from atlas.ml.dataset import load_dataset
+
+    gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    for rec in [r for r in load_dataset().records if len(r.smiles) > 300][:40]:
+        for src, dst in (("C(N)=O", "C(NC)=O"), ("CC(=O)N", "CCC(=O)N")):
+            if src not in rec.smiles:
+                continue
+            a = rec.smiles.replace(src, dst, 1)
+            b = rec.smiles.replace(src, dst + "C", 1)
+            ma, mb = Chem.MolFromSmiles(a), Chem.MolFromSmiles(b)
+            if not (ma and mb) or Chem.MolToSmiles(ma) == Chem.MolToSmiles(mb):
+                continue
+            sim = DataStructs.TanimotoSimilarity(
+                gen.GetFingerprint(ma), gen.GetFingerprint(mb))
+            if 0.8 <= sim < 0.999:
+                return a, b
+    return None
+
+
+def test_a_cliff_pair_quotes_its_band_not_the_pooled_figure(service):
+    pair = _novel_similar_pair()
+    if pair is None:
+        pytest.skip("no novel cliff-band pair constructible from this dataset")
+    r = service.rank(*pair)
+    if r.abstained or r.basis == "measurement":
+        pytest.skip("constructed pair was not answered by the prediction path")
+    assert r.is_activity_cliff is True
+    assert r.similarity_band == ">0.8"
+    # The band figure, which is *lower* than the pooled headline.
+    assert r.confidence < r.pooled_accuracy
+    assert r.band_meets_gate is False
+    assert any("activity cliff" in l for l in r.limitations)
+    assert any("does not clear the gate" in l for l in r.limitations)
+
+
+def test_a_measurement_comparison_is_not_flagged_as_a_cliff(service):
+    """A cliff warning is about model reliability; measurements have none."""
+    from rdkit import Chem, DataStructs
+    from rdkit.Chem import rdFingerprintGenerator
+
+    from atlas.ml.dataset import load_dataset
+
+    recs = [r for r in load_dataset().records if len(r.smiles) > 300][:60]
+    gen = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
+    fps = [gen.GetFingerprint(Chem.MolFromSmiles(r.smiles)) for r in recs]
+    for i in range(len(recs)):
+        for j in range(i + 1, len(recs)):
+            if 0.8 <= DataStructs.TanimotoSimilarity(fps[i], fps[j]) < 0.99:
+                r = service.rank(recs[i].smiles, recs[j].smiles)
+                if r.basis == "measurement":
+                    assert r.is_activity_cliff is False
+                    assert r.band_meets_gate is None
+                    return
+    pytest.skip("no measured cliff-band pair found")

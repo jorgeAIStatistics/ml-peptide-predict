@@ -53,19 +53,35 @@
       "accuracy_by_similarity_band": {
         "0-0.4": {
           "n": 8,
-          "accuracy": 1.0
+          "accuracy": 1.0,
+          "lower": 1.0,
+          "upper": 1.0,
+          "n_groups": 4,
+          "served": false
         },
         "0.4-0.6": {
           "n": 1428,
-          "accuracy": 0.8991596638655462
+          "accuracy": 0.8991596638655462,
+          "lower": 0.8439619713569906,
+          "upper": 0.9464373249299719,
+          "n_groups": 129,
+          "served": false
         },
         "0.6-0.8": {
           "n": 2192,
-          "accuracy": 0.9470802919708029
+          "accuracy": 0.9470802919708029,
+          "lower": 0.9250242987661944,
+          "upper": 0.9666379327626646,
+          "n_groups": 144,
+          "served": true
         },
         ">0.8": {
           "n": 538,
-          "accuracy": 0.862453531598513
+          "accuracy": 0.862453531598513,
+          "lower": 0.7970355643211604,
+          "upper": 0.9176523109243697,
+          "n_groups": 101,
+          "served": true
         }
       },
       "criteria": {
@@ -105,7 +121,7 @@
         "median_trials_per_group": 17.0
       },
       "naive_lower_bound": 0.6705726054889979,
-      "magnitude_spearman": 0.1574432352767575,
+      "magnitude_spearman": 0.15744394499283504,
       "accuracy_by_delta_band": {
         "0-0.5": {
           "n": 2074,
@@ -127,19 +143,35 @@
       "accuracy_by_similarity_band": {
         "0-0.4": {
           "n": 18,
-          "accuracy": 0.8888888888888888
+          "accuracy": 0.8888888888888888,
+          "lower": 0.7058823529411765,
+          "upper": 1.0,
+          "n_groups": 15,
+          "served": false
         },
         "0.4-0.6": {
           "n": 2092,
-          "accuracy": 0.7533460803059273
+          "accuracy": 0.7533460803059273,
+          "lower": 0.7112517497496265,
+          "upper": 0.793346978219551,
+          "n_groups": 346,
+          "served": false
         },
         "0.6-0.8": {
           "n": 3622,
-          "accuracy": 0.6907785753727222
+          "accuracy": 0.6907785753727222,
+          "lower": 0.6640240792887077,
+          "upper": 0.7160711110889094,
+          "n_groups": 365,
+          "served": true
         },
         ">0.8": {
           "n": 690,
-          "accuracy": 0.6521739130434783
+          "accuracy": 0.6521739130434783,
+          "lower": 0.6126637280245528,
+          "upper": 0.6952436728717841,
+          "n_groups": 260,
+          "served": true
         }
       },
       "criteria": {
@@ -149,7 +181,7 @@
           "met": false
         },
         "magnitude_discrimination_spearman": {
-          "actual": 0.1574432352767575,
+          "actual": 0.15744394499283504,
           "required": ">= 0.3",
           "met": false
         }
@@ -162,8 +194,12 @@
     "cross_series_passes": false,
     "deployable_mode": "within_series_ranking"
   },
-  "what_this_licenses": "An ordering of two peptides of the same series, with the measured accuracy attached and the applicability condition checked from the two queries. It licenses no numeric affinity estimate, makes no measurement, and creates no knowledge-graph edge. The affinity deployment gate is unchanged and still fails.",
-  "built_at": "2026-10-19T17:05:30.722221+00:00",
+  "what_this_licenses": "An ordering of two peptides of the same series, with the measured accuracy of the similarity band the pair falls in attached, and the applicability condition checked from the two queries. It licenses no numeric affinity estimate, makes no measurement, and creates no knowledge-graph edge. The affinity deployment gate is unchanged and still fails.",
+  "cliff_band": {
+    "threshold": 0.8,
+    "note": "Pairs above 0.8 mutual similarity are the hardest: a near-identical pair with a real affinity gap is an activity cliff. Their band accuracy is lower than the pooled figure and is quoted in its place, with a warning, rather than letting the pooled number flatter the answer."
+  },
+  "built_at": "2026-10-19T17:40:08.827723+00:00",
   "findings": [
     "Within series, on the domain the service actually serves -- pairs of mutual similarity at least 0.6 differing by at least 0.5 log units -- the ranker is correct on 93.0% of 2730 held-out pairs. Bootstrapping over the 150 held-out molecules those pairs come from, rather than over the pairs, gives a 95% interval of [90.6%, 95.1%]. A binomial bound treating every pair as independent would have claimed 92.0% -- 1.4 points too confident, because a molecule appearing in 16 pairs is one observation, not 16.",
     "Restricting to the served domain matters: over *all* 4166 within-series meaningful pairs the figure is 92.0% with a bound of 89.0%, because cluster co-membership is a looser condition than mutual similarity -- the largest series holds 335 molecules within 0.4 distance of a centroid, so two of its members can be far apart from each other. The quoted figure is the one measured under the condition the service checks.",
