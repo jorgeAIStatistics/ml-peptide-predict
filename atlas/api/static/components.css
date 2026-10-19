@@ -494,3 +494,244 @@
   .toolbar-flush { margin: 0 calc(var(--s4) * -1); }
   .diag-grid, .split-grid { gap: var(--s5); }
 }
+
+/* ============================================================
+   Interface Explorer
+   ============================================================
+   Added in 2.5 Stage 2 priority 10. Self-contained: every
+   selector below is prefixed `iface-` or `struct-`, so nothing
+   here reaches an existing workspace.
+
+   The vocabulary of marks is the point. An evidence chip
+   (`.iface-ev`) and a provenance chip (`.iface-prov`) carry
+   geometry as well as colour, as the status marks in
+   design.css do, so "candidate" and "measured" stay
+   distinguishable in greyscale and under colour-vision
+   differences.
+   ============================================================ */
+
+/* ---------------- standing statements band ---------------- */
+.iface-band {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: var(--s5);
+  padding: var(--s4) var(--s6);
+  background: var(--sunk);
+  border-bottom: 1px solid var(--rule);
+}
+.iface-band-main p + p { margin-top: var(--s2); }
+.iface-band-main .label { margin-bottom: var(--s2); }
+.iface-band p { margin: 0; line-height: 1.55; max-width: 72ch; }
+
+.iface-key { display: grid; gap: 2px; margin-top: var(--s2); }
+.iface-class {
+  border-left: 2px solid var(--rule-strong);
+  background: var(--surface);
+  padding: 0 0 0 var(--s2);
+}
+.iface-class > summary {
+  display: flex; align-items: center; gap: var(--s2);
+  padding: 5px var(--s2); cursor: pointer; list-style: none;
+  font-size: var(--t-small);
+}
+.iface-class > summary::-webkit-details-marker { display: none; }
+.iface-class > summary:hover { color: var(--teal); }
+.iface-class > p { margin: 0; padding: 0 var(--s2) var(--s2) 19px; line-height: 1.5; }
+.iface-class-mark { width: 9px; height: 9px; flex: none; background: currentColor; }
+.iface-class-name { font-weight: 500; }
+.iface-class-teal { border-left-color: var(--teal); color: var(--teal); }
+.iface-class-blue { border-left-color: var(--blue); color: var(--blue); }
+.iface-class-amber { border-left-color: var(--amber); color: var(--amber); }
+.iface-class-amber .iface-class-mark { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.iface-class-copper { border-left-color: var(--copper); color: var(--copper); }
+.iface-class-copper .iface-class-mark {
+  background: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor;
+}
+.iface-class-stone { border-left-color: var(--stone-ink); color: var(--stone-ink); }
+.iface-class-stone .iface-class-mark {
+  background: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 4px);
+}
+
+/* ---------------- rail + canvas ---------------- */
+.iface { display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: start; }
+.iface-rail {
+  border-right: 1px solid var(--rule);
+  background: var(--surface);
+  position: sticky; top: var(--specimen-h);
+  max-height: calc(100vh - var(--bar-h) - var(--specimen-h));
+  overflow-y: auto;
+}
+.iface-canvas { min-width: 0; }
+.iface-note { margin: var(--s2) 0 0; line-height: 1.5; }
+
+/* ---------------- complex selector ---------------- */
+.iface-list { display: grid; gap: 1px; margin-top: var(--s2); }
+.iface-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "id ligand" "id meta" "warn warn";
+  gap: 0 var(--s2);
+  width: 100%; text-align: left; cursor: pointer;
+  padding: 6px var(--s2); background: none;
+  border: 0; border-left: 2px solid transparent;
+  color: var(--ink-2);
+}
+.iface-item:hover { background: color-mix(in srgb, var(--teal) 5%, transparent); color: var(--ink); }
+.iface-item.is-active { background: var(--teal-wash); border-left-color: var(--teal); color: var(--ink); }
+.iface-item-id { grid-area: id; align-self: center; font-size: var(--t-small); font-weight: 600; }
+.iface-item-ligand { grid-area: ligand; font-size: var(--t-small); font-weight: 500; }
+.iface-item-meta { grid-area: meta; }
+.iface-item-warn { grid-area: warn; color: var(--copper); }
+
+/* ---------------- overlay toggles ---------------- */
+.iface-toggles { display: grid; gap: 1px; margin-top: var(--s2); }
+.iface-toggle {
+  display: grid;
+  grid-template-columns: auto 14px minmax(0, 1fr) auto auto;
+  align-items: center; gap: var(--s2);
+  padding: 4px 2px; cursor: pointer; font-size: var(--t-small);
+}
+.iface-toggle:hover { background: color-mix(in srgb, var(--teal) 5%, transparent); }
+.iface-toggle input { accent-color: var(--teal); margin: 0; }
+.iface-toggle.is-zero { color: var(--ink-4); cursor: default; }
+.iface-toggle-rule { height: 2px; display: block; border-radius: 1px; }
+.iface-toggle-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.iface-toggle-n { color: var(--ink-3); }
+.iface-view-actions { margin-top: var(--s2); flex-wrap: wrap; gap: var(--s1); }
+
+/* ---------------- evidence + provenance chips ---------------- */
+.iface-ev, .iface-prov {
+  display: inline-flex; align-items: center; gap: 4px;
+  font: 600 var(--t-micro)/1 var(--mono);
+  letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 3px 5px; border: 1px solid currentColor; border-radius: var(--r);
+  white-space: nowrap;
+}
+.iface-ev::before { content: ""; width: 6px; height: 6px; flex: none; background: currentColor; }
+.iface-ev-teal { color: var(--teal); background: var(--teal-wash); }
+.iface-ev-blue { color: var(--blue); background: var(--blue-wash); }
+.iface-ev-amber { color: var(--amber); background: var(--amber-wash); }
+.iface-ev-amber::before { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.iface-ev-copper { color: var(--copper); background: var(--copper-wash); }
+.iface-ev-copper::before { background: none; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
+.iface-ev-stone { color: var(--stone-ink); background: color-mix(in srgb, var(--stone-ink) 10%, transparent); }
+.iface-ev-stone::before { background: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 4px); }
+
+.iface-prov { margin-left: var(--s2); border-color: transparent; padding: 2px 0; }
+.iface-prov-computed { color: var(--ink-4); }
+.iface-prov-estimated { color: var(--amber); }
+.iface-prov-estimated::before { content: "≈ "; }
+.iface-prov-unavailable { color: var(--copper); }
+.iface-prov-measured { color: var(--teal); }
+.iface-na { color: var(--ink-4); font-style: italic; font-family: var(--sans); }
+
+/* ---------------- structure viewer ---------------- */
+.struct-host {
+  background:
+    radial-gradient(circle at 50% 45%,
+      color-mix(in srgb, var(--teal) 4%, var(--surface)), var(--surface) 72%);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+.struct-host.is-rotating { cursor: grabbing; }
+.struct-host:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.struct-svg { display: block; width: 100%; height: auto; }
+.struct-pick-dot { cursor: pointer; }
+.struct-pick-dot:hover { stroke: var(--teal); stroke-width: 2; }
+.struct-pick-dot:focus { outline: none; stroke: var(--teal); stroke-width: 2.4; }
+
+.lg-rule { width: 18px; height: 2px; display: inline-block; border-radius: 1px; }
+
+/* ---------------- contact map ---------------- */
+.iface-map {
+  display: flex; gap: 2px; align-items: flex-end;
+  overflow-x: auto; padding-bottom: var(--s2);
+}
+.iface-col {
+  flex: 1 1 18px; min-width: 18px;
+  display: grid; justify-items: center; gap: 3px;
+  padding: 2px 0; cursor: pointer;
+  background: none; border: 0; border-bottom: 2px solid transparent;
+  color: var(--ink-3);
+}
+.iface-col:hover { background: color-mix(in srgb, var(--teal) 6%, transparent); color: var(--ink); }
+.iface-col.is-selected { border-bottom-color: var(--teal); background: var(--teal-wash); color: var(--ink); }
+.iface-col-support {
+  width: 10px; height: 54px;
+  background: var(--stone);
+  display: flex; align-items: flex-end;
+}
+.iface-col-fill { width: 100%; background: var(--ink-4); display: block; }
+.iface-col.is-selected .iface-col-fill { background: var(--teal); }
+.iface-col-contact {
+  width: 11px; height: 11px;
+  border: 1px solid var(--rule-strong);
+  background: none;
+}
+.iface-col-contact.is-touching { background: var(--teal); border-color: var(--teal); }
+.iface-col-aa { font: 500 var(--t-small)/1 var(--mono); }
+.iface-col-pos { font-size: 9px; line-height: 1.2; color: var(--ink-4); }
+.iface-col-mut { font-size: 8px; color: var(--copper); line-height: 1; }
+
+/* ---------------- residue inspector ---------------- */
+.iface-inspector { display: grid; gap: var(--s4); }
+.iface-insp-head {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s5); align-items: start;
+  padding-bottom: var(--s3); border-bottom: 1px solid var(--rule-soft);
+}
+.iface-insp-aa { margin: 0; font-size: var(--t-display); line-height: 1; color: var(--teal); }
+.iface-insp-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--s4); }
+.iface-fact p { margin: 2px 0 0; }
+.iface-fact-v { font-size: var(--t-lead); color: var(--ink); }
+.iface-insp-label { margin: 0; }
+.iface-insp-sect { padding-top: var(--s3); border-top: 1px solid var(--rule-soft); }
+.iface-insp-sect > .label { display: block; margin-bottom: var(--s2); }
+.iface-insp-sub { margin: var(--s3) 0 0; }
+.iface-caveat-inline {
+  margin: var(--s1) 0 var(--s2); padding: var(--s2);
+  background: var(--amber-wash); border-left: 2px solid var(--amber);
+  color: var(--ink-2); line-height: 1.5;
+}
+
+.iface-pairs {
+  border: 1px solid var(--rule); border-left: 2px solid var(--rule-strong);
+  border-radius: var(--r); margin-top: var(--s2); background: var(--surface);
+}
+.iface-pairs > summary {
+  display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap;
+  padding: var(--s2) var(--s3); cursor: pointer; list-style: none;
+  font-size: var(--t-small);
+}
+.iface-pairs > summary::-webkit-details-marker { display: none; }
+.iface-pairs > summary:hover { background: color-mix(in srgb, var(--teal) 4%, transparent); }
+.iface-pairs > summary .iface-toggle-rule { width: 18px; }
+.iface-pairs > p { margin: 0 var(--s3) var(--s2); font-size: var(--t-small); line-height: 1.5; }
+.iface-pairs .table-wrap { margin: 0 var(--s3) var(--s3); }
+.iface-pair-table td { padding: 5px var(--s3); }
+
+.iface-measure-grid { margin-top: var(--s4); }
+.iface-sweeps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--s4); }
+.iface-sweeps .ledger-tight { grid-template-columns: 56px minmax(0, 1fr); }
+
+/* ---------------- responsive ---------------- */
+@media (max-width: 1100px) {
+  .iface { grid-template-columns: minmax(0, 1fr); }
+  .iface-rail {
+    position: static; max-height: none;
+    border-right: 0; border-bottom: 1px solid var(--rule);
+  }
+  .iface-band { grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
+  .iface-insp-head { grid-template-columns: minmax(0, 1fr); gap: var(--s3); }
+}
+
+@media (max-width: 860px) {
+  .iface-band { padding: var(--s3) var(--s4); }
+  .iface-map { gap: 1px; }
+  /* The strip scrolls inside itself below this width, so the columns keep
+     room for a three-digit position rather than shrinking it away. */
+  .iface-col { flex: 0 0 24px; min-width: 24px; }
+  .iface-col-support { height: 42px; width: 8px; }
+}

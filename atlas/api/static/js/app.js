@@ -10,6 +10,7 @@ import { MolecularAtlas, renderSpecimen } from './atlas.js';
 import { EvidenceLandscape } from './workspaces.js';
 import { SimulationStudio } from './studio.js';
 import { ModelIntelligence } from './models.js';
+import { InterfaceExplorer } from './interfaces.js';
 
 const state = {
   meta: null,
@@ -26,6 +27,7 @@ const GLYPHS = {
   systems: 'M6 6h.01|M18 6h.01|M6 18h.01|M18 18h.01|M12 12h.01|M6 6l6 6|M18 6l-6 6|M6 18l6-6|M18 18l-6-6',
   studio: 'M3 18c3-9 6 3 9-4s6 2 9-6|M3 3v18h18',
   interaction: 'M9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z|M15 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6z|M11 10.5 13 13.5',
+  interfaces: 'M4 3v18|M20 3v18|M4 7c5 0 5 3 10 3M4 17c5 0 5-3 10-3|M15 10h.01|M15 14h.01|M9 12h.01',
   gero: 'M12 21s-7-4.4-7-10a7 7 0 0 1 14 0c0 5.6-7 10-7 10z|M12 11v6|M9.5 13.5 12 11l2.5 2.5',
   models: 'M4 19V9|M10 19V5|M16 19v-7|M22 19H2',
   evidence: 'M5 4h11l3 3v13H5z|M16 4v3h3|M8 12h8|M8 16h5',
@@ -43,6 +45,7 @@ const MODULES = [
   { group: 'Analysis', items: [
     { id: 'studio', name: 'Simulation Studio', glyph: 'studio' },
     { id: 'interaction', name: 'Interaction Lab', glyph: 'interaction' },
+    { id: 'interfaces', name: 'Interface Explorer', glyph: 'interfaces' },
     { id: 'models', name: 'Model Intelligence', glyph: 'models' },
   ]},
   { group: 'Evidence', items: [
@@ -185,6 +188,12 @@ function mount(opts = {}) {
       workspaces.models.host = host;
       workspaces.models.render();
       break;
+    case 'interfaces':
+      workspaces.interfaces = workspaces.interfaces
+        || new InterfaceExplorer(host, { state });
+      workspaces.interfaces.host = host;
+      workspaces.interfaces.render();
+      break;
     default:
       renderUnbuilt(host, state.view);
   }
@@ -246,7 +255,8 @@ function renderHome(host) {
     entry('Molecular Atlas', 'Position every compound by how much is known about it.', () => go('atlas')),
     entry('Evidence Library', 'See which questions the evidence can and cannot answer.', () => go('evidence')),
     entry('Model Intelligence', 'Held-out performance, calibration and applicability.', () => go('models')),
-    entry('Simulation Studio', 'Run a mechanistic model and read its diagnostics.', () => go('studio')))));
+    entry('Simulation Studio', 'Run a mechanistic model and read its diagnostics.', () => go('studio')),
+    entry('Interface Explorer', 'Follow one residue across ten solved complexes.', () => go('interfaces')))));
 }
 
 function entry(title, body, onclick) {
