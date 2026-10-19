@@ -537,6 +537,97 @@ def create_app() -> Flask:
             "entries": store.get("entries", {}),
         })
 
+    @app.post("/api/sensitivity")
+    def sensitivity():
+        """How each parameter moves the reported quantities.
+
+        Each parameter is varied by a fraction above and below its value while
+        the others are held, and the derived quantities are recomputed. This is
+        a local one-at-a-time analysis: it shows which parameter a conclusion
+        rests on, and it does not explore interactions between them.
+        """
+        body = request.get_json(silent=True) or {}
+        try:
+            model = get_model(body.get("model") or "")
+        except KeyError as exc:
+            return jsonify({"error": str(exc)}), 400
+        dose_mg = body.get("dose_mg")
+        fraction = float(body.get("fraction", 0.2))
+        if not isinstance(dose_mg, (int, float)) or dose_mg <= 0:
+            return jsonify({"error": "'dose_mg' must be a positive number"}), 400
+        if not 0.01 <= fraction <= 0.9:
+            return jsonify({"error": "'fraction' must be between 0.01 and 0.9"}), 400
+        try:
+            base = model.validate({k: float(v) for k, v in (body.get("parameters") or {}).items()})
+        except (ParameterError, TypeError, ValueError) as exc:
+            return jsonify({"error": str(exc), "error_kind": "parameter"}), 400
+
+        def quantities(params: dict[str, float]) -> dict[str, float] | None:
+            try:
+                half = model.terminal_half_life_h(params) or 1.0
+                times = np.concatenate([[0.0], np.logspace(-3, np.log10(20 * half), 900)])
+                compartment = "depot_mg" if "depot_mg" in model.state_names else "central_mg"
+                res = simulate(model, params, [DoseEvent(0.0, float(dose_mg), compartment)],
+                               times, settings=SolverSettings(rtol=1e-9, atol=1e-12))
+                conc = res.concentration_mg_per_l
+                return {
+                    "cmax": float(np.max(conc)) * 1000.0,
+                    "auc": (model.analytical_auc_inf(float(dose_mg), params) or 0.0) * 1000.0,
+                    "half_life": half,
+                }
+            except (SolverError, ValueError, ParameterError):
+                return None
+
+        reference = quantities(base)
+        if reference is None:
+            return jsonify({"error": "the base parameter set could not be solved"}), 400
+
+        rows = []
+        for name, value in base.items():
+            spec = model.spec(name)
+            entry: dict[str, Any] = {"parameter": name, "unit": spec.unit,
+                                     "base_value": value, "low_value": None,
+                                     "high_value": None, "effects": {}}
+            for direction, factor in (("low", 1.0 - fraction), ("high", 1.0 + fraction)):
+                trial = dict(base)
+                candidate = value * factor
+                # Respect the parameter's declared range rather than pushing it
+                # outside the domain the model is defined on.
+                if spec.upper is not None:
+                    candidate = min(candidate, spec.upper)
+                if candidate <= spec.lower and not spec.lower_inclusive:
+                    candidate = spec.lower + abs(value) * 1e-6
+                trial[name] = candidate
+                entry[f"{direction}_value"] = candidate
+                out = quantities(trial)
+                if out is None:
+                    continue
+                for q, v in out.items():
+                    entry["effects"].setdefault(q, {})[direction] = v
+            rows.append(entry)
+
+        # Rank by the widest swing in each quantity, which is what a tornado
+        # plot orders on.
+        for q in ("cmax", "auc", "half_life"):
+            for r in rows:
+                e = r["effects"].get(q, {})
+                lo, hi = e.get("low"), e.get("high")
+                ref = reference[q]
+                e["swing"] = (abs(hi - lo) / ref) if (lo is not None and hi is not None and ref) else None
+
+        return jsonify({
+            "model": model.name,
+            "fraction": fraction,
+            "dose_mg": dose_mg,
+            "reference": reference,
+            "parameters": rows,
+            "method": (
+                "Local one-at-a-time sensitivity. Each parameter is varied while "
+                "the others are held, so interactions between parameters are not "
+                "explored."
+            ),
+        })
+
     @app.get("/api/calibration")
     def calibration():
         return jsonify({

@@ -244,3 +244,117 @@ class TestStaticFrontend:
         html = client.get("/").get_data(as_text=True)
         assert "http://" not in html.replace("http://www.w3.org", "")
         assert "cdn" not in html.lower()
+
+
+class TestSensitivityEndpoint:
+    """Local one-at-a-time sensitivity, used by the Studio's tornado figure."""
+
+    BASE = {
+        "model": "one_compartment_oral",
+        "parameters": {"CL": 6.5, "V": 25.0, "ka": 2.54, "F": 1.0},
+        "dose_mg": 1.75,
+        "fraction": 0.2,
+    }
+
+    def test_returns_an_entry_per_parameter(self, client):
+        r = client.post("/api/sensitivity", json=self.BASE).get_json()
+        assert {p["parameter"] for p in r["parameters"]} == set(self.BASE["parameters"])
+
+    def test_auc_depends_only_on_clearance_and_bioavailability(self, client):
+        """AUC = F*Dose/CL exactly, so V and ka must show no effect at all.
+
+        This is a correctness check on the solver as much as on the endpoint:
+        a non-zero swing here would mean the numerics disagree with the algebra.
+        """
+        r = client.post("/api/sensitivity", json=self.BASE).get_json()
+        swing = {p["parameter"]: p["effects"]["auc"]["swing"] for p in r["parameters"]}
+        assert swing["V"] == pytest.approx(0.0, abs=1e-6)
+        assert swing["ka"] == pytest.approx(0.0, abs=1e-6)
+        assert swing["CL"] > 0.3
+        # F starts at its upper bound of 1.0, so the +20% arm is capped there
+        # and the swing spans 0.8 to 1.0 rather than 0.8 to 1.2.
+        assert swing["F"] == pytest.approx(0.2, abs=0.02)
+
+    def test_half_life_is_unaffected_by_bioavailability(self, client):
+        r = client.post("/api/sensitivity", json=self.BASE).get_json()
+        swing = {p["parameter"]: p["effects"]["half_life"]["swing"] for p in r["parameters"]}
+        assert swing["F"] == pytest.approx(0.0, abs=1e-6)
+        assert swing["CL"] > 0.3 and swing["V"] > 0.3
+
+    def test_iv_bolus_cmax_is_independent_of_clearance(self, client):
+        """For an IV bolus Cmax = Dose/V, so clearance cannot move it."""
+        r = client.post("/api/sensitivity", json={
+            "model": "one_compartment_iv",
+            "parameters": {"CL": 1.0, "V": 10.0},
+            "dose_mg": 10.0,
+        }).get_json()
+        swing = {p["parameter"]: p["effects"]["cmax"]["swing"] for p in r["parameters"]}
+        assert swing["CL"] == pytest.approx(0.0, abs=1e-6)
+        assert swing["V"] > 0.3
+
+    def test_reference_matches_an_unperturbed_simulation(self, client):
+        sens = client.post("/api/sensitivity", json=self.BASE).get_json()
+        sim = client.post("/api/simulate", json={
+            k: v for k, v in self.BASE.items() if k != "fraction"
+        }).get_json()
+        assert sens["reference"]["auc"] == pytest.approx(
+            sim["nca"]["analytic_auc_inf_mg_h_per_l"] * 1000, rel=1e-6)
+
+    def test_bounded_parameters_are_not_pushed_out_of_range(self, client):
+        """F is capped at 1; a +20% variation must not produce F = 1.2."""
+        r = client.post("/api/sensitivity", json=self.BASE).get_json()
+        f = next(p for p in r["parameters"] if p["parameter"] == "F")
+        assert f["high_value"] <= 1.0
+
+    def test_method_is_disclosed_as_one_at_a_time(self, client):
+        r = client.post("/api/sensitivity", json=self.BASE).get_json()
+        assert "one-at-a-time" in r["method"]
+        assert "interactions" in r["method"]
+
+    def test_invalid_parameters_rejected(self, client):
+        r = client.post("/api/sensitivity", json={**self.BASE, "parameters": {"CL": 1.0}})
+        assert r.status_code == 400
+
+    def test_fraction_is_bounded(self, client):
+        assert client.post("/api/sensitivity",
+                           json={**self.BASE, "fraction": 5}).status_code == 400
+
+
+class TestHeldOutDiagnostics:
+    """Per-molecule diagnostics behind the Model Intelligence figures."""
+
+    def test_calibration_report_carries_per_molecule_diagnostics(self, client):
+        d = client.get("/api/calibration").get_json()["report"]["diagnostics"]
+        n = d["n"]
+        assert n > 100
+        for key in ("observed", "predicted", "residual", "similarity",
+                    "modality", "covered", "interval_low", "interval_high"):
+            assert len(d[key]) == n, key
+
+    def test_residuals_are_consistent_with_predictions(self, client):
+        d = client.get("/api/calibration").get_json()["report"]["diagnostics"]
+        for i in range(0, d["n"], 37):
+            assert d["residual"][i] == pytest.approx(
+                d["predicted"][i] - d["observed"][i], abs=1e-9)
+
+    def test_covered_flags_match_the_intervals(self, client):
+        d = client.get("/api/calibration").get_json()["report"]["diagnostics"]
+        for i in range(0, d["n"], 29):
+            inside = d["interval_low"][i] <= d["observed"][i] <= d["interval_high"][i]
+            assert d["covered"][i] is inside
+
+    def test_reliability_curve_spans_several_levels(self, client):
+        rel = client.get("/api/calibration").get_json()["report"]["reliability"]
+        assert len(rel) >= 5
+        assert all(0 < p["empirical"] <= 1 for p in rel)
+
+    def test_wider_nominal_levels_give_wider_intervals(self, client):
+        rel = client.get("/api/calibration").get_json()["report"]["reliability"]
+        widths = [p["median_width"] for p in sorted(rel, key=lambda p: p["nominal"])]
+        assert widths == sorted(widths)
+
+    def test_measured_coverage_tracks_nominal_across_levels(self, client):
+        """Calibration should hold at every level, not only where it was set."""
+        rel = client.get("/api/calibration").get_json()["report"]["reliability"]
+        for p in rel:
+            assert abs(p["empirical"] - p["nominal"]) <= 0.05, p

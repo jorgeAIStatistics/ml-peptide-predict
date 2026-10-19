@@ -139,9 +139,42 @@ def run(seed: int = SEED) -> dict[str, Any]:
         calibration_set_size=len(split.calib_idx),
     ))
 
+    # Per-molecule held-out diagnostics. These are what make a
+    # predicted-versus-observed plot, a residual distribution, an
+    # applicability map and a reliability diagram possible at all: without
+    # them the interface could only restate summary statistics.
+    lo_d, hi_d, half_d = cal_disjoint.intervals(pred_test)
+    diagnostics = {
+        "split": "four-way scaffold-disjoint (test role)",
+        "n": int(len(pred_test)),
+        "molecule_ids": [fs.ids[i] for i in split.test_idx],
+        "observed": [float(v) for v in y_test],
+        "predicted": [float(v) for v in pred_test],
+        "residual": [float(p - o) for p, o in zip(pred_test, y_test)],
+        "similarity": [float(s) for s in sim_test],
+        "modality": [m.value for m in modal_test],
+        "interval_low": [float(v) for v in lo_d],
+        "interval_high": [float(v) for v in hi_d],
+        "covered": [bool(lo <= o <= hi) for lo, hi, o in zip(lo_d, hi_d, y_test)],
+    }
+
+    # Reliability: does measured coverage track the nominal level across the
+    # whole range, or only at the one level the model was calibrated for?
+    reliability = []
+    for alpha in (0.50, 0.40, 0.30, 0.20, 0.10, 0.05):
+        c = ConformalCalibrator(alpha=alpha).fit(resid_disjoint)
+        lo_a, hi_a, _ = c.intervals(pred_test)
+        reliability.append({
+            "nominal": round(1 - alpha, 3),
+            "empirical": float(np.mean((y_test >= lo_a) & (y_test <= hi_a))),
+            "median_width": float(np.median(hi_a - lo_a)),
+        })
+
     return {
         "created_at": utc_now().isoformat(),
         "dataset_version": bundle.version,
+        "diagnostics": diagnostics,
+        "reliability": reliability,
         "seed": seed,
         "alpha": ALPHA,
         "split": {

@@ -7,7 +7,9 @@
 import { $, $$, el, clear, fmtCount, titleCase, label, region } from './ui.js';
 import { api } from './api.js';
 import { MolecularAtlas, renderSpecimen } from './atlas.js';
-import { SimulationStudio, EvidenceLandscape, ModelIntelligence } from './workspaces.js';
+import { EvidenceLandscape } from './workspaces.js';
+import { SimulationStudio } from './studio.js';
+import { ModelIntelligence } from './models.js';
 
 const state = {
   meta: null,

@@ -319,28 +319,43 @@ export function lineFigure(host, config) {
     yt.textContent = config.yLabel || '';
     root.append(yt);
 
-    // crosshair readout against the first series
+    // Crosshair readout against the first series. `cursorIndex` lets several
+    // figures share one cursor, so a time read on one is marked on all.
     const primary = config.series[0];
     const cross = svg('line', { stroke: 'var(--ink-3)', 'stroke-width': 1, 'stroke-dasharray': '2 2', y1: pad.t, y2: pad.t + ih, opacity: 0 });
     const dot = svg('circle', { r: 3.5, fill: 'var(--surface)', stroke: 'var(--teal)', 'stroke-width': 2, opacity: 0 });
     const hit = svg('rect', { x: pad.l, y: pad.t, width: iw, height: ih, fill: 'transparent' });
     root.append(cross, dot, hit);
+
+    const place = (i) => {
+      const p = primary.points[i];
+      if (!p) { cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); return; }
+      cross.setAttribute('x1', sx(p[0])); cross.setAttribute('x2', sx(p[0]));
+      cross.setAttribute('opacity', 1);
+      dot.setAttribute('cx', sx(p[0])); dot.setAttribute('cy', sy(p[1]));
+      dot.setAttribute('opacity', 1);
+    };
+    if (config.cursorIndex != null) place(config.cursorIndex);
+
     hit.addEventListener('pointermove', (ev) => {
       const box = root.getBoundingClientRect();
       const xv = x0 + ((ev.clientX - box.left - pad.l) / iw) * (x1 - x0);
       let best = 0, bd = Infinity;
       primary.points.forEach((p, i) => { const d = Math.abs(p[0] - xv); if (d < bd) { bd = d; best = i; } });
+      place(best);
       const p = primary.points[best];
-      cross.setAttribute('x1', sx(p[0])); cross.setAttribute('x2', sx(p[0])); cross.setAttribute('opacity', 1);
-      dot.setAttribute('cx', sx(p[0])); dot.setAttribute('cy', sy(p[1])); dot.setAttribute('opacity', 1);
       const lines = config.series.map((s) => {
         const q = s.points[best];
         return q ? `${s.name}: ${fmt(q[1], 4)}` : null;
       }).filter(Boolean).join('<br>');
       tip(`<strong>${config.xLabel?.split(' ')[0] || 'x'} = ${fmt(p[0], 4)}</strong>${lines}`, ev.clientX, ev.clientY);
+      if (config.onCursor) config.onCursor(best);
     });
     hit.addEventListener('pointerleave', () => {
-      cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); hideTip();
+      hideTip();
+      if (config.cursorIndex == null) {
+        cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0);
+      }
     });
 
     host.append(root);
@@ -439,6 +454,260 @@ export function barFigure(host, { rows, refValue, refLabel, xLabel }) {
     const xt = svg('text', { class: 'ax-title', x: pad.l + iw / 2, y: height - 4, 'text-anchor': 'middle' });
     xt.textContent = xLabel;
     root.append(xt);
+    host.append(root);
+  };
+  responsive(host, draw);
+}
+
+/* ============================================================
+   Predicted versus observed
+   ============================================================
+   The plot a model has to survive. The identity line is where a perfect
+   model would lie; vertical reach shows each prediction's interval, and
+   colour marks whether the observation fell inside it.
+   ============================================================ */
+
+export function predictedObserved(host, d, { colourBy = 'covered', onHover } = {}) {
+  const draw = () => {
+    const width = Math.max(320, host.clientWidth || 640);
+    const height = Math.min(520, Math.max(340, width * 0.72));
+    host.textContent = '';
+    const pad = { t: 14, r: 16, b: 46, l: 56 };
+    const iw = width - pad.l - pad.r;
+    const ih = height - pad.t - pad.b;
+
+    const all = [...d.observed, ...d.predicted];
+    const lo = Math.floor(Math.min(...all) * 2) / 2;
+    const hi = Math.ceil(Math.max(...all) * 2) / 2;
+    const sx = (v) => pad.l + ((v - lo) / (hi - lo)) * iw;
+    const sy = (v) => pad.t + ih - ((v - lo) / (hi - lo)) * ih;
+
+    const root = svg('svg', { width, height, viewBox: `0 0 ${width} ${height}`,
+      role: 'img', 'aria-label': 'Predicted against observed pKi on held-out molecules' });
+
+    for (const v of niceTicks(lo, hi, 6)) {
+      root.append(svg('line', { class: 'ax-grid', x1: sx(v), x2: sx(v), y1: pad.t, y2: pad.t + ih }));
+      root.append(svg('line', { class: 'ax-grid', x1: pad.l, x2: pad.l + iw, y1: sy(v), y2: sy(v) }));
+      const a = svg('text', { class: 'ax-text', x: sx(v), y: pad.t + ih + 16, 'text-anchor': 'middle' });
+      a.textContent = fmt(v, 3); root.append(a);
+      const b = svg('text', { class: 'ax-text', x: pad.l - 8, y: sy(v) + 3.5, 'text-anchor': 'end' });
+      b.textContent = fmt(v, 3); root.append(b);
+    }
+
+    // identity line, and the +/- 1 log-unit corridor
+    root.append(svg('line', { x1: sx(lo), y1: sy(lo), x2: sx(hi), y2: sy(hi),
+      stroke: 'var(--ink-3)', 'stroke-width': 1.2 }));
+    for (const off of [-1, 1]) {
+      root.append(svg('line', {
+        x1: sx(lo), y1: sy(lo + off), x2: sx(hi), y2: sy(hi + off),
+        stroke: 'var(--rule-strong)', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+    }
+
+    for (let i = 0; i < d.observed.length; i++) {
+      const x = sx(d.observed[i]);
+      const covered = d.covered[i];
+      const colour = colourBy === 'modality'
+        ? (d.modality[i] === 'peptide_like' ? 'var(--blue)' : 'var(--teal)')
+        : (covered ? 'var(--teal)' : 'var(--copper)');
+      const g = svg('g', { class: 'pt', tabindex: '0', role: 'button',
+        'aria-label': `${d.molecule_ids[i]}: observed ${fmt(d.observed[i], 3)}, predicted ${fmt(d.predicted[i], 3)}` });
+      g.append(svg('line', {
+        x1: x, x2: x, y1: sy(d.interval_low[i]), y2: sy(d.interval_high[i]),
+        stroke: colour, 'stroke-width': 1, opacity: 0.22 }));
+      g.append(svg('circle', { cx: x, cy: sy(d.predicted[i]), r: 3.2,
+        fill: colour, 'fill-opacity': 0.72, stroke: colour, 'stroke-width': 0.8 }));
+      const show = (ev) => {
+        tip(`<strong>${d.molecule_ids[i]}</strong>`
+          + `observed ${fmt(d.observed[i], 4)} · predicted ${fmt(d.predicted[i], 4)}<br>`
+          + `residual ${fmt(d.residual[i], 3)} · similarity ${fmt(d.similarity[i], 3)}<br>`
+          + `${covered ? 'inside' : 'outside'} its interval · ${titleCase(d.modality[i])}`,
+          ev.clientX || 0, ev.clientY || 0);
+        if (onHover) onHover(i);
+      };
+      g.addEventListener('pointerenter', show);
+      g.addEventListener('pointermove', show);
+      g.addEventListener('pointerleave', () => { hideTip(); if (onHover) onHover(null); });
+      g.addEventListener('focus', show);
+      g.addEventListener('blur', () => { hideTip(); if (onHover) onHover(null); });
+      root.append(g);
+    }
+
+    const xt = svg('text', { class: 'ax-title', x: pad.l + iw / 2, y: height - 6, 'text-anchor': 'middle' });
+    xt.textContent = 'observed pKi'; root.append(xt);
+    const yt = svg('text', { class: 'ax-title', x: 12, y: pad.t + ih / 2,
+      'text-anchor': 'middle', transform: `rotate(-90 12 ${pad.t + ih / 2})` });
+    yt.textContent = 'predicted pKi'; root.append(yt);
+    host.append(root);
+  };
+  responsive(host, draw);
+}
+
+/* ============================================================
+   Applicability map — error against similarity to training
+   ============================================================ */
+
+export function applicabilityMap(host, d) {
+  const draw = () => {
+    const width = Math.max(300, host.clientWidth || 600);
+    const height = 280;
+    host.textContent = '';
+    const pad = { t: 14, r: 16, b: 46, l: 56 };
+    const iw = width - pad.l - pad.r;
+    const ih = height - pad.t - pad.b;
+    const err = d.residual.map(Math.abs);
+    const maxErr = Math.max(...err, 1);
+    const sx = (v) => pad.l + v * iw;
+    const sy = (v) => pad.t + ih - (v / maxErr) * ih;
+
+    const root = svg('svg', { width, height, viewBox: `0 0 ${width} ${height}`,
+      role: 'img', 'aria-label': 'Absolute error against similarity to the training set' });
+    for (const v of niceTicks(0, maxErr, 5)) {
+      root.append(svg('line', { class: 'ax-grid', x1: pad.l, x2: pad.l + iw, y1: sy(v), y2: sy(v) }));
+      const t = svg('text', { class: 'ax-text', x: pad.l - 8, y: sy(v) + 3.5, 'text-anchor': 'end' });
+      t.textContent = fmt(v, 2); root.append(t);
+    }
+    for (const v of [0, 0.2, 0.4, 0.6, 0.8, 1]) {
+      root.append(svg('line', { class: 'ax-grid', x1: sx(v), x2: sx(v), y1: pad.t, y2: pad.t + ih }));
+      const t = svg('text', { class: 'ax-text', x: sx(v), y: pad.t + ih + 16, 'text-anchor': 'middle' });
+      t.textContent = v.toFixed(1); root.append(t);
+    }
+
+    // binned mean error, which is the trend the cloud is hiding
+    const bins = [[0, 0.4], [0.4, 0.55], [0.55, 0.7], [0.7, 1.01]];
+    const means = [];
+    for (const [a, b] of bins) {
+      const sel = err.filter((_, i) => d.similarity[i] >= a && d.similarity[i] < b);
+      if (sel.length >= 3) means.push({ x: (a + Math.min(b, 1)) / 2, y: sel.reduce((p, c) => p + c, 0) / sel.length, n: sel.length });
+    }
+
+    for (let i = 0; i < err.length; i++) {
+      root.append(svg('circle', { cx: sx(d.similarity[i]), cy: sy(err[i]), r: 2.6,
+        fill: d.covered[i] ? 'var(--teal)' : 'var(--copper)', 'fill-opacity': 0.4 }));
+    }
+    if (means.length > 1) {
+      root.append(svg('path', {
+        d: means.map((m, i) => `${i ? 'L' : 'M'}${sx(m.x).toFixed(1)},${sy(m.y).toFixed(1)}`).join(''),
+        fill: 'none', stroke: 'var(--ink)', 'stroke-width': 1.8 }));
+      for (const m of means) {
+        root.append(svg('circle', { cx: sx(m.x), cy: sy(m.y), r: 3.6, fill: 'var(--ink)' }));
+      }
+    }
+
+    const xt = svg('text', { class: 'ax-title', x: pad.l + iw / 2, y: height - 6, 'text-anchor': 'middle' });
+    xt.textContent = 'max Tanimoto to training set'; root.append(xt);
+    const yt = svg('text', { class: 'ax-title', x: 12, y: pad.t + ih / 2,
+      'text-anchor': 'middle', transform: `rotate(-90 12 ${pad.t + ih / 2})` });
+    yt.textContent = 'absolute error'; root.append(yt);
+    host.append(root);
+  };
+  responsive(host, draw);
+}
+
+/* ============================================================
+   Reliability diagram — measured against nominal coverage
+   ============================================================ */
+
+export function reliabilityFigure(host, points) {
+  const draw = () => {
+    const width = Math.max(260, host.clientWidth || 400);
+    const height = Math.min(340, width);
+    host.textContent = '';
+    const pad = { t: 14, r: 16, b: 44, l: 50 };
+    const iw = width - pad.l - pad.r;
+    const ih = height - pad.t - pad.b;
+    const s = (v) => ({ x: pad.l + ((v - 0.4) / 0.6) * iw, y: pad.t + ih - ((v - 0.4) / 0.6) * ih });
+
+    const root = svg('svg', { width, height, viewBox: `0 0 ${width} ${height}`,
+      role: 'img', 'aria-label': 'Measured coverage against nominal level' });
+    for (const v of [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]) {
+      const p = s(v);
+      root.append(svg('line', { class: 'ax-grid', x1: p.x, x2: p.x, y1: pad.t, y2: pad.t + ih }));
+      root.append(svg('line', { class: 'ax-grid', x1: pad.l, x2: pad.l + iw, y1: p.y, y2: p.y }));
+      const a = svg('text', { class: 'ax-text', x: p.x, y: pad.t + ih + 16, 'text-anchor': 'middle' });
+      a.textContent = v.toFixed(1); root.append(a);
+      const b = svg('text', { class: 'ax-text', x: pad.l - 8, y: p.y + 3.5, 'text-anchor': 'end' });
+      b.textContent = v.toFixed(1); root.append(b);
+    }
+    const p0 = s(0.4), p1 = s(1.0);
+    root.append(svg('line', { x1: p0.x, y1: p0.y, x2: p1.x, y2: p1.y,
+      stroke: 'var(--ink-3)', 'stroke-width': 1.2, 'stroke-dasharray': '4 3' }));
+
+    const path = points.map((pt, i) => {
+      const a = s(pt.nominal), b = s(pt.empirical);
+      return `${i ? 'L' : 'M'}${a.x.toFixed(1)},${b.y.toFixed(1)}`;
+    }).join('');
+    root.append(svg('path', { d: path, fill: 'none', stroke: 'var(--teal)', 'stroke-width': 1.8 }));
+    for (const pt of points) {
+      const a = s(pt.nominal), b = s(pt.empirical);
+      const g = svg('g', { class: 'pt', tabindex: '0',
+        'aria-label': `nominal ${pt.nominal}, measured ${pt.empirical.toFixed(3)}` });
+      g.append(svg('circle', { cx: a.x, cy: b.y, r: 4, fill: 'var(--teal)' }));
+      const show = (ev) => tip(`<strong>nominal ${pt.nominal.toFixed(2)}</strong>`
+        + `measured ${pt.empirical.toFixed(3)}<br>median width ${pt.median_width.toFixed(2)} log units`,
+        ev.clientX || 0, ev.clientY || 0);
+      g.addEventListener('pointerenter', show);
+      g.addEventListener('pointerleave', hideTip);
+      g.addEventListener('focus', show);
+      g.addEventListener('blur', hideTip);
+      root.append(g);
+    }
+    const xt = svg('text', { class: 'ax-title', x: pad.l + iw / 2, y: height - 6, 'text-anchor': 'middle' });
+    xt.textContent = 'nominal coverage'; root.append(xt);
+    const yt = svg('text', { class: 'ax-title', x: 12, y: pad.t + ih / 2,
+      'text-anchor': 'middle', transform: `rotate(-90 12 ${pad.t + ih / 2})` });
+    yt.textContent = 'measured'; root.append(yt);
+    host.append(root);
+  };
+  responsive(host, draw);
+}
+
+/* ============================================================
+   Tornado — which parameter a conclusion rests on
+   ============================================================ */
+
+export function tornadoFigure(host, { rows, reference, quantity, unit }) {
+  const draw = () => {
+    const width = Math.max(300, host.clientWidth || 560);
+    host.textContent = '';
+    const rowH = 30;
+    const pad = { t: 24, r: 20, b: 34, l: 86 };
+    const ih = rows.length * rowH;
+    const height = ih + pad.t + pad.b;
+    const iw = width - pad.l - pad.r;
+
+    const vals = rows.flatMap((r) => [r.low, r.high]).filter((v) => v != null);
+    const lo = Math.min(reference, ...vals);
+    const hi = Math.max(reference, ...vals);
+    const padFrac = (hi - lo) * 0.08 || 1;
+    const x0 = lo - padFrac, x1 = hi + padFrac;
+    const sx = (v) => pad.l + ((v - x0) / (x1 - x0)) * iw;
+
+    const root = svg('svg', { width, height, viewBox: `0 0 ${width} ${height}`,
+      role: 'img', 'aria-label': `Parameter sensitivity of ${quantity}` });
+    for (const v of niceTicks(x0, x1, 5)) {
+      root.append(svg('line', { class: 'ax-grid', x1: sx(v), x2: sx(v), y1: pad.t, y2: pad.t + ih }));
+      const t = svg('text', { class: 'ax-text', x: sx(v), y: pad.t + ih + 15, 'text-anchor': 'middle' });
+      t.textContent = fmt(v, 3); root.append(t);
+    }
+    rows.forEach((r, i) => {
+      const y = pad.t + i * rowH + rowH / 2;
+      if (r.low != null && r.high != null) {
+        const a = Math.min(sx(r.low), sx(r.high)), b = Math.max(sx(r.low), sx(r.high));
+        root.append(svg('rect', { x: a, y: y - 8, width: Math.max(2, b - a), height: 16,
+          fill: 'var(--teal)', 'fill-opacity': 0.26, stroke: 'var(--teal)', 'stroke-width': 1 }));
+      }
+      const lab = svg('text', { class: 'ax-text', x: pad.l - 10, y: y + 3.5, 'text-anchor': 'end' });
+      lab.textContent = r.parameter; root.append(lab);
+      const sw = svg('text', { class: 'ax-text', x: pad.l + iw + 4, y: y + 3.5, fill: 'var(--ink-3)' });
+      sw.textContent = r.swing != null ? `${(r.swing * 100).toFixed(0)}%` : '—';
+      root.append(sw);
+    });
+    const rx = sx(reference);
+    root.append(svg('line', { x1: rx, x2: rx, y1: pad.t - 6, y2: pad.t + ih,
+      stroke: 'var(--ink)', 'stroke-width': 1.4 }));
+    const rt = svg('text', { class: 'ax-text', x: rx, y: pad.t - 10, 'text-anchor': 'middle', fill: 'var(--ink)' });
+    rt.textContent = `${fmt(reference, 4)}${unit ? ` ${unit}` : ''}`;
+    root.append(rt);
     host.append(root);
   };
   responsive(host, draw);

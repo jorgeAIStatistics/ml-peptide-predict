@@ -12,11 +12,12 @@ async function get(path, { fresh = false } = {}) {
   return data;
 }
 
-async function post(path, body) {
+async function post(path, body, { signal } = {}) {
   const res = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal,
   });
   const data = await res.json().catch(() => ({ error: 'malformed response' }));
   if (!res.ok) throw new Error(data.error || `${res.status}`);
@@ -32,6 +33,7 @@ export const api = {
   verification: () => get('/api/verification'),
   calibration: () => get('/api/calibration'),
   pkParameters: () => get('/api/pk-parameters'),
-  predict: (body) => post('/api/predict', body),
-  simulate: (body) => post('/api/simulate', body),
+  predict: (body, opts) => post('/api/predict', body, opts),
+  simulate: (body, opts) => post('/api/simulate', body, opts),
+  sensitivity: (body, opts) => post('/api/sensitivity', body, opts),
 };

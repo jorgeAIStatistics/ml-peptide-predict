@@ -452,3 +452,45 @@
   .cap-name { min-width: 120px; }
   .readings { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
 }
+
+/* ---------------- studio: live controls ---------------- */
+.param-live { display: grid; gap: 4px; }
+.param-live input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 3px; background: var(--rule); border-radius: 2px;
+  cursor: pointer;
+}
+.param-live input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--teal); border: 2px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--teal);
+}
+.param-live input[type="range"]:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+.solve-status {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--teal); opacity: 0.35;
+  transition: opacity var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.solve-status.is-busy { opacity: 1; background: var(--amber); animation: pulse 900ms infinite var(--ease); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.live-toggle { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-3); cursor: pointer; }
+.live-toggle input { accent-color: var(--teal); }
+
+.cursor-readout { color: var(--teal); }
+
+/* ---------------- model diagnostics ---------------- */
+/* Figures keep their natural height so each caption sits under its own
+   figure rather than being pushed to the bottom of a stretched row. */
+.diag-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--s6); align-items: start; }
+.split-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--s6); align-items: start; }
+.toolbar-flush { margin: 0 calc(var(--s6) * -1); }
+
+@media (max-width: 860px) {
+  .toolbar-flush { margin: 0 calc(var(--s4) * -1); }
+  .diag-grid, .split-grid { gap: var(--s5); }
+}

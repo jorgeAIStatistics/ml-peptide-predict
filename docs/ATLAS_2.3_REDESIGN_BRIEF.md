@@ -126,9 +126,29 @@ notation), `api` (one fetch layer), `figures` (scientific figures), `atlas`,
 `workspaces`, `app` (shell and routing) — plus `design.css` (tokens) and
 `components.css` (research components).
 
+### Stage 3 complete
+Simulation Studio and Model Intelligence rebuilt as integrated environments.
+
+**Studio.** Three zones. Each parameter has a number field and a slider on the
+same value; changing either re-solves after a 260 ms settle, and a run that is
+superseded is cancelled with `AbortController` rather than allowed to land out
+of order. The concentration and compartment figures share one time cursor. A
+scenario can be held as a ghost baseline. A tornado figure, backed by a new
+`/api/sensitivity` endpoint, shows which parameter a conclusion rests on.
+Observed label values overlay the curve as crosshair marks where the compound
+has them.
+
+**Model Intelligence.** Four diagnostic figures over 396 held-out molecules
+from the scaffold-disjoint test role, newly saved by the calibration
+experiment: predicted-against-observed with per-point intervals, an
+applicability map with binned mean error, error by molecular family, and a
+reliability diagram. Split comparisons became linked small multiples.
+
+**Finding.** Measured coverage tracks nominal across the whole range — 0.485 at
+0.50, 0.626 at 0.60, 0.715 at 0.70, 0.798 at 0.80, 0.909 at 0.90, 0.965 at 0.95
+— so the intervals are calibrated at every level, not only where they were set.
+
 ### Remaining
-- **Stage 3** Simulation Studio and Model Intelligence are rebuilt in the new
-  language but deserve the linked-view and live-parameter work the brief asks for.
 - **Stage 4** Evidence Library is rebuilt as a reason landscape; the coverage
   map and timeline views are not built.
 - **Stage 5** Systems Explorer, Geroscience Atlas and Interaction Laboratory are
