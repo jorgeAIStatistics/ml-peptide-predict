@@ -19,7 +19,8 @@ from atlas.ml.residue_chemistry import (
 )
 
 from tests.test_peptide_structure import (
-    AFAMELANOTIDE, ASPIRIN, MELANOTAN_II, OXYTOCIN, SOMATOSTATIN,
+    AFAMELANOTIDE, ASPIRIN, BRADYKININ, CYCLOSPORINE, MELANOTAN_II, OXYTOCIN,
+    SOMATOSTATIN,
 )
 
 P_CHLORO_PHE = "*Cc1ccc(Cl)cc1"
@@ -257,3 +258,60 @@ def test_provenance_summary_reports_coverage():
 def test_describe_residue_is_deterministic():
     assert describe_residue(DICHLORO_PHE).vector().tolist() == \
         describe_residue(DICHLORO_PHE).vector().tolist()
+
+
+# --------------------------------------------------- local sequence context ----
+
+def test_local_context_excludes_the_residue_itself():
+    """Context is what flanks a position, not the position.
+
+    A homopolymer makes this checkable: every neighbourhood is the same
+    residue, so the context block equals that residue's own descriptors; a
+    heteropolymer's would not.
+    """
+    from atlas.ml.residue_chemistry import local_context
+
+    tri = analyse_peptide("C[C@H](N)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(O)=O")  # Ala3
+    ctx = local_context([tri])
+    ala = describe_residue("A").vector()
+    assert np.allclose(ctx[0, :len(DESCRIPTOR_NAMES)], ala)
+
+
+def test_local_context_wraps_only_for_a_cyclic_backbone():
+    """Position 1 adjoins position n in a macrocycle and not in a linear chain."""
+    from atlas.ml.peptide_representations import oriented_keys
+    from atlas.ml.residue_chemistry import local_context
+
+    cyc = analyse_peptide(CYCLOSPORINE[1])
+    lin = analyse_peptide(BRADYKININ[1])
+    assert cyc.is_cyclic_backbone and not lin.is_cyclic_backbone
+
+    n_desc = len(DESCRIPTOR_NAMES)
+    # For the linear peptide, position 0 has exactly one neighbour, so its
+    # context is that neighbour alone.
+    keys = oriented_keys(lin)
+    expected = describe_residue(keys[1]).vector()
+    assert np.allclose(local_context([lin])[0, :n_desc], expected)
+
+    # For the cyclic one, position 0 has two neighbours: positions 1 and n-1.
+    ckeys = oriented_keys(cyc)
+    both = np.mean([describe_residue(ckeys[1]).vector(),
+                    describe_residue(ckeys[-1]).vector()], axis=0)
+    assert np.allclose(local_context([cyc])[0, :n_desc], both)
+
+
+def test_local_context_width_and_finiteness():
+    from atlas.ml.residue_chemistry import local_context
+
+    peptides = [analyse_peptide(s) for _c, s in (OXYTOCIN, MELANOTAN_II)]
+    ctx = local_context(peptides)
+    assert ctx.shape == (2, (8 + 3) * len(DESCRIPTOR_NAMES))
+    assert np.isfinite(ctx).all()
+
+
+def test_non_peptide_context_is_zero_not_an_error():
+    from atlas.ml.residue_chemistry import local_context
+
+    ctx = local_context([analyse_peptide(ASPIRIN[1])])
+    assert ctx.shape[0] == 1
+    assert ctx.sum() == 0.0

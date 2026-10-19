@@ -47,6 +47,7 @@ __all__ = [
     "Provenance", "ResidueProperties", "describe_residue", "DESCRIPTOR_NAMES",
     "DESCRIPTOR_PROVENANCE", "residue_property_matrix", "positional_chemistry",
     "ASSUMED_PH", "REFERENCE_PKA", "ionised_fraction", "provenance_summary",
+    "local_context",
 ]
 
 
@@ -384,6 +385,58 @@ def positional_chemistry(
             out[row, base:base + n_desc] = m.sum(axis=0)
             out[row, base + n_desc:base + 2 * n_desc] = m.mean(axis=0)
             out[row, base + 2 * n_desc] = len(keys)
+    return out
+
+
+def local_context(
+    analyses: Sequence[PeptideAnalysis], *, window: int = 1,
+    n_term: int = 8, c_term: int = 3,
+) -> np.ndarray:
+    """Chemistry of each position's sequence neighbours.
+
+    The descriptors above treat a residue in isolation, but a residue's
+    behaviour depends on what flanks it: a charged side chain beside an
+    aromatic one is not the same environment as one beside a second charge.
+    This adds, per position, the mean descriptor vector of the residues within
+    ``window`` positions either side, excluding the residue itself.
+
+    Neighbours **wrap** for a head-to-tail cyclic backbone, where position 1
+    genuinely adjoins position n, and do not wrap for a linear or side-chain
+    bridged one, where the termini are real. 58 of 630 peptides are cyclic.
+    """
+    from atlas.ml.peptide_representations import oriented_keys
+
+    n_desc = len(DESCRIPTOR_NAMES)
+    out = np.zeros((len(analyses), (n_term + c_term) * n_desc), dtype=float)
+
+    for row, a in enumerate(analyses):
+        keys = oriented_keys(a)
+        if not keys:
+            continue
+        vectors = [describe_residue(k).vector() for k in keys]
+        cyclic = a.is_cyclic_backbone
+        n = len(keys)
+
+        def neighbourhood(i: int) -> np.ndarray:
+            picks = []
+            for offset in range(-window, window + 1):
+                if offset == 0:
+                    continue
+                j = i + offset
+                if cyclic:
+                    picks.append(vectors[j % n])
+                elif 0 <= j < n:
+                    picks.append(vectors[j])
+            return (np.mean(picks, axis=0) if picks
+                    else np.zeros(n_desc, dtype=float))
+
+        slots = list(range(min(n_term, n)))
+        tail = list(range(max(0, n - c_term), n))
+        for slot, i in enumerate(slots):
+            out[row, slot * n_desc:(slot + 1) * n_desc] = neighbourhood(i)
+        for k, i in enumerate(tail):
+            slot = n_term + (c_term - len(tail)) + k
+            out[row, slot * n_desc:(slot + 1) * n_desc] = neighbourhood(i)
     return out
 
 

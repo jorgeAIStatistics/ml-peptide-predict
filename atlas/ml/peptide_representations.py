@@ -226,9 +226,10 @@ def build_representations(
     # Imported here rather than at module scope: residue_chemistry needs
     # oriented_keys from this module, and a top-level import either way round
     # would be circular.
-    from atlas.ml.residue_chemistry import positional_chemistry
+    from atlas.ml.residue_chemistry import local_context, positional_chemistry
 
     chem = positional_chemistry(analyses)
+    context = local_context(analyses)
 
     mats: dict[str, np.ndarray] = {
         "topology": topo,
@@ -238,6 +239,8 @@ def build_representations(
         "positional_onehot+topology": np.hstack([onehot, topo]),
         "positional_fragment_fp+topology": np.hstack([fragfp, topo]),
         "residue_chemistry+positional_fragment_fp": np.hstack([chem, fragfp]),
+        "residue_chemistry+local_context": np.hstack([chem, context]),
+        "positional_fragment_fp+local_context": np.hstack([fragfp, context]),
     }
     for name, mat in (extra or {}).items():
         mats[name] = mat

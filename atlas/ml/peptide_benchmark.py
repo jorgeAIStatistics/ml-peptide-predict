@@ -300,17 +300,42 @@ def split_diagnostics(
 
 # --------------------------------------------------------------- benchmark ----
 
+def _assay_block(
+    records: Sequence[Any] | None, tr: np.ndarray
+) -> np.ndarray | None:
+    """Assay-context features, with vocabularies fitted on training rows only.
+
+    Returns None when the metadata has not been built, so the arm is skipped
+    rather than silently replaced by zeros.
+    """
+    from atlas.ml.assay_context import (
+        ASSAY_CONTEXT_PATH, assay_encoding, build_assay_vocabularies,
+        load_assay_metadata,
+    )
+
+    if records is None or not ASSAY_CONTEXT_PATH.exists():
+        return None
+    metadata = load_assay_metadata()["metadata"]
+    vocab = build_assay_vocabularies([records[i] for i in tr], metadata)
+    if not vocab["bao_label"]:
+        return None
+    return assay_encoding(records, metadata, vocab)
+
+
 def _evaluate(
     analyses: Sequence, y: np.ndarray, morgan: np.ndarray,
     tr: np.ndarray, te: np.ndarray,
+    records: Sequence[Any] | None = None,
 ) -> dict[str, dict[str, float]]:
     """Fit every representation on one split, vocabulary from training only."""
     # Fitting the vocabulary on all molecules would let the test set define the
     # feature space, which is leakage even though no label is touched.
     vocab = residue_vocabulary([analyses[i] for i in tr])
-    reps = build_representations(
-        analyses, vocabulary=vocab, extra={"morgan_fp": morgan.astype(float)},
-    )
+    extra: dict[str, np.ndarray] = {"morgan_fp": morgan.astype(float)}
+    assay = _assay_block(records, tr)
+    if assay is not None:
+        extra["assay_context"] = assay
+    reps = build_representations(analyses, vocabulary=vocab, extra=extra)
 
     results: dict[str, dict[str, float]] = {
         "baseline_mean": _score(
@@ -514,6 +539,47 @@ def _findings(
         "it is a narrower claim than the R2 alone suggests."
     )
 
+    # Ablation: every feature group added to the best single representation,
+    # one at a time, cross-series. Generated rather than narrated so the
+    # verdict cannot drift from the numbers.
+    added = {k: v for k, v in xc.items() if k.endswith("_added_to_fragment_fp")}
+    if added:
+        helped = sorted(k.replace("_added_to_fragment_fp", "")
+                        for k, v in added.items() if v["a_better"])
+        hurt = [k for k in sorted(added) if not added[k]["a_better"]]
+        out.append(
+            f"Ablation, cross-series, random forest: of {len(added)} feature "
+            f"groups added one at a time to the positional fragment "
+            f"fingerprint, {len(helped)} improved it and {len(hurt)} made it "
+            f"worse. Helped: {', '.join(helped) or 'none'}. Hurt: "
+            + "; ".join(
+                f"{k.replace('_added_to_fragment_fp', '')} "
+                f"({added[k]['best_mae_b']:.3f} to {added[k]['best_mae_a']:.3f})"
+                for k in hurt
+            )
+            + ". Across ATLAS 2.4 and 2.5 the representation layer has been "
+            "extended four times -- explicit topology, residue chemistry, local "
+            "sequence context and assay context -- and **none improves "
+            "cross-series generalisation.** The best cross-series model remains "
+            f"{cb_name} at MAE {cb['mae']:.3f}, unchanged. On this dataset the "
+            "representation is not the binding constraint, which agrees with "
+            "Stage A's effective sample size of ~30 series and with the pocket "
+            "encoder's null result."
+        )
+        ac_cross = cross["results"].get("assay_context__forest")
+        ac_within = within["results"].get("assay_context__forest")
+        if ac_cross and ac_within:
+            out.append(
+                f"Assay context behaves as its own caveat warned. Alone it "
+                f"scores R2 {ac_cross['r2']:+.3f} cross-series -- far worse "
+                f"than the mean -- and R2 {ac_within['r2']:+.3f} within-series. "
+                "Assay identity correlates with document and so with analogue "
+                "series: when whole series are held out the assay features "
+                "point at training series and mislead, and when series are "
+                "shared they carry weak real signal. That is a reason to keep "
+                "it as a recorded covariate, not a predictive feature."
+            )
+
     verdict = gate["passes"]
     out.append(
         f"Deployment gate: {'PASS' if verdict else 'FAIL'}. "
@@ -587,6 +653,12 @@ def run_benchmark(
     y = fs.y[keep]
     morgan = fs.fingerprints[keep]
 
+    # Records aligned to the peptide subset, for the assay-context arm.
+    # featurize drops unparseable molecules, so alignment goes through fs.ids
+    # rather than through the original record order.
+    by_id = {r.molecule_chembl_id: r for r in records}
+    pep_records = [by_id[i] for i, k in zip(fs.ids, keep) if k]
+
     ceilings = representational_ceilings(pep_an, y)
 
     labels = cross_series_groups(morgan)
@@ -597,7 +669,7 @@ def run_benchmark(
         "evaluation": "whole analogue series held out",
         "n_clusters": int(len(np.unique(labels))),
         "diagnostics": split_diagnostics(morgan, pep_an, tr_x, te_x),
-        "results": _evaluate(pep_an, y, morgan, tr_x, te_x),
+        "results": _evaluate(pep_an, y, morgan, tr_x, te_x, pep_records),
     }
 
     # What a lookup of the series mean achieves, as the bar a within-series
@@ -611,7 +683,7 @@ def run_benchmark(
         "min_cluster_size": 4,
         "series_mean_predictor_mae": float(np.abs(series_mean - y[te_w]).mean()),
         "diagnostics": split_diagnostics(morgan, pep_an, tr_w, te_w),
-        "results": _evaluate(pep_an, y, morgan, tr_w, te_w),
+        "results": _evaluate(pep_an, y, morgan, tr_w, te_w, pep_records),
     }
 
     # The contrasts Stage B exists to settle, each a like-for-like comparison
@@ -646,6 +718,12 @@ def run_benchmark(
                 d["results"], "residue_chemistry", "positional_fragment_fp"),
             "residue_chemistry_added_to_fragment_fp": pair(
                 d["results"], "residue_chemistry+positional_fragment_fp",
+                "positional_fragment_fp"),
+            "local_context_added_to_fragment_fp": pair(
+                d["results"], "positional_fragment_fp+local_context",
+                "positional_fragment_fp"),
+            "assay_context_added_to_fragment_fp": pair(
+                d["results"], "positional_fragment_fp+assay_context",
                 "positional_fragment_fp"),
         }
         for ev, d in (("cross_series", cross), ("within_series", within))

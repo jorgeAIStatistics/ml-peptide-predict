@@ -1,0 +1,975 @@
+{
+  "audit": {
+    "n_assays_referenced": 89,
+    "n_assays_resolved": 89,
+    "field_variation": {
+      "assay_type": {
+        "n_distinct": 1,
+        "counts": {
+          "B": 89
+        }
+      },
+      "bao_format": {
+        "n_distinct": 4,
+        "counts": {
+          "BAO_0000219": 56,
+          "BAO_0000357": 27,
+          "BAO_0000249": 4,
+          "BAO_0000019": 2
+        }
+      },
+      "bao_label": {
+        "n_distinct": 4,
+        "counts": {
+          "cell-based format": 56,
+          "single protein format": 27,
+          "cell membrane format": 4,
+          "assay format": 2
+        }
+      },
+      "assay_cell_type": {
+        "n_distinct": 7,
+        "counts": {
+          "HEK293": 46,
+          "None": 32,
+          "CHO": 4,
+          "CHO-K1": 3,
+          "HEK2936E": 2,
+          "BHK": 1,
+          "Sf9": 1
+        }
+      },
+      "confidence_score": {
+        "n_distinct": 2,
+        "counts": {
+          "9": 71,
+          "8": 18
+        }
+      },
+      "relationship_type": {
+        "n_distinct": 2,
+        "counts": {
+          "D": 71,
+          "H": 18
+        }
+      },
+      "assay_organism": {
+        "n_distinct": 2,
+        "counts": {
+          "Homo sapiens": 71,
+          "None": 18
+        }
+      }
+    },
+    "non_varying_fields": [
+      "assay_type"
+    ],
+    "assays_per_molecule": {
+      "mean": 1.2463402322059567,
+      "max": 7
+    },
+    "molecules_spanning_several_formats": 162,
+    "missing_conditions": [
+      "ph",
+      "temperature_c",
+      "ionic_strength_mm",
+      "buffer_composition",
+      "incubation_time_min",
+      "radioligand_concentration_nm"
+    ],
+    "caveat": "Assay identity correlates with document, and document with analogue series, so this context can proxy for series membership. A gain from it is not evidence of learned assay physics and the benchmark ablates it."
+  },
+  "metadata": {
+    "CHEMBL712906": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity for human Melanocortin-4 receptor (hMC4R)"
+    },
+    "CHEMBL714436": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity towards human melanocortin 4 receptor (hMC4R)"
+    },
+    "CHEMBL714437": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity towards human melanocortin 4 receptor using [125I]NDP-alpha-MSH as a radioligand in HEK293 cells"
+    },
+    "CHEMBL714438": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity against Melanocortin 4 receptor by gamma-MCH displacement."
+    },
+    "CHEMBL714439": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Inhibitory activity against human melanocortin receptor human Melanocortin 4 receptor was determined"
+    },
+    "CHEMBL714440": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity in competition with [125I]NDP-MSH on recombinant melanocortin 4 receptor"
+    },
+    "CHEMBL717597": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity towards Melanocortin 4 receptor, expressed as negative log of the Ki value"
+    },
+    "CHEMBL715501": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "In vitro binding affinity towards melanocortin 4 receptor."
+    },
+    "CHEMBL824629": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity against human melanocortin receptor 4 (hMC4R) (concentration of the peptide at 50% specific binding)"
+    },
+    "CHEMBL828210": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity for human melanocortin 4 receptor"
+    },
+    "CHEMBL829432": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]NDP-MSH (radioligand) binding to the hMC4R stably expressed in HEK293 cells "
+    },
+    "CHEMBL828893": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity towards human melanocortin 4 receptor expressed in HEK 293 cells using [125I]NDP-MSH"
+    },
+    "CHEMBL828178": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]-AgRP(83132) (radioligand) binding to the hMC4R stably expressed in HEK293 cells"
+    },
+    "CHEMBL829626": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]-AgRP(83132) (radioligand) binding to the hMC4R stably expressed in HEK293 cells; "
+    },
+    "CHEMBL826380": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from HEK293 cells expressing human melanocortin-4 receptor"
+    },
+    "CHEMBL828966": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity towards human melanocortin 4 receptor expressed in HEK 293 cells was determined by using [125I]NDP-MSH as radioligand"
+    },
+    "CHEMBL829696": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]NDP-alpha-MSH binding to melanocortin-4 receptor expressed in HEK293 cells"
+    },
+    "CHEMBL1027398": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of europium-labeled NDP-alpha-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL1116909": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [3H] melanocortin-2 from human recombinant MC4 receptor expressed in CHO cells by scintillation counting"
+    },
+    "CHEMBL1687623": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "BHK",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-alpha-MSH from human MC4 receptor expressed in BHK cells"
+    },
+    "CHEMBL1909167": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000249",
+      "bao_label": "cell membrane format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "DRUGMATRIX: Melanocortin MC4 radioligand binding (ligand: [125I] NDP-alpha-MSH)"
+    },
+    "CHEMBL1918645": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of Eu-DTAP-NDP-alpha-MSH-NH2 from MC4 receptor expressed in human HEK293 cells after 1 hr by time resolved fluorescence method"
+    },
+    "CHEMBL1925782": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of Eu-NDP-alphaMSH from human MC4 receptor expressed in human HEK293 cells after 1.5 hrs by time-resolved fluorescence analysis"
+    },
+    "CHEMBL2040206": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDPMSH from human MC4 receptor expressed in HEK293 cells after 2 hrs by liquid scintillation counting"
+    },
+    "CHEMBL2073120": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NAD-alpha-MSH from MC4 receptor after 2 hrs by gamma counting in presence of ovalbumin"
+    },
+    "CHEMBL2395689": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to human MC4 receptor by radioligand displacement assay"
+    },
+    "CHEMBL2417035": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of Eu-DTPA-PEGO-NDP-alpha-MSH-NH2 from human MC4R expressed in HEL293 cells after 1 hr by time-resolved fluorescence assay"
+    },
+    "CHEMBL2417036": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of Eu-DTPA-PEGOMSH(7) from human MC4R expressed in HEL293 cells after 1 hr by time-resolved fluorescence assay"
+    },
+    "CHEMBL3706166": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Competitive Inhibition Assay: A competitive inhibition binding assay was performed for exemplified peptides according to the invention using membrane homogenates prepared from HEK-293 cells that express recombinant hMC4-R, hMC3-R, or hMC5-R, and from B-16 mouse melanoma cells (containing endogenous "
+    },
+    "CHEMBL3706020": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Competitive Inhibition Assay: A competitive inhibition binding assay is performed using membrane homogenates prepared from HEK-293 cells that express recombinant hMC4-R, hMC3-R, or hMC5-R, and from B-16 mouse melanoma cells (containing endogenous MC1-R). In some instances, HEK-293 cells that express"
+    },
+    "CHEMBL3777323": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of 125I-NDP-a-MSH from human Melanocortin receptor 4 after 2 hrs by TopCount microplate scintillation and luminescence counter"
+    },
+    "CHEMBL3889152": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Competitive Inhibition Binding Assay: A competitive inhibition binding assay was performed using membrane homogenates prepared from HEK-293 cells that express recombinant hMCR-1a or hMCR-4 (in each instance where the h prefix refers to human), or alternatively membrane homogenates from B16-F10 mouse"
+    },
+    "CHEMBL3889213": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Competitive Inhibition Assay Using [I125]-NDP-a-MSH: A competitive inhibition binding assay is performed using membrane homogenates prepared from HEK-293 cells that express recombinant hMC4-R, hMC3-R, or hMC5-R, and from B-16 mouse melanoma cells (containing endogenous MC1-R). In some instances, HEK"
+    },
+    "CHEMBL3889214": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Competitive Binding Assay Using Eu-NDP-a-MSH: A competitive inhibition binding assay was performed employing Eu-NDP-\u03b1-MSH (PerkinElmer Life Sciences catalog No. AD0225) with determination by time-resolved fluorometry (TRF) of the lanthanide chelate. In comparison studies with [I125]-NDP-\u03b1-MSH, the s"
+    },
+    "CHEMBL4001173": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of human recombinant melanocortin 4 receptor expressed in CHO cells"
+    },
+    "CHEMBL4049180": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NDP-alpha-MSH from human MC4R LBD expressed in HEK293 cell membranes incubated for 16 to 23 hrs in dark by scintillation proximity assay"
+    },
+    "CHEMBL4382893": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NDP-alpha-MSH from human MC4R expressed in HEK cell membranes after 1 hr by liquid scintillation counting"
+    },
+    "CHEMBL4630234": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO-K1",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NDP-alpha-MSH from human MC4R expressed in CHO-K1 cell membranes incubated for 3 hrs by top-count beta counting"
+    },
+    "CHEMBL4775180": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000249",
+      "bao_label": "cell membrane format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-[NIe,DPhe7]-alpha-MSH from human MC4R expressed in HEK293 cell membranes incubated for 120 mins"
+    },
+    "CHEMBL5034977": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000249",
+      "bao_label": "cell membrane format",
+      "assay_cell_type": "HEK2936E",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NDP-alpha-MSH from human MC4R expressed in HEK2936E cell membrane measured after 16-23 hrs by 1450 microbeta trilux scintillation proximity assay"
+    },
+    "CHEMBL5107058": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000249",
+      "bao_label": "cell membrane format",
+      "assay_cell_type": "HEK2936E",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NDP-alpha-MSH from human MC4R expressed in HEK2936E cell membrane measured after 16 to 23 hrs by 1450 microbeta trilux scintillation proximity assay"
+    },
+    "CHEMBL5119419": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-NDP-alpha-MSH from human MC4R expressed in CHO cells by Topcount beta counter analysis"
+    },
+    "CHEMBL5141272": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]-[Nle4-D-phe7]-alpha-MSH from to human MC4R expressed in CHO cells incubated for 2 hrs by liquid scintillation counting method"
+    },
+    "CHEMBL5320099": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Antagonist activity at human MC4R in CHO cells measured for 24 hrs in presence of alpha-MSH"
+    },
+    "CHEMBL5320174": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of sCy5-MT-I from human MC4R stably expressed in human HEK293 cells incubated for 2 hrs by Cheng-Prusoff equation based FACS analysis"
+    },
+    "CHEMBL5721303": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to MC4 receptor (unknown origin) assessed as inhibition constant"
+    },
+    "CHEMBL5732217": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Assay for Agonist Activity: Accumulation of intracellular cAMP was examined as a measure of the ability of the peptides of the present invention to elicit a functional response in HEK-293 cells that express MC4-R. Confluent HEK-293 cells that express recombinant hMC4-R were detached from culture pla"
+    },
+    "CHEMBL5735118": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000019",
+      "bao_label": "assay format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Competitive Inhibition Assay: A competitive inhibition binding assay is performed using membrane homogenates prepared from HEK-293 cells that express recombinant hMC4-R, hMC3-R, or hMC5-R, and from B-16 mouse melanoma cells (containing endogenous MC1-R). In some instances, HEK-293 cells that express"
+    },
+    "CHEMBL6081183": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to human MC4R assessed as inhibition constant"
+    },
+    "CHEMBL6125505": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO-K1",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Agonist activity at human MC4R expressed in CHO-K1 cells assessed as inhibition constant by Cheng-Prusoff equation analysis"
+    },
+    "CHEMBL872562": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Tested for its binding affinity towards human recombinant Melanocortin 4 receptor by using radioligand binding assay"
+    },
+    "CHEMBL839533": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibitory activity towards human Melanocortin 4 Receptor"
+    },
+    "CHEMBL830236": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity towards Melanocortin 4 receptor using [125I]NDP-MSH"
+    },
+    "CHEMBL839716": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity for melanocortin-4 receptor transfected in HEK 293 cells using [125I]NDP-MSH as radioligand"
+    },
+    "CHEMBL872344": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]-NDP MSH binding towards human melanocortin 4 receptor"
+    },
+    "CHEMBL882466": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]-NDP MSH binding to human Melanocortin 4 receptor"
+    },
+    "CHEMBL860438": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL853024": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-alpha-MSH from human wild type MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL866558": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to MC4 receptor"
+    },
+    "CHEMBL868466": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000019",
+      "bao_label": "assay format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to MC4R by membrane filtration assay"
+    },
+    "CHEMBL865696": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-alpha-MSH from cloned human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL868539": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-alpha-MSH from human cloned MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL865536": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Inhibition of [125I]NDP-alpha-MSH binding to human MC4R transfected in HEK293 cells"
+    },
+    "CHEMBL863666": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL869042": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-alpha-MSH from human MC4 receptor transfected in HEK293 cells"
+    },
+    "CHEMBL871434": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of europium labeled NDP-alpha-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL910341": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to human MC4R"
+    },
+    "CHEMBL856320": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R stably expressed in HEK293 cells"
+    },
+    "CHEMBL869276": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL917731": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125]NDP-MSH from human MC4 receptor expressed in HEK293 cells"
+    },
+    "CHEMBL895641": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "CHO-K1",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-alphaMSH from human melanocortin 4 receptor expressed in CHOK1 cells"
+    },
+    "CHEMBL898343": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Displacement of [125I]NDP-MSH from MC4R receptor in HEK293 cells"
+    },
+    "CHEMBL897839": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "Sf9",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human recombinant MC4 receptor expressed in Sf9 cells"
+    },
+    "CHEMBL899759": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity at human MC4R"
+    },
+    "CHEMBL900799": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL899931": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4 receptor expressed in HEK293 cells"
+    },
+    "CHEMBL900284": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDPMSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL923354": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL942952": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [12]NDPMSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL942957": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity to MC5R"
+    },
+    "CHEMBL929031": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    },
+    "CHEMBL929035": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity at human MC4R"
+    },
+    "CHEMBL928656": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125]NDPMSH from human MC4 receptor expressed in HEK293 cells"
+    },
+    "CHEMBL928665": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 8,
+      "relationship_type": "H",
+      "assay_organism": null,
+      "description": "Binding affinity to MC4 receptor"
+    },
+    "CHEMBL933031": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of europium labeled NDP-alpha-MSH from human MC4 receptor expressed in HEK293 cells"
+    },
+    "CHEMBL947013": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4 receptor expressed in HEK293 cells"
+    },
+    "CHEMBL947355": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of radiolabeled NDPalpha-MSH from human MC4 receptor"
+    },
+    "CHEMBL973601": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000357",
+      "bao_label": "single protein format",
+      "assay_cell_type": null,
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Binding affinity to human MC4 receptor"
+    },
+    "CHEMBL973312": {
+      "assay_type": "B",
+      "bao_format": "BAO_0000219",
+      "bao_label": "cell-based format",
+      "assay_cell_type": "HEK293",
+      "confidence_score": 9,
+      "relationship_type": "D",
+      "assay_organism": "Homo sapiens",
+      "description": "Displacement of [125I]NDP-MSH from human MC4R expressed in HEK293 cells"
+    }
+  },
+  "built_at": "2026-10-19T14:46:12.823551+00:00"
+}

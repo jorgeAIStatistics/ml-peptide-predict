@@ -111,9 +111,9 @@
         "n_test": 191
       },
       "topology__forest": {
-        "mae": 1.508484489997594,
-        "rmse": 1.805893613339919,
-        "r2": -1.020941367967687,
+        "mae": 1.5084844899975938,
+        "rmse": 1.8058936133399186,
+        "r2": -1.0209413679676862,
         "spearman": -0.03136204819054196,
         "n_train": 439,
         "n_test": 191
@@ -127,9 +127,9 @@
         "n_test": 191
       },
       "positional_onehot__forest": {
-        "mae": 1.009245614145252,
-        "rmse": 1.261238904265918,
-        "r2": 0.01425608061316408,
+        "mae": 1.0092456141452524,
+        "rmse": 1.2612389042659182,
+        "r2": 0.014256080613163746,
         "spearman": 0.43097582544080826,
         "n_train": 439,
         "n_test": 191
@@ -143,9 +143,9 @@
         "n_test": 191
       },
       "positional_fragment_fp__forest": {
-        "mae": 0.893728117237711,
+        "mae": 0.8937281172377111,
         "rmse": 1.1074545377419833,
-        "r2": 0.23998668029473214,
+        "r2": 0.23998668029473202,
         "spearman": 0.49055841766457875,
         "n_train": 439,
         "n_test": 191
@@ -159,9 +159,9 @@
         "n_test": 191
       },
       "residue_chemistry__forest": {
-        "mae": 0.9364987111862296,
-        "rmse": 1.1670297399111227,
-        "r2": 0.15601789830105828,
+        "mae": 0.9364987111862301,
+        "rmse": 1.167029739911123,
+        "r2": 0.15601789830105772,
         "spearman": 0.3009939331017937,
         "n_train": 439,
         "n_test": 191
@@ -175,9 +175,9 @@
         "n_test": 191
       },
       "positional_onehot+topology__forest": {
-        "mae": 1.2903200684575757,
+        "mae": 1.2903200684575755,
         "rmse": 1.5286828583787657,
-        "r2": -0.44811876451110666,
+        "r2": -0.44811876451110644,
         "spearman": 0.06871018988146672,
         "n_train": 439,
         "n_test": 191
@@ -192,8 +192,8 @@
       },
       "positional_fragment_fp+topology__forest": {
         "mae": 1.167733259058423,
-        "rmse": 1.381706012244515,
-        "r2": -0.18304341996337947,
+        "rmse": 1.3817060122445153,
+        "r2": -0.1830434199633797,
         "spearman": 0.19405059244011955,
         "n_train": 439,
         "n_test": 191
@@ -207,10 +207,42 @@
         "n_test": 191
       },
       "residue_chemistry+positional_fragment_fp__forest": {
-        "mae": 0.9082884568913231,
-        "rmse": 1.1294107060305876,
-        "r2": 0.2095522089680495,
+        "mae": 0.9082884568913232,
+        "rmse": 1.1294107060305878,
+        "r2": 0.20955220896804905,
         "spearman": 0.4046429555388554,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "residue_chemistry+local_context__ridge": {
+        "mae": 1.9986048320249552,
+        "rmse": 2.627652319765926,
+        "r2": -3.27863452159467,
+        "spearman": 0.08420868222239705,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "residue_chemistry+local_context__forest": {
+        "mae": 1.0537367625132457,
+        "rmse": 1.265190144637485,
+        "r2": 0.008070080174957917,
+        "spearman": 0.23530243238862789,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+local_context__ridge": {
+        "mae": 1.1866893914645025,
+        "rmse": 1.5299633571800801,
+        "r2": -0.4505458094193442,
+        "spearman": 0.4234882256003422,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+local_context__forest": {
+        "mae": 0.9637204869897955,
+        "rmse": 1.2019900380460413,
+        "r2": 0.10469476011779844,
+        "spearman": 0.3407215976770828,
         "n_train": 439,
         "n_test": 191
       },
@@ -223,7 +255,7 @@
         "n_test": 191
       },
       "morgan_fp__forest": {
-        "mae": 0.9054322629435752,
+        "mae": 0.9054322629435753,
         "rmse": 1.1844565450159295,
         "r2": 0.13062398608477133,
         "spearman": 0.43028461969690296,
@@ -241,8 +273,40 @@
       "positional_fragment_fp+morgan_fp__forest": {
         "mae": 0.8803847236765571,
         "rmse": 1.090678517539314,
-        "r2": 0.26283805371565694,
+        "r2": 0.26283805371565705,
         "spearman": 0.4777266630057546,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "assay_context__ridge": {
+        "mae": 1.214429496512245,
+        "rmse": 1.491208809299052,
+        "r2": -0.37799077719850893,
+        "spearman": 0.06291437103407489,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "assay_context__forest": {
+        "mae": 1.765509376287216,
+        "rmse": 2.0928406147326077,
+        "r2": -1.7141990827701838,
+        "spearman": 0.06837805199967889,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+assay_context__ridge": {
+        "mae": 1.1155460607758556,
+        "rmse": 1.401424927257971,
+        "r2": -0.2170518077580077,
+        "spearman": 0.4561110464511752,
+        "n_train": 439,
+        "n_test": 191
+      },
+      "positional_fragment_fp+assay_context__forest": {
+        "mae": 0.9461894974118877,
+        "rmse": 1.1649497539024989,
+        "r2": 0.1590236598913216,
+        "spearman": 0.4602853808240933,
         "n_train": 439,
         "n_test": 191
       }
@@ -304,9 +368,9 @@
         "n_test": 156
       },
       "positional_onehot__forest": {
-        "mae": 0.5885096992896443,
-        "rmse": 0.8313294107987669,
-        "r2": 0.5879686620438646,
+        "mae": 0.5885096992896444,
+        "rmse": 0.8313294107987667,
+        "r2": 0.5879686620438647,
         "spearman": 0.731391548955235,
         "n_train": 474,
         "n_test": 156
@@ -320,8 +384,8 @@
         "n_test": 156
       },
       "positional_fragment_fp__forest": {
-        "mae": 0.6129809737039937,
-        "rmse": 0.8345433676478374,
+        "mae": 0.612980973703994,
+        "rmse": 0.8345433676478375,
         "r2": 0.5847766403729486,
         "spearman": 0.7346413337765526,
         "n_train": 474,
@@ -336,7 +400,7 @@
         "n_test": 156
       },
       "residue_chemistry__forest": {
-        "mae": 0.601715776226478,
+        "mae": 0.6017157762264781,
         "rmse": 0.8218699691209342,
         "r2": 0.5972920701706321,
         "spearman": 0.7495740814322142,
@@ -352,9 +416,9 @@
         "n_test": 156
       },
       "positional_onehot+topology__forest": {
-        "mae": 0.5203152636175589,
-        "rmse": 0.7409131114418337,
-        "r2": 0.6727207143659906,
+        "mae": 0.5203152636175588,
+        "rmse": 0.7409131114418334,
+        "r2": 0.6727207143659908,
         "spearman": 0.7904319418394513,
         "n_train": 474,
         "n_test": 156
@@ -368,9 +432,9 @@
         "n_test": 156
       },
       "positional_fragment_fp+topology__forest": {
-        "mae": 0.54577259818885,
-        "rmse": 0.7532345635241477,
-        "r2": 0.6617448337706753,
+        "mae": 0.5457725981888498,
+        "rmse": 0.7532345635241476,
+        "r2": 0.6617448337706755,
         "spearman": 0.7858279524571172,
         "n_train": 474,
         "n_test": 156
@@ -385,9 +449,41 @@
       },
       "residue_chemistry+positional_fragment_fp__forest": {
         "mae": 0.605822264023948,
-        "rmse": 0.8162704196917352,
-        "r2": 0.6027608212839153,
+        "rmse": 0.8162704196917354,
+        "r2": 0.6027608212839151,
         "spearman": 0.7488636293609507,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "residue_chemistry+local_context__ridge": {
+        "mae": 0.6510127469609304,
+        "rmse": 0.876248800455898,
+        "r2": 0.5422389560510503,
+        "spearman": 0.7074164726389187,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "residue_chemistry+local_context__forest": {
+        "mae": 0.6044324869234209,
+        "rmse": 0.8081836102669513,
+        "r2": 0.6105927475913631,
+        "spearman": 0.7464133897480577,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+local_context__ridge": {
+        "mae": 0.5787688287521408,
+        "rmse": 0.8034254553200021,
+        "r2": 0.6151644951350461,
+        "spearman": 0.7571932718185987,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+local_context__forest": {
+        "mae": 0.5921285139543707,
+        "rmse": 0.7987134356557769,
+        "r2": 0.6196653106818875,
+        "spearman": 0.7448485613911217,
         "n_train": 474,
         "n_test": 156
       },
@@ -402,7 +498,7 @@
       "morgan_fp__forest": {
         "mae": 0.548360159662871,
         "rmse": 0.7618265324087629,
-        "r2": 0.6539840282589232,
+        "r2": 0.6539840282589231,
         "spearman": 0.8150111184672812,
         "n_train": 474,
         "n_test": 156
@@ -416,10 +512,42 @@
         "n_test": 156
       },
       "positional_fragment_fp+morgan_fp__forest": {
-        "mae": 0.5235364267908041,
+        "mae": 0.5235364267908043,
         "rmse": 0.7331578857431518,
         "r2": 0.6795361999090104,
         "spearman": 0.7981197741589554,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "assay_context__ridge": {
+        "mae": 0.9781692746906608,
+        "rmse": 1.2342692533657957,
+        "r2": 0.09175340367290086,
+        "spearman": 0.14360134636553004,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "assay_context__forest": {
+        "mae": 0.96251701092772,
+        "rmse": 1.2215439815013456,
+        "r2": 0.11038484112964297,
+        "spearman": 0.2511914240049857,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+assay_context__ridge": {
+        "mae": 0.5946401364483888,
+        "rmse": 0.8175711917825287,
+        "r2": 0.6014937672938533,
+        "spearman": 0.7422304141296713,
+        "n_train": 474,
+        "n_test": 156
+      },
+      "positional_fragment_fp+assay_context__forest": {
+        "mae": 0.6042691095253957,
+        "rmse": 0.8178308318856276,
+        "r2": 0.6012406159356893,
+        "spearman": 0.7369269002867052,
         "n_train": 474,
         "n_test": 156
       }
@@ -431,17 +559,17 @@
         "a": "positional_fragment_fp",
         "b": "positional_onehot",
         "model": "forest",
-        "best_mae_a": 0.893728117237711,
-        "best_mae_b": 1.009245614145252,
-        "a_minus_b": -0.11551749690754098,
+        "best_mae_a": 0.8937281172377111,
+        "best_mae_b": 1.0092456141452524,
+        "a_minus_b": -0.11551749690754132,
         "a_better": true
       },
       "fragment_fp_vs_whole_molecule_fp": {
         "a": "positional_fragment_fp",
         "b": "morgan_fp",
         "model": "forest",
-        "best_mae_a": 0.893728117237711,
-        "best_mae_b": 0.9054322629435752,
+        "best_mae_a": 0.8937281172377111,
+        "best_mae_b": 0.9054322629435753,
         "a_minus_b": -0.0117041457058642,
         "a_better": true
       },
@@ -450,26 +578,44 @@
         "b": "positional_fragment_fp",
         "model": "forest",
         "best_mae_a": 1.167733259058423,
-        "best_mae_b": 0.893728117237711,
-        "a_minus_b": 0.2740051418207121,
+        "best_mae_b": 0.8937281172377111,
+        "a_minus_b": 0.274005141820712,
         "a_better": false
       },
       "residue_chemistry_vs_fragment_fp": {
         "a": "residue_chemistry",
         "b": "positional_fragment_fp",
         "model": "forest",
-        "best_mae_a": 0.9364987111862296,
-        "best_mae_b": 0.893728117237711,
-        "a_minus_b": 0.042770593948518676,
+        "best_mae_a": 0.9364987111862301,
+        "best_mae_b": 0.8937281172377111,
+        "a_minus_b": 0.04277059394851901,
         "a_better": false
       },
       "residue_chemistry_added_to_fragment_fp": {
         "a": "residue_chemistry+positional_fragment_fp",
         "b": "positional_fragment_fp",
         "model": "forest",
-        "best_mae_a": 0.9082884568913231,
-        "best_mae_b": 0.893728117237711,
+        "best_mae_a": 0.9082884568913232,
+        "best_mae_b": 0.8937281172377111,
         "a_minus_b": 0.014560339653612142,
+        "a_better": false
+      },
+      "local_context_added_to_fragment_fp": {
+        "a": "positional_fragment_fp+local_context",
+        "b": "positional_fragment_fp",
+        "model": "forest",
+        "best_mae_a": 0.9637204869897955,
+        "best_mae_b": 0.8937281172377111,
+        "a_minus_b": 0.06999236975208445,
+        "a_better": false
+      },
+      "assay_context_added_to_fragment_fp": {
+        "a": "positional_fragment_fp+assay_context",
+        "b": "positional_fragment_fp",
+        "model": "forest",
+        "best_mae_a": 0.9461894974118877,
+        "best_mae_b": 0.8937281172377111,
+        "a_minus_b": 0.052461380174176675,
         "a_better": false
       }
     },
@@ -478,36 +624,36 @@
         "a": "positional_fragment_fp",
         "b": "positional_onehot",
         "model": "forest",
-        "best_mae_a": 0.6129809737039937,
-        "best_mae_b": 0.5885096992896443,
-        "a_minus_b": 0.024471274414349486,
+        "best_mae_a": 0.612980973703994,
+        "best_mae_b": 0.5885096992896444,
+        "a_minus_b": 0.024471274414349597,
         "a_better": false
       },
       "fragment_fp_vs_whole_molecule_fp": {
         "a": "positional_fragment_fp",
         "b": "morgan_fp",
         "model": "forest",
-        "best_mae_a": 0.6129809737039937,
+        "best_mae_a": 0.612980973703994,
         "best_mae_b": 0.548360159662871,
-        "a_minus_b": 0.06462081404112274,
+        "a_minus_b": 0.06462081404112296,
         "a_better": false
       },
       "topology_added_to_fragment_fp": {
         "a": "positional_fragment_fp+topology",
         "b": "positional_fragment_fp",
         "model": "forest",
-        "best_mae_a": 0.54577259818885,
-        "best_mae_b": 0.6129809737039937,
-        "a_minus_b": -0.06720837551514369,
+        "best_mae_a": 0.5457725981888498,
+        "best_mae_b": 0.612980973703994,
+        "a_minus_b": -0.06720837551514414,
         "a_better": true
       },
       "residue_chemistry_vs_fragment_fp": {
         "a": "residue_chemistry",
         "b": "positional_fragment_fp",
         "model": "forest",
-        "best_mae_a": 0.601715776226478,
-        "best_mae_b": 0.6129809737039937,
-        "a_minus_b": -0.011265197477515754,
+        "best_mae_a": 0.6017157762264781,
+        "best_mae_b": 0.612980973703994,
+        "a_minus_b": -0.011265197477515865,
         "a_better": true
       },
       "residue_chemistry_added_to_fragment_fp": {
@@ -515,8 +661,26 @@
         "b": "positional_fragment_fp",
         "model": "forest",
         "best_mae_a": 0.605822264023948,
-        "best_mae_b": 0.6129809737039937,
-        "a_minus_b": -0.007158709680045727,
+        "best_mae_b": 0.612980973703994,
+        "a_minus_b": -0.007158709680045949,
+        "a_better": true
+      },
+      "local_context_added_to_fragment_fp": {
+        "a": "positional_fragment_fp+local_context",
+        "b": "positional_fragment_fp",
+        "model": "forest",
+        "best_mae_a": 0.5921285139543707,
+        "best_mae_b": 0.612980973703994,
+        "a_minus_b": -0.020852459749623242,
+        "a_better": true
+      },
+      "assay_context_added_to_fragment_fp": {
+        "a": "positional_fragment_fp+assay_context",
+        "b": "positional_fragment_fp",
+        "model": "forest",
+        "best_mae_a": 0.6042691095253957,
+        "best_mae_b": 0.612980973703994,
+        "a_minus_b": -0.008711864178598261,
         "a_better": true
       }
     }
@@ -534,7 +698,7 @@
         "met": false
       },
       "within_series_beats_series_mean": {
-        "actual": 0.5203152636175589,
+        "actual": 0.5203152636175588,
         "required": "< 0.845",
         "met": true
       }
@@ -556,8 +720,10 @@
     "The design hypothesis holds, and the mechanism is visible. Encoding each side chain by its fragment fingerprint rather than by a one-hot index improves cross-series MAE from 1.009 to 0.894. The reason is measurable: 38.7% of held-out molecules carry a side chain absent from the 119-entry training vocabulary (104 positions in total). A one-hot index has nothing to say about those; a fragment fingerprint places an unseen chlorophenylalanine near a seen one.",
     "The peptide-native representation beats the whole-molecule fingerprint on the harder question: cross-series MAE 0.894 against 0.905, and R2 +0.276 against +0.131. Positional residue chemistry is doing work that circular substructure bits over the whole molecule do not.",
     "Stage A's requirement that the macrocyclic constraint be an explicit feature is **not** supported by measurement. Adding the topology block to the fragment fingerprint changes cross-series MAE from 0.894 to 1.168 at best, and with a random forest it is far worse \u2014 0.894 without topology against 1.168 with it. Topology alone is worse than the mean baseline (1.408 against 1.189). Residue count and molecular weight let a tree split on series identity, which is exactly what does not transfer to an unseen series. The constraint is better carried implicitly by the bridge chemistry already present in the fragment encoding.",
-    "Every representation choice reverses between the two evaluations. 5 of 5 contrasts flip sign: fragment_fp_vs_onehot favours positional_fragment_fp cross-series (0.894 against 1.009) but positional_onehot within-series (0.589 against 0.613); fragment_fp_vs_whole_molecule_fp favours positional_fragment_fp cross-series (0.894 against 0.905) but morgan_fp within-series (0.548 against 0.613); topology_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 1.168) but positional_fragment_fp+topology within-series (0.546 against 0.613); residue_chemistry_vs_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.936) but residue_chemistry within-series (0.602 against 0.613); residue_chemistry_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.908) but residue_chemistry+positional_fragment_fp within-series (0.606 against 0.613). A programme that benchmarked only within-series \u2014 the evaluation most papers report \u2014 would have selected one-hot residue indices, explicit topology and whole-molecule fingerprints: in each case the choice that generalises worst to an unseen series. This is the clearest vindication of Stage A's requirement to report the two separately.",
+    "Every representation choice reverses between the two evaluations. 7 of 7 contrasts flip sign: fragment_fp_vs_onehot favours positional_fragment_fp cross-series (0.894 against 1.009) but positional_onehot within-series (0.589 against 0.613); fragment_fp_vs_whole_molecule_fp favours positional_fragment_fp cross-series (0.894 against 0.905) but morgan_fp within-series (0.548 against 0.613); topology_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 1.168) but positional_fragment_fp+topology within-series (0.546 against 0.613); residue_chemistry_vs_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.936) but residue_chemistry within-series (0.602 against 0.613); residue_chemistry_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.908) but residue_chemistry+positional_fragment_fp within-series (0.606 against 0.613); local_context_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.964) but positional_fragment_fp+local_context within-series (0.592 against 0.613); assay_context_added_to_fragment_fp favours positional_fragment_fp cross-series (0.894 against 0.946) but positional_fragment_fp+assay_context within-series (0.604 against 0.613). A programme that benchmarked only within-series \u2014 the evaluation most papers report \u2014 would have selected one-hot residue indices, explicit topology and whole-molecule fingerprints: in each case the choice that generalises worst to an unseen series. This is the clearest vindication of Stage A's requirement to report the two separately.",
     "The within-series result must be read with its diagnostics: median nearest-training-neighbour similarity is 0.941 and 100.0% of held-out molecules have a training neighbour above 0.7 Tanimoto, against a median of 0.600 cross-series. Within-series performance is therefore interpolation among close analogues \u2014 the lead-optimisation regime \u2014 and not evidence of generalisation. That is a genuinely useful capability, but it is a narrower claim than the R2 alone suggests.",
+    "Ablation, cross-series, random forest: of 4 feature groups added one at a time to the positional fragment fingerprint, 0 improved it and 4 made it worse. Helped: none. Hurt: assay_context (0.894 to 0.946); local_context (0.894 to 0.964); residue_chemistry (0.894 to 0.908); topology (0.894 to 1.168). Across ATLAS 2.4 and 2.5 the representation layer has been extended four times -- explicit topology, residue chemistry, local sequence context and assay context -- and **none improves cross-series generalisation.** The best cross-series model remains positional_fragment_fp+morgan_fp__ridge at MAE 0.870, unchanged. On this dataset the representation is not the binding constraint, which agrees with Stage A's effective sample size of ~30 series and with the pocket encoder's null result.",
+    "Assay context behaves as its own caveat warned. Alone it scores R2 -1.714 cross-series -- far worse than the mean -- and R2 +0.110 within-series. Assay identity correlates with document and so with analogue series: when whole series are held out the assay features point at training series and mislead, and when series are shared they carry weak real signal. That is a reason to keep it as a recorded covariate, not a predictive feature.",
     "Deployment gate: FAIL. cross_series_mae = 0.870 against <= 0.7 (not met); cross_series_r2 = 0.276 against >= 0.3 (not met); within_series_beats_series_mean = 0.520 against < 0.845 (met). The peptide affinity model therefore remains undeployed and must not publish numeric affinity estimates, nor propagate them into pharmacokinetic models or knowledge-graph edges."
   ]
 }

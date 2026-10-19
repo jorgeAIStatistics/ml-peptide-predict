@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 685 tests passing
+Last updated: 2026-10-19 · 728 tests passing
 
 ## What this is
 
@@ -689,6 +689,59 @@ estimates.
 The expansion **confirmed Stage A and weakened Stage B**, and improved no
 model. That is a negative result and is recorded as one.
 
+### ATLAS 2.5 Stage 2: biophysics-aware representations
+
+Reproduce with `python3 -m atlas.ml.interaction_features`,
+`python3 -m atlas.ml.assay_context`, `python3 -m atlas.ml.peptide_benchmark`.
+
+**Typed interaction descriptors** (`atlas/ml/interaction_features.py`). All ten
+MC4R peptide complexes now yield hydrogen-bond candidates, salt bridges,
+hydrophobic contacts, aromatic stacking classified by interplanar angle,
+cation-pi, Shrake-Rupley solvent accessibility and interface geometry, with
+every threshold saved alongside. Receptor atoms are typed by name (always
+standard residues); peptide atoms by element and distance-inferred bonds,
+because these ligands are largely non-canonical — ring detection finds 3-6
+rings per peptide from the graph alone.
+
+Measured: buried peptide fraction 0.52-0.74, higher for constrained
+heptapeptides than 13-mers. Hydrogen bonds are **candidates**, not bonds: at
+2.58-3.30 A there are no hydrogens, so D-H...A angles cannot be checked and
+counts nearly double from 3.2 to 3.9 A. **Cation-pi is genuinely absent** —
+nearest cationic-group-to-ring-centroid distance 6.8-8.6 A in nine of ten
+structures, refuting an expectation that Arg-aromatic contacts would be common.
+21LT reports no salt bridge at 4.0 A and two at 4.5 A because its Arg-Asp pair
+sits at 4.24 A against 7PIU's 2.54 A — the same ligand either side of a cutoff,
+which is why a sweep is saved per structure.
+
+**These are retrospective by construction.** Every descriptor comes from a
+solved bound complex and cannot exist for an unseen pair.
+`InteractionProfile.vector()` calls a guard that raises rather than degrading
+quietly, so bound geometry cannot enter a prospective pathway.
+
+**Assay context** (`atlas/ml/assay_context.py`). 89 binding assays resolved:
+4 BAO formats (cell-based 56, single protein 27, membrane 4), 7 cell types, two
+confidence scores. 162 molecules span several formats, so this is real
+within-molecule variation. pH, temperature and ionic strength are **not** in
+ChEMBL's structured fields and are recorded as absent.
+
+**Local sequence context** (`residue_chemistry.local_context`). Neighbour
+chemistry per position, wrapping for cyclic backbones and not for linear ones.
+
+**Ablation, cross-series, random forest: 0 of 4 feature groups improved the
+positional fragment fingerprint and 4 made it worse** — assay context 0.894 to
+0.946, local context to 0.964, residue chemistry to 0.908, topology to 1.168.
+Across 2.4 and 2.5 the representation layer has been extended four times and
+none improves cross-series generalisation. The best cross-series model remains
+`positional_fragment_fp+morgan_fp` at **MAE 0.870, R2 0.276 — unchanged**. On
+this dataset the representation is not the binding constraint, which agrees
+with Stage A's ~30 effective series and the pocket encoder's null result.
+
+Assay context behaves as its caveat warned: R2 -1.714 cross-series, +0.110
+within-series. Assay identity proxies for series, so it is kept as a recorded
+covariate, not a predictive feature.
+
+**The deployment gate still fails** and no improvement is claimed.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -729,7 +782,7 @@ model. That is a negative result and is recorded as one.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 685 tests
+python3 -m pytest -q                              # 728 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
