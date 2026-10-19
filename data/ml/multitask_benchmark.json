@@ -1,0 +1,125 @@
+{
+  "panel_version": "71e36895a4b10915",
+  "endpoint": "Ki",
+  "n_rows": 1354,
+  "n_peptides": 640,
+  "n_clusters": 29,
+  "per_receptor": {
+    "MC1R": {
+      "single_task": {
+        "mae": 0.897883484669232,
+        "r2": 0.2910539979518839,
+        "n_train": 198,
+        "n_test": 161
+      },
+      "pooled_family": {
+        "mae": 0.8725122946859913,
+        "r2": 0.21761110890557256,
+        "n_train": 811,
+        "n_test": 161
+      },
+      "baseline_mean": {
+        "mae": 1.075026664157099,
+        "r2": -0.04041151581302471,
+        "n_train": 198,
+        "n_test": 161
+      },
+      "pooled_gain_mae": 0.025371189983240616,
+      "extra_training_rows": 613,
+      "pooled_helps": true
+    },
+    "MC3R": {
+      "single_task": {
+        "mae": 0.9901862071095865,
+        "r2": -0.39649362611847794,
+        "n_train": 102,
+        "n_test": 167
+      },
+      "pooled_family": {
+        "mae": 0.9590406415739932,
+        "r2": -0.5554683584148778,
+        "n_train": 811,
+        "n_test": 167
+      },
+      "baseline_mean": {
+        "mae": 1.2725774920746742,
+        "r2": -1.0217026912195983,
+        "n_train": 102,
+        "n_test": 167
+      },
+      "pooled_gain_mae": 0.031145565535593334,
+      "extra_training_rows": 709,
+      "pooled_helps": true
+    },
+    "MC4R": {
+      "single_task": {
+        "mae": 0.9021679993386249,
+        "r2": 0.016323578330148414,
+        "n_train": 446,
+        "n_test": 184
+      },
+      "pooled_family": {
+        "mae": 1.0741220063405832,
+        "r2": -0.2798076559668268,
+        "n_train": 811,
+        "n_test": 184
+      },
+      "baseline_mean": {
+        "mae": 1.1942464418015206,
+        "r2": -0.5154066921413558,
+        "n_train": 446,
+        "n_test": 184
+      },
+      "pooled_gain_mae": -0.1719540070019583,
+      "extra_training_rows": 365,
+      "pooled_helps": false
+    },
+    "MC5R": {
+      "single_task": {
+        "mae": 1.2315027444956461,
+        "r2": -1.0428210215719127,
+        "n_train": 65,
+        "n_test": 31
+      },
+      "pooled_family": {
+        "mae": 1.2453793292370694,
+        "r2": -1.202230881346026,
+        "n_train": 811,
+        "n_test": 31
+      },
+      "baseline_mean": {
+        "mae": 1.290704714640199,
+        "r2": -1.4540691864167186,
+        "n_train": 65,
+        "n_test": 31
+      },
+      "pooled_gain_mae": -0.013876584741423281,
+      "extra_training_rows": 746,
+      "pooled_helps": false
+    }
+  },
+  "summary": {
+    "receptors_compared": [
+      "MC1R",
+      "MC3R",
+      "MC4R",
+      "MC5R"
+    ],
+    "receptors_abstained": [],
+    "pooling_helps_on": [
+      "MC1R",
+      "MC3R"
+    ],
+    "pooling_hurts_on": [
+      "MC4R",
+      "MC5R"
+    ],
+    "mean_gain_mae": -0.032328459056136905,
+    "holdout": "Peptide clusters held out globally: a held-out cluster's molecules are absent from training for every receptor, so the pooled arm cannot see a test peptide's affinity on a sister receptor."
+  },
+  "findings": [
+    "Pooling the receptor family was tested on 4 receptors with peptide clusters held out globally, so a held-out peptide is absent from training for every receptor. MC1R (161 test rows): single-task 0.898, pooled 0.873 with 613 extra rows, baseline 1.075; MC3R (167 test rows): single-task 0.990, pooled 0.959 with 709 extra rows, baseline 1.273; MC4R (184 test rows): single-task 0.902, pooled 1.074 with 365 extra rows, baseline 1.194; MC5R (31 test rows): single-task 1.232, pooled 1.245 with 746 extra rows, baseline 1.291.",
+    "Pooling helps on 2 of 4 receptors (MC1R, MC3R) and hurts on 2 (MC4R, MC5R), with a mean change of -0.032 log units. Pooling the family therefore does not buy sample efficiency, so the four receptors are closer to four separate problems than to one problem with four times the data.",
+    "The sign of the effect tracks how much data a receptor already has. MC4R, with the most single-task training rows (446), is the worst hurt (-0.172); the receptors that gain are the data-poor ones (MC1R, MC3R). Pooling redistributes rather than adds: a thin receptor borrows from its siblings while the richest is diluted by them. That is why the mean is near zero, and why a family-pooled model is not a way around the series bottleneck."
+  ]
+}

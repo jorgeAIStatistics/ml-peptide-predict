@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 728 tests passing
+Last updated: 2026-10-19 · 760 tests passing
 
 ## What this is
 
@@ -742,6 +742,54 @@ covariate, not a predictive feature.
 
 **The deployment gate still fails** and no improvement is claimed.
 
+### Targeting the bottleneck, not the representation
+
+Reproduce with `python3 -m atlas.ml.pairwise` and
+`python3 -m atlas.ml.multitask`.
+
+Four representation extensions had failed, and the diagnosis was that the
+representation was never the binding constraint: effective sample size is ~30
+series, two thirds of label variance is *within* series, and only four
+receptors carry peptide data. Two ways at that were tried.
+
+**More data is not available.** Non-human melanocortin receptors hold 325 Ki
+binding records against the human family's 7,342 — and a mouse MC4R is a
+different protein, so pooling species repeats the mutant-receptor error at
+species scale. Censored relations add 50. BindingDB's SOAP endpoint is gone.
+Stage A put MAE 0.70 at ~158,000 training peptides. The dataset cannot be
+fixed, so the task had to change.
+
+**Within-series pairwise Δ-affinity.** 630 peptides in 30 series give 15,506
+ordered pairs, a 25-fold increase, with both orderings included so
+antisymmetry is enforced by the data. Splits partition molecules and clusters,
+never pairs — a test pair whose members both appear in training pairs would be
+almost fully determined.
+
+*Null as a training scheme*: on held-out molecules the pairwise model reaches
+MAE 0.579 against 0.541 for simply subtracting two absolute predictions; on
+held-out series 1.204 against 1.151. Training on differences buys nothing.
+
+**But the evaluation reframe is the real result.** The same model that fails
+its gate for publishing numbers (MAE 0.870, R² 0.276) ranks two analogues of
+one series correctly **92.0%** of the time when their true difference exceeds
+0.5 log units, on 5,880 held-out pairs whose test member it had never seen.
+Across unseen series it ranks at 70.8% — above chance, far weaker. Absolute
+error concealed a usable capability because it answered a question nobody asks
+of this model.
+
+This licenses a **within-series ranking** claim with its accuracy attached,
+bounded to peptides with a close training neighbour. It does **not** license a
+numeric affinity estimate and does **not** change the deployment gate.
+Ranking and estimating are different claims; only the first now has evidence.
+
+**Family pooling does not buy sample efficiency.** With peptide clusters held
+out *globally* — so a held-out peptide is absent from training for every
+receptor, and the pooled model cannot see its affinity on a sister receptor —
+pooling helps 2 of 4 receptors and hurts 2, mean −0.032 log units. The sign
+tracks existing data volume: MC4R (most rows) is the worst hurt at −0.172,
+while the data-poor MC1R and MC3R gain. Pooling redistributes rather than
+adds.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -782,7 +830,7 @@ covariate, not a predictive feature.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 728 tests
+python3 -m pytest -q                              # 760 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

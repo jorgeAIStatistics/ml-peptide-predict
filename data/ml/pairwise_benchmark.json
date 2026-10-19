@@ -1,0 +1,103 @@
+{
+  "dataset_version": "29fe2a249bcd581d",
+  "n_molecules": 630,
+  "n_clusters": 30,
+  "n_pairs": 15506,
+  "data_probe": {
+    "question": "can the ~30 series bottleneck be relieved from available sources?",
+    "chembl_human_melanocortin_ki_binding": 7342,
+    "chembl_non_human_melanocortin_ki_binding": 325,
+    "non_human_breakdown": {
+      "mouse_MC1R": 215,
+      "mouse_MC4R": 50,
+      "mouse_MC3R": 37,
+      "mouse_MC5R": 14,
+      "rat_MC4R": 7,
+      "rat_MC3R": 2
+    },
+    "human_mc4r_censored_relations": {
+      "greater_than": 46,
+      "less_than": 4
+    },
+    "bindingdb_rest_api": "the axis2 SOAP endpoint returns 404; not probed further",
+    "verdict": "No. Non-human receptors add 4% more records and are different proteins, so pooling species repeats the mutant-receptor error at species scale. Censored relations add 50 records. Stage A's learning curve put MAE 0.70 at roughly 158,000 training peptides, which is not reachable, so the task had to change rather than the dataset."
+  },
+  "held_out_series": {
+    "n_train_pairs": 7010,
+    "n_test_pairs": 8496,
+    "n_train_molecules": 235,
+    "pairwise_model": {
+      "mae": 1.2036679963913126,
+      "sign_accuracy": 0.6145244821092278,
+      "n_pairs": 8496,
+      "n_meaningful": 6422,
+      "sign_accuracy_meaningful": 0.650264715042043,
+      "spearman": 0.3550955007598643
+    },
+    "absolute_model_implied_delta": {
+      "mae": 1.1513601546759615,
+      "sign_accuracy": 0.6560734463276836,
+      "n_pairs": 8496,
+      "n_meaningful": 6422,
+      "sign_accuracy_meaningful": 0.7075677359078169,
+      "spearman": 0.4841421787704724
+    },
+    "zero_predictor": {
+      "mae": 1.3291937382297552,
+      "sign_accuracy": 0.018832391713747645,
+      "n_pairs": 8496,
+      "n_meaningful": 6422,
+      "sign_accuracy_meaningful": 0.0,
+      "spearman": NaN
+    },
+    "delta_distribution": {
+      "mean_abs": 1.3291937382297552,
+      "sd": 1.6924196318338347,
+      "fraction_meaningful": 0.7558851224105462
+    },
+    "pairwise_minus_implied_mae": 0.05230784171535108
+  },
+  "held_out_molecules": {
+    "n_train_pairs": 8710,
+    "n_test_pairs": 5880,
+    "n_train_molecules": 460,
+    "pairwise_model": {
+      "mae": 0.5791958525382523,
+      "sign_accuracy": 0.825,
+      "n_pairs": 5880,
+      "n_meaningful": 4166,
+      "sign_accuracy_meaningful": 0.9085453672587614,
+      "spearman": 0.8334951073838769
+    },
+    "absolute_model_implied_delta": {
+      "mae": 0.5412093246262406,
+      "sign_accuracy": 0.8295918367346938,
+      "n_pairs": 5880,
+      "n_meaningful": 4166,
+      "sign_accuracy_meaningful": 0.9198271723475756,
+      "spearman": 0.8565951364482709
+    },
+    "zero_predictor": {
+      "mae": 1.1937023809523808,
+      "sign_accuracy": 0.01598639455782313,
+      "n_pairs": 5880,
+      "n_meaningful": 4166,
+      "sign_accuracy_meaningful": 0.0,
+      "spearman": NaN
+    },
+    "delta_distribution": {
+      "mean_abs": 1.1937023809523808,
+      "sd": 1.5476711300760082,
+      "fraction_meaningful": 0.7085034013605442
+    },
+    "pairwise_minus_implied_mae": 0.037986527912011736
+  },
+  "findings": [
+    "The series bottleneck cannot be relieved by acquiring more data. 325 non-human melanocortin Ki records exist against 7342 human ones, and a mouse MC4R is a different protein, so pooling species would repeat the mutant-receptor error at species scale. Censored relations add 50 records. The task therefore had to change rather than the dataset.",
+    "Reformulating as within-series differences turns 630 peptides in 30 series into 15506 ordered pairs -- a 25-fold increase in training examples, because within-series pairs grow with the square of series size. Both orderings of every pair are included, so the antisymmetry of the target is enforced by the data rather than hoped for.",
+    "On held-out molecules (5880 test pairs from 8710 training pairs): the pairwise model reaches MAE 0.579 on the difference and 90.9% sign accuracy on pairs differing by at least 0.5 log units. Subtracting two absolute predictions instead gives MAE 0.541 and 92.0%. Predicting no difference at all gives MAE 1.194. Pairwise training does **not** beat the absolute model's implied difference, by 0.038 log units.",
+    "On held-out series (8496 test pairs from 7010 training pairs): the pairwise model reaches MAE 1.204 on the difference and 65.0% sign accuracy on pairs differing by at least 0.5 log units. Subtracting two absolute predictions instead gives MAE 1.151 and 70.8%. Predicting no difference at all gives MAE 1.329. Pairwise training does **not** beat the absolute model's implied difference, by 0.052 log units.",
+    "Pairwise training is a null result, but reframing the *evaluation* is not, and this is the milestone's real finding. The same model that fails its deployment gate for publishing numbers -- cross-series MAE 0.870, R2 0.276 -- ranks two analogues of one series correctly **92.0%** of the time when their true difference exceeds 0.5 log units, measured on 5880 held-out pairs whose test member the model had never seen. Across unseen series it ranks at 70.8%, well above chance but far weaker. Absolute error concealed a usable capability because it was answering a question nobody asked of this model.",
+    "What that licenses, precisely: a **within-series ranking** claim with its measured accuracy attached, bounded to peptides having a close training neighbour. It does **not** license a numeric affinity estimate, it does not change the deployment gate, and it is not an affinity measurement. Ranking and estimating are different claims with different evidence, and only the first of them now has any."
+  ]
+}
