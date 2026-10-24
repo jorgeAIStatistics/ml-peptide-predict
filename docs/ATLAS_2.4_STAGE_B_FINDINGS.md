@@ -263,8 +263,13 @@ Not supported:
 
 - Frozen protein language model embeddings are **not** ruled out by vocabulary
   collapse, contrary to Stage A. Their ceiling (0.382) is better than current
-  performance (0.870). They remain untested here for want of PyTorch, and that is a
-  gap rather than a conclusion.
+  performance (0.870). They remained untested here for want of PyTorch, and
+  that was a gap rather than a conclusion. **The gap is now closed**
+  (`docs/ATLAS_2.6_PROTEIN_LANGUAGE_MODEL.md`): ESM-2 650M was run on these
+  splits and scores cross-series MAE 1.107 alone and 1.093 added to the
+  fragment fingerprint, against 0.894 without it. This section's reasoning
+  holds up — the ceiling did not rule them out, and measuring them was the only
+  way to find out — but the answer is that they do not help.
 - Adding more small-molecule data. Stage A measured non-peptide-only training
   at R² −0.791.
 
@@ -282,7 +287,10 @@ Not supported:
   0.894 to 0.912, slightly *worse*, and within-series by 0.005. The correction
   to record is the expectation of cheap improvement, not the diagnosis of the
   gap.
-- No protein language model was run; §2 bounds them rather than measuring them.
+- No protein language model was run *here*; §2 bounds them rather than
+  measuring them. One has since been measured in ATLAS 2.6, and the bound in §2
+  turned out to be slack rather than binding: the arm fails well above its own
+  ceiling.
 - Head-to-tail cyclic peptides (58 of 630) have their rotation canonicalised
   lexicographically. This makes position indices comparable but the choice of
   origin is still arbitrary with respect to biology.

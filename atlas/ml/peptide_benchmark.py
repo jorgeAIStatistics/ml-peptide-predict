@@ -354,6 +354,34 @@ def _assay_block(
     return assay_encoding(records, metadata, vocab)
 
 
+def _plm_block(analyses: Sequence[Any]) -> np.ndarray | None:
+    """Frozen protein language model embeddings, read from the cache.
+
+    Returns None when the cache has not been built, so the arm is skipped
+    rather than silently replaced by zeros -- the same contract as
+    ``_assay_block``. Nothing is fitted here. A frozen embedding is a
+    per-sequence constant, so unlike the assay vocabularies there is no
+    training-only quantity that could leak; the matrix is built for every
+    molecule and the benchmark's existing train/test indexing does the rest.
+
+    A sequence absent from the cache also skips the arm. That case arises for
+    injected records from another receptor, whose peptides were never embedded:
+    zero-filling them would make the arm score badly for a reason unrelated to
+    the language model, and the benchmark would report that as a measurement.
+    """
+    from atlas.ml.plm_embeddings import (
+        PLM_EMBEDDING_PATH, load_embeddings, plm_matrix,
+    )
+
+    if not PLM_EMBEDDING_PATH.exists():
+        return None
+    try:
+        return plm_matrix(analyses, load_embeddings())
+    except KeyError as exc:
+        logger.warning("PLM arm skipped: %s", exc)
+        return None
+
+
 def _evaluate(
     analyses: Sequence, y: np.ndarray, morgan: np.ndarray,
     tr: np.ndarray, te: np.ndarray,
@@ -369,6 +397,9 @@ def _evaluate(
     assay = _assay_block(records, tr)
     if assay is not None:
         extra["assay_context"] = assay
+    plm = _plm_block(analyses)
+    if plm is not None:
+        extra["esm2_embedding"] = plm
     reps = build_representations(
         analyses, vocabulary=vocab, stereo_vocabulary=svocab, extra=extra)
 
@@ -411,6 +442,21 @@ def _best(results: dict[str, dict[str, float]]) -> tuple[str, dict[str, float]]:
     candidates = {k: v for k, v in results.items() if k != "baseline_mean"}
     name = min(candidates, key=lambda k: candidates[k]["mae"])
     return name, candidates[name]
+
+
+def _extension_roster(cross: dict[str, Any]) -> str:
+    """Name the representation extensions measured, and count them honestly.
+
+    Generated rather than written out, so the count cannot drift from how many
+    arms actually ran. The language model arm is skipped when its embedding
+    cache is absent, and then it must not be claimed as measured.
+    """
+    names = ["explicit topology", "residue chemistry", "local sequence context",
+             "assay context", "backbone stereochemistry"]
+    if "esm2_embedding__forest" in cross["results"]:
+        names.append("a pretrained protein language model")
+    words = {5: "five", 6: "six", 7: "seven"}.get(len(names), str(len(names)))
+    return f"{words} times -- " + ", ".join(names[:-1]) + f" and {names[-1]}"
 
 
 def _findings(
@@ -592,9 +638,8 @@ def _findings(
                 f"({added[k]['best_mae_b']:.3f} to {added[k]['best_mae_a']:.3f})"
                 for k in hurt
             )
-            + ". Across ATLAS 2.4 and 2.5 the representation layer has been "
-            "extended five times -- explicit topology, residue chemistry, local "
-            "sequence context, assay context and backbone stereochemistry -- "
+            + ". Across ATLAS 2.4 to 2.6 the representation layer has been "
+            f"extended {_extension_roster(cross)} -- "
             "and **none improves cross-series generalisation.** The best "
             "cross-series model remains "
             f"{cb_name} at MAE {cb['mae']:.3f}, unchanged. On this dataset the "
@@ -629,6 +674,49 @@ def _findings(
                 "the representation is. A model that cannot distinguish D-Phe "
                 "from L-Phe must not be asked to order them, which is a "
                 "refusal to implement rather than a metric to improve."
+            )
+        plm_add = xc.get("esm2_embedding_added_to_fragment_fp")
+        plm_alone = xc.get("esm2_embedding_vs_fragment_fp")
+        if plm_add and plm_alone and np.isfinite(plm_alone["best_mae_a"]):
+            wplm = wcon.get("esm2_embedding_added_to_fragment_fp", {})
+            out.append(
+                f"A pretrained protein language model is the only extension "
+                f"tried that imports information from outside these "
+                f"{n_peptides} molecules, and it does not help either. Frozen "
+                f"ESM-2 650M embeddings of the canonical sequence score "
+                f"cross-series MAE {plm_alone['best_mae_a']:.3f} on their own "
+                f"against {plm_alone['best_mae_b']:.3f} for the positional "
+                f"fragment fingerprint; concatenated with that fingerprint "
+                f"they leave it at {plm_add['best_mae_a']:.3f} against "
+                f"{plm_add['best_mae_b']:.3f}"
+                + (f", and within-series at {wplm['best_mae_a']:.3f} against "
+                   f"{wplm['best_mae_b']:.3f}" if wplm else "")
+                + ". Pretraining across tens of millions of UniRef sequences "
+                "therefore transfers nothing measurable to this endpoint that "
+                "the side-chain fingerprint does not already carry."
+            )
+            out.append(
+                f"Two candidate explanations can be separated here, and only "
+                f"one survives. The ceiling is **not** the explanation: the "
+                f"canonical sequence gives {seq['n_distinct_keys']} distinct "
+                f"strings for {n_peptides} molecules and an oracle MAE of "
+                f"{seq['oracle_mae']:.3f}, which is far below the "
+                f"{cb['mae']:.3f} the best real model reaches, so a "
+                f"sequence-only representation had room to improve and did not "
+                f"take it. The vocabulary loss is real and is the plausible "
+                f"mechanism: every residue outside the canonical twenty "
+                f"reaches the model as the single unknown token X, so the "
+                f"{chem['n_distinct_keys']} chemically distinct peptides the "
+                f"fragment encoding resolves arrive at the language model as "
+                f"{seq['n_distinct_keys']} inputs, and "
+                f"{seq['colliding_fraction']:.1%} of molecules share their "
+                f"input with another. A model pretrained on natural proteins "
+                f"has no representation for a 4-chloro-phenylalanine because "
+                f"UniRef contains none. This is the sixth consecutive null "
+                f"result on the representation layer and the first that cannot "
+                f"be answered by adding more chemistry to the feature set -- "
+                f"it points back at sample structure, where Stage A's "
+                f"effective sample size of ~30 series already pointed."
             )
         ac_cross = cross["results"].get("assay_context__forest")
         ac_within = within["results"].get("assay_context__forest")
@@ -794,6 +882,11 @@ def run_benchmark(
                 "positional_fragment_fp"),
             "stereo_aware_vs_blind_onehot": pair(
                 d["results"], "positional_onehot_stereo", "positional_onehot"),
+            "esm2_embedding_vs_fragment_fp": pair(
+                d["results"], "esm2_embedding", "positional_fragment_fp"),
+            "esm2_embedding_added_to_fragment_fp": pair(
+                d["results"], "positional_fragment_fp+esm2_embedding",
+                "positional_fragment_fp"),
         }
         for ev, d in (("cross_series", cross), ("within_series", within))
     }

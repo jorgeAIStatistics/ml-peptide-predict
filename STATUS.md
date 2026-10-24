@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-24 · 872 tests passing
+Last updated: 2026-10-24 · 886 tests passing
 
 ## What this is
 
@@ -490,7 +490,12 @@ that the two evaluations can disagree, so both must be reported. Two Stage A
 recommendations were refuted by measurement: explicit topology features *hurt*
 cross-series (0.894 → 1.168 with a forest), and vocabulary collapse does *not*
 currently rule out frozen protein language models, whose ceiling (MAE 0.382) is
-better than the best model measured (0.870).
+better than the best model measured (0.870). That second point has since been
+settled by measurement rather than left as a bound: ESM-2 650M embeddings were
+run through this same benchmark (ATLAS 2.6, below) and score cross-series MAE
+1.093 added to the fragment fingerprint against 0.894 without it. The ceiling
+argument was right — the collapse does not rule them out — and they fail
+anyway.
 
 Representational ceilings were computed without running a language model, by
 grouping molecules on representation key and predicting group means — a hard
@@ -500,7 +505,7 @@ reading `XRWX` that span 4.01 log units of pKi, a 10,233-fold affinity range
 rendered as one string.
 
 **Deployment gate FAILS:** cross-series MAE 0.870 against ≤0.70 required, R²
-0.276 against ≥0.30. Within-series beats a series-mean lookup (0.513 vs 0.845)
+0.276 against ≥0.30. Within-series beats a series-mean lookup (0.520 vs 0.845)
 but its median neighbour similarity of 0.941 makes that interpolation, not
 generalisation. The model publishes no numeric affinity estimates.
 
@@ -646,8 +651,10 @@ for the residue-level interface data a structural viewer needs. It should be
 re-tested if more receptors become available, not adopted on performance it
 has not shown.
 
-**Deferred with a reason:** protein language model embeddings — no PyTorch or
-transformers installed.
+**No longer deferred:** protein language model embeddings were the one
+extension left untested for want of PyTorch. Both packages were installed and
+the arm was measured (ATLAS 2.6, below). It does not help and the gate is
+unchanged.
 
 #### Three groupings, including study grouping
 
@@ -931,10 +938,12 @@ by a constitutional key alone, with a median pKi range of 1.30 inside them.
 
 **It does not improve prediction.** Added to the fragment fingerprint,
 cross-series MAE goes from 0.894 to 0.912 — slightly worse — and within-series
-improves by 0.005. The gate is unchanged and still fails. That makes **0 of 5**:
-topology, residue chemistry, local context, assay context and stereochemistry
-have each been added and none improves cross-series generalisation, which
-agrees with the ~30 effective series and the pocket encoder's null result.
+improves by 0.005. The gate is unchanged and still fails. That made **0 of
+5** at the time, and is **0 of 6** since the language model arm below:
+topology, residue chemistry, local context, assay context, stereochemistry and
+a pretrained protein language model have each been added and none improves
+cross-series generalisation, which agrees with the ~30 effective series and the
+pocket encoder's null result.
 
 **Inside the side chain, the loss is real and costs nothing.** A separate
 census (`atlas/ml/side_chain_stereochemistry.py`, section 7 of the write-up)
@@ -957,6 +966,45 @@ on canonical SMILES; a same-constitution pair is refused as **stereoisomers**
 with the measured spread it is avoiding; and the refusal applies only when a
 model estimate is involved, so two measured stereoisomers are still ranked as a
 comparison of measurements. No frontend change was needed.
+
+### Protein language model embeddings: the sixth null
+
+`atlas/ml/plm_embeddings.py` · findings in `docs/ATLAS_2.6_PROTEIN_LANGUAGE_MODEL.md`
+
+The five extensions above all rearranged information already present in the
+same 630 molecules. A pretrained protein language model is the only lever that
+imports information from **outside** the dataset, so it was worth one
+measurement even against five priors. Frozen ESM-2 650M
+(`facebook/esm2_t33_650M_UR50D`), mean-pooled over residue tokens to 1280
+dimensions, run as three arms through the existing benchmark — embedding alone,
+embedding concatenated with the fragment fingerprint, and the fingerprint by
+itself.
+
+**It does not help.** Cross-series, random forest: the embedding alone scores
+MAE 1.107 (R² −0.151) and added to the fragment fingerprint 1.093, against
+**0.894** for the fingerprint alone and a mean-predictor baseline of 1.189.
+Both PLM arms have negative R². Within-series the arm and the baseline are the
+same number to three decimals (0.613 against 0.613). **The deployment gate is
+unchanged — MAE 0.870, R² 0.276, still FAIL** — with the same best model as
+before, and re-running the benchmark moved zero pre-existing metrics.
+
+The null is **not** explained by the representational ceiling: the canonical
+sequence's oracle MAE is 0.382, far below the 0.870 achieved, so a sequence-only
+representation had headroom and declined it. The mechanism is vocabulary. 80.5%
+of these peptides carry residues outside the canonical twenty, every one
+reaches the model as the single unknown token `X`, and the 449 chemically
+distinct peptides the fragment encoding resolves arrive at the language model
+as **205 inputs** with 77.8% of molecules sharing an input. UniRef contains no
+4-chloro-phenylalanine, so pretraining breadth does not reach the chemotype
+this dataset is built on. Under ridge the arm does lower MAE from 1.143 to
+1.009 — recorded, and not an improvement: it is the scaling artefact the
+`CONTRAST_MODEL = "forest"` rule exists to exclude, and 1.009 is still worse
+than 0.894 without any embedding.
+
+Frozen embeddings only; no fine-tuning was attempted, since a 650M-parameter
+model fitted on 439 molecules in ~30 series would make a positive result less
+believable than this negative one. The finding points back at sample structure,
+where Stage A's effective sample ratio of 0.048 already pointed.
 
 ## Not built yet
 
@@ -987,9 +1035,14 @@ comparison of measurements. No frontend change was needed.
 - Broad names inflate counts: `glutathione` matches ~199k records partly through
   its aliases. Counts measure query recall, not compound-specific evidence.
 - `-1` in a literature count means *not measured* (a failed request), never zero.
-- RDKit 2026.09.1 is installed and required by the ML layer. PyTorch is not
-  installed and is not needed: no model tried here benefited from it, and the
-  best scaffold-split model is a nearest-neighbour regressor.
+- RDKit 2026.09.1 is installed and required by the ML layer. PyTorch 2.14.1
+  and transformers 5.20.2 are **now installed** (ATLAS 2.6, reversing an
+  earlier deliberate choice) solely to settle whether protein language model
+  embeddings help. They do not, and **neither package is needed to reproduce
+  anything**: the 205 ESM-2 vectors are cached in `data/ml/plm_embeddings.npz`
+  and committed, torch is imported only inside the function that rebuilds that
+  cache, and the full suite passes without either installed. No deployed model
+  uses a neural network.
 - Only the alpha carbon's configuration is assigned. Side-chain stereocentres
   are still lost — threonine and allo-threonine produce the same key — because
   the side-chain fragment is rebuilt without chiral tags and fingerprinted with
@@ -1017,9 +1070,10 @@ comparison of measurements. No frontend change was needed.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 872 tests
+python3 -m pytest -q                              # 886 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 python3 -m atlas.ml.side_chain_stereochemistry     # side-chain stereo census
+python3 -m atlas.ml.peptide_benchmark              # representation benchmark + gate
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
 PYTHONPATH=. python3 -m atlas.api.app             # web interface on :5055

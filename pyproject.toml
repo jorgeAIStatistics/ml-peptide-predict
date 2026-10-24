@@ -18,6 +18,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# Only needed to rebuild data/ml/plm_embeddings.npz, which is committed. No
+# deployed model uses a neural network; see docs/ATLAS_2.6_PROTEIN_LANGUAGE_MODEL.md
+# for the measurement that left these optional rather than required.
+plm = ["torch>=2.0", "transformers>=4.40"]
 
 [tool.setuptools.packages.find]
 include = ["atlas*"]
