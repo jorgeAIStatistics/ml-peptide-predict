@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-24 · 854 tests passing
+Last updated: 2026-10-24 · 872 tests passing
 
 ## What this is
 
@@ -936,6 +936,19 @@ topology, residue chemistry, local context, assay context and stereochemistry
 have each been added and none improves cross-series generalisation, which
 agrees with the ~30 effective series and the pocket encoder's null result.
 
+**Inside the side chain, the loss is real and costs nothing.** A separate
+census (`atlas/ml/side_chain_stereochemistry.py`, section 7 of the write-up)
+cuts each side chain out with `FragmentOnBonds` rather than rebuilding it, so
+chiral tags survive, and compares each fragment against itself stripped. 156 of
+5298 residues carry a side-chain stereocentre; 7 carry a configuration the
+deployed alpha-carbon key cannot imply, all threonine at one position of one
+series. All 33 stereoisomeric pairs in the set are separated by the
+alpha-carbon key, **0 need side-chain configuration**, and the representational
+ceiling is unchanged. Nothing was changed on the strength of a loss that
+separates no two molecules — and the naive fix would have been wrong anyway:
+D-threonine and allo-L-threonine share a side-chain fragment, so only the two
+axes together name a residue.
+
 What changed is the ranking service. It measured pair similarity on a
 chirality-free fingerprint, which scores a stereoisomer pair at exactly 1.0, and
 reported *"the two structures are the same molecule"* — false for CHEMBL263878
@@ -980,7 +993,22 @@ comparison of measurements. No frontend change was needed.
 - Only the alpha carbon's configuration is assigned. Side-chain stereocentres
   are still lost — threonine and allo-threonine produce the same key — because
   the side-chain fragment is rebuilt without chiral tags and fingerprinted with
-  chirality off. Unmeasured, so not assumed small.
+  chirality off. **Now measured** (`python3 -m atlas.ml.side_chain_stereochemistry`,
+  docs/ATLAS_2.5_STEREOCHEMISTRY.md section 7): 156 of 5298 traced residues
+  carry a side-chain stereocentre, 7 of them in a configuration the deployed
+  alpha-carbon key cannot imply, and **all 33 stereoisomeric pairs in the set
+  are separated by the alpha-carbon key already** — 0 need side-chain
+  configuration. The loss is real and separates no two molecules here, so
+  neither mechanism was changed; a threonine/allo-threonine contrast pair
+  appearing in a rebuilt dataset would fail the tests and reopen it.
+- 41 of those 156 stereocentres exist only in the whole molecule — a bridged
+  side chain cut at both ends has two branches that are identical inside the
+  fragment — so no fragment-local residue key can carry them, configuration-aware
+  or not.
+- Two pairs of molecules receive byte-identical deployed feature rows for
+  non-stereochemical reasons: a Lys/Glu swap at positions 14 and 16 of a 25-mer
+  (outside the 8 N-terminal and 3 C-terminal slots) and a disulfide-pairing
+  isomer. Worth 0.12 and 0.01 log units, recorded rather than fixed.
 - The MC4R model covers one target. It says nothing about selectivity over
   MC1R, MC3R or MC5R, and binding affinity is not efficacy, exposure or safety.
 - Docker daemon is not running; no Postgres/Redis/Neo4j locally. Current code
@@ -989,8 +1017,9 @@ comparison of measurements. No frontend change was needed.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 854 tests
+python3 -m pytest -q                              # 872 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
+python3 -m atlas.ml.side_chain_stereochemistry     # side-chain stereo census
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep
 PYTHONPATH=. python3 -m atlas.api.app             # web interface on :5055

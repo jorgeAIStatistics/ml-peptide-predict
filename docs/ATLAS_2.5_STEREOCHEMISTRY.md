@@ -205,10 +205,138 @@ the new reason and its remedies, verified in the browser.
   the same key: the side-chain fragment is rebuilt atom by atom without chiral
   tags, and the fragment fingerprint is generated with chirality off. Alpha
   carbons were fixed first because they carry the D/L axis the melanocortin
-  series is designed on; the side-chain case is unmeasured and should not be
-  assumed small.
+  series is designed on. **The side-chain case has since been measured —
+  section 7 — and left in place.**
 - **Configuration is not conformation.** Knowing a residue is D says nothing
   about the backbone geometry it induces. Nothing here is a structural
   prediction.
 - **The affinity gate still fails**, unchanged by this work. The peptide model
   publishes no numeric affinity estimates.
+
+---
+
+## 7. Side-chain stereochemistry: measured, then left alone
+
+**Code:** `atlas/ml/side_chain_stereochemistry.py` ·
+**Reproduce:** `python3 -m atlas.ml.side_chain_stereochemistry` ·
+**Tests:** 18 new (872 total)
+
+Section 6 recorded the side-chain loss as unmeasured and said it should not be
+assumed small. It is now measured, and on this dataset it is small: real at the
+residue level, and it separates **no two molecules**. Neither mechanism was
+changed.
+
+### How the fragment is cut
+
+Not by rebuilding it. The rebuild in `_side_chain_code` reorders a
+stereocentre's neighbours, so a chiral tag copied across is wrong as often as
+right, and correcting it is the hand-rolled parity arithmetic section 1 refuses
+to do. The census instead cuts every bond leaving the traced side chain with
+`Chem.FragmentOnBonds`, which substitutes a dummy for the severed partner and
+keeps each stereocentre's neighbour count and ordering intact. RDKit assigns
+the tags; the census only compares them, each fragment's stereo SMILES against
+the same fragment stripped. Calibration on reference standards, with their CIP
+labels:
+
+| Standard | Fragment |
+|---|---|
+| L-threonine (2S,3R) | `*[C@@H](C)O` |
+| allo-L-threonine (2S,3S) | `*[C@H](C)O` |
+| **D-threonine (2R,3S)** | **`*[C@H](C)O`** |
+| L-isoleucine (2S,3S) | `*[C@@H](C)CC` |
+| allo-L-isoleucine (2S,3R) | `*[C@H](C)CC` |
+
+The bolded row is the case a naive fix gets wrong. Inverting the alpha carbon
+inverts the beta carbon with it, so D-threonine's fragment is allo-L-threonine's
+fragment. A residue key built from the stereo-aware fragment *alone* would merge
+them; the fragment together with the alpha-carbon assignment does not. Any fix
+has to combine the two axes, not replace one with the other.
+
+### Census: 630 peptides, 5298 traced residues
+
+| | Residues |
+|---|---|
+| carrying a side-chain stereocentre | **156** (2.9%), in 99 molecules (15.7%) |
+| carrying one the record leaves undefined | 19 |
+| of the 156, expressible in a cut fragment | 115 |
+| of the 156, **only** a stereocentre in the whole molecule | **41** |
+
+Three further residues carry no stereocentre but do carry a side-chain double
+bond's geometry, which the flat key discards on the same mechanism. The 41 are
+bridged side chains, cut at both ends: `*CC(O)C*` has two branches
+that are identical inside the fragment and distinct outside it. No
+fragment-local residue key can carry that configuration, stereo-aware or not —
+which is a limit on the proposed fix, not on the census, and is why the decisive
+measurement below compares whole molecules.
+
+Of 169 distinct flat fragments, **2** occur in more than one configuration:
+threonine's `*C(C)O` and isoleucine's `*C(C)CC`. Taking the deployed
+alpha-carbon assignment into account leaves **one** ambiguous
+(configuration, fragment) pair:
+
+| Residue | Configuration | Count |
+|---|---|---|
+| isoleucine | L (2S,3S) | 53 |
+| isoleucine | D (2R,3R) | 2 |
+| threonine | L (2S,3R) | 45 |
+| threonine | D (2R,3R), allo | 2 |
+| **threonine** | **L (2S,3S), allo** | **7** |
+
+The two D rows cost nothing, for two different reasons. D-isoleucine is the
+exact mirror image of L-isoleucine, so its beta centre is inverted *with* the
+alpha carbon and the deployed key — `D` plus the flat fragment — already implies
+it. The two D threonines are (2R,3R), which is D-*allo*-threonine rather than
+D-threonine's (2R,3S); that key is unambiguous only because the set happens to
+contain no D-threonine to contrast it with, which is a fact about the data and
+not about the key. **7 residues of 5298 (0.13%)
+carry a configuration the deployed key cannot imply** — threonine deposited as
+(2S,3S) at position 9 of one 14-residue traced series (`ICHFRWRCTASIPP`), in 7
+molecules spanning pKi 4.60 to 6.13. All 7 members of that traced series carry
+it and the set holds no (2S,3R) counterpart, so the dataset offers no contrast
+either way, and whether this is a deliberate allo-threonine or a depositor's
+transcription of threonine cannot be settled from the records. The census counts
+what the records say.
+
+### What it costs: nothing measurable
+
+| Test | Result |
+|---|---|
+| stereoisomeric pairs (one constitution, two structures) | 33, in 25 constitutional groups |
+| separated by the alpha-carbon key | **33** |
+| needing side-chain configuration | **0** |
+| groups a flat fragment key merges and a stereo-aware one splits | **0** |
+| representational ceiling, with and without | 490 keys / oracle MAE 0.128, unchanged |
+
+The 25 groups and 33 pairs are the same ones section 3 found. Every one of them
+is separated by the alpha-carbon assignment already deployed. Not one pair in
+the set is a side-chain stereoisomer, so making the fragment rebuild and the
+fingerprint generator configuration-aware would change no key, no bit and no
+row — and therefore could not change a metric. The fix was not made.
+
+This is not the sixth null result in the series; it is weaker than that. The
+previous five were features that were built, fitted and measured not to help.
+This one was measured not to *apply*: there is nothing in this dataset for the
+feature to be right about. A single threonine/allo-threonine contrast pair would
+change the decision, and `tests/test_side_chain_stereochemistry.py` fails if one
+appears.
+
+### What the census turned up on the way
+
+Two pairs of molecules receive byte-identical `positional_fragment_fp+morgan_fp`
+rows and are separated by *neither* stereochemical axis, because they differ
+constitutionally in places the representation cannot see:
+
+- **CHEMBL5169353 / CHEMBL5201799** (pKi 6.70, 6.58) — a 25-residue pair with
+  Lys and Glu swapped between positions 14 and 16. The fragment fingerprint
+  indexes 8 N-terminal and 3 C-terminal slots, so in a 25-mer both positions
+  fall outside every slot, and a positional isomer is invisible to the
+  whole-molecule fingerprint as well.
+- **CHEMBL5192562 / CHEMBL5206293** (pKi 7.34, 7.33) — identical residues and
+  identical configurations, different disulfide pairing: Cys5–Cys18/Cys7–Cys9
+  against Cys5–Cys9/Cys7–Cys18.
+
+Both differences are worth 0.12 and 0.01 log units respectively, so neither is
+an error worth chasing here. They are recorded because they are where the
+deployed representation's remaining blindness actually is — mid-chain
+substitution in long peptides and bridge topology — and not where this
+milestone went looking.

@@ -20,9 +20,10 @@ residue.
 
 What it cannot do is also recorded. Backbone tracing establishes connectivity
 and alpha-carbon configuration, not stereochemistry *within* a side chain --
-threonine's beta carbon and allo-threonine's still produce the same key -- nor
-residue order confidence for unusual chemistry, and a molecule can be a
-genuine peptidomimetic while tracing only two units.
+threonine's beta carbon and allo-threonine's still produce the same key, a loss
+measured in ``atlas.ml.side_chain_stereochemistry`` and found to separate no two
+molecules in this dataset -- nor residue order confidence for unusual chemistry,
+and a molecule can be a genuine peptidomimetic while tracing only two units.
 """
 
 from __future__ import annotations
@@ -64,8 +65,10 @@ def _tautomer_key(smiles: str) -> str:
 __all__ = [
     "PeptideClass",
     "PeptideAnalysis",
+    "SideChainWalk",
     "analyse_peptide",
     "classify_molecule",
+    "side_chain_atoms",
     "CANONICAL_SIDE_CHAINS",
     "Configuration",
 ]
@@ -232,15 +235,42 @@ class PeptideAnalysis:
         )
 
 
-def _side_chain_code(
+@dataclass(frozen=True)
+class SideChainWalk:
+    """The fragment hanging off one alpha carbon, as atom indices.
+
+    Separated from the residue-naming code because the atom set is useful on
+    its own: the side-chain stereochemistry census cuts the molecule at this
+    fragment's boundary rather than rebuilding it, which is the only way to
+    carry chiral tags across correctly.
+    """
+
+    atoms: frozenset[int] = frozenset()
+    branch_roots: tuple[int, ...] = ()
+    #: The walk reached *another* residue's backbone.
+    bridges: bool = False
+    #: The walk closed onto this residue's own nitrogen: a cyclic imino acid.
+    reaches_own_n: bool = False
+
+
+def _backbone_units(mol: Chem.Mol) -> dict[int, tuple[int, int, int]]:
+    """``N-Calpha-C(=O)`` units, keyed by alpha carbon.
+
+    One alpha carbon belongs to one unit, so the matches are de-duplicated on
+    it: a residue whose nitrogen is reachable two ways must not be counted
+    twice.
+    """
+    units: dict[int, tuple[int, int, int]] = {}
+    for n_idx, ca_idx, c_idx, _o in mol.GetSubstructMatches(_UNIT):
+        units.setdefault(ca_idx, (n_idx, ca_idx, c_idx))
+    return units
+
+
+def _side_chain_walk(
     mol: Chem.Mol, ca_idx: int, n_idx: int, c_idx: int,
     backbone: set[int], disulfide_bonds: set[frozenset[int]],
-) -> tuple[str, bool, str | None]:
-    """Identify the fragment hanging off an alpha carbon.
-
-    Returns a one-letter code — canonical residue, 'G' where the alpha carbon
-    carries no side chain, 'X' where the fragment is something else — and
-    whether the side chain bridges to another residue's backbone.
+) -> SideChainWalk:
+    """Collect the side-chain atoms of one residue.
 
     The walk is blocked at *every* backbone atom in the molecule, not merely
     this residue's, and is cut at disulfide bonds. Without those two cuts a
@@ -253,7 +283,7 @@ def _side_chain_code(
         if nb.GetIdx() not in (n_idx, c_idx) and nb.GetAtomicNum() > 1
     ]
     if not branch_roots:
-        return "G", False, None  # glycine: no side chain at all
+        return SideChainWalk()  # glycine: no side chain at all
 
     own = {n_idx, c_idx, ca_idx}
     blocked = (backbone | own) - set(branch_roots)
@@ -282,6 +312,46 @@ def _side_chain_code(
                     reaches_own_n = True
                 continue
             stack.append(j)
+    return SideChainWalk(frozenset(collected), tuple(branch_roots),
+                         bridges, reaches_own_n)
+
+
+def side_chain_atoms(mol: Chem.Mol) -> dict[int, SideChainWalk]:
+    """Side-chain walk for every backbone unit traced in a molecule.
+
+    Keyed by alpha carbon index, so a caller can line the result up against
+    ``PeptideAnalysis.alpha_carbon_indices``.
+    """
+    units = _backbone_units(mol)
+    backbone = {i for u in units.values() for i in u}
+    disulfides = {frozenset(m) for m in mol.GetSubstructMatches(_DISULFIDE)}
+    return {
+        ca: _side_chain_walk(mol, ca, n_idx, c_idx, backbone, disulfides)
+        for ca, (n_idx, _ca, c_idx) in units.items()
+    }
+
+
+def _side_chain_code(
+    mol: Chem.Mol, ca_idx: int, n_idx: int, c_idx: int,
+    backbone: set[int], disulfide_bonds: set[frozenset[int]],
+) -> tuple[str, bool, str | None]:
+    """Identify the fragment hanging off an alpha carbon.
+
+    Returns a one-letter code — canonical residue, 'G' where the alpha carbon
+    carries no side chain, 'X' where the fragment is something else — and
+    whether the side chain bridges to another residue's backbone.
+
+    The fragment is rebuilt without its chiral tags, so the key is flat:
+    threonine and allo-threonine produce the same one. That loss is measured
+    in :mod:`atlas.ml.side_chain_stereochemistry` -- 7 of 5298 traced
+    residues in the MC4R set, separating no two molecules -- and is left in
+    place rather than fixed on the strength of nothing.
+    """
+    walk = _side_chain_walk(mol, ca_idx, n_idx, c_idx, backbone,
+                            disulfide_bonds)
+    collected = set(walk.atoms)
+    branch_roots = list(walk.branch_roots)
+    bridges, reaches_own_n = walk.bridges, walk.reaches_own_n
     if not collected:
         return "G", False, None
 
@@ -344,11 +414,7 @@ def analyse_peptide(smiles: str) -> PeptideAnalysis:
     largest_ring = max((len(r) for r in rings), default=0)
     n_disulfide = len(mol.GetSubstructMatches(_DISULFIDE))
 
-    matches = mol.GetSubstructMatches(_UNIT)
-    # One alpha carbon belongs to one unit; de-duplicate on it.
-    units: dict[int, tuple[int, int, int]] = {}
-    for n_idx, ca_idx, c_idx, _o in matches:
-        units.setdefault(ca_idx, (n_idx, ca_idx, c_idx))
+    units = _backbone_units(mol)
 
     analysis = PeptideAnalysis(
         smiles=smiles, peptide_class=PeptideClass.SMALL_MOLECULE,
