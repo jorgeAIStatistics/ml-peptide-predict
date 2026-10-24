@@ -1,6 +1,6 @@
 # ATLAS — build status
 
-Last updated: 2026-10-19 · 820 tests passing
+Last updated: 2026-10-24 · 854 tests passing
 
 ## What this is
 
@@ -450,9 +450,12 @@ scores *below* the baseline, because a bag of residue counts cannot
 distinguish positional isomers and this population is single-substitution
 analogue series. That negative result is asserted by a test.
 
-Stereochemistry is **not** resolved by the tracer: D- versus L-residues are
-indistinguishable in the current representation, which matters because D-amino
-acid substitution is central to melanocortin peptide design.
+Stereochemistry **is** now resolved by the tracer, which was not true when
+Stage A was written: each residue carries an L / D / achiral /
+alpha-disubstituted / unspecified configuration, assigned from the backbone
+arrangement rather than from CIP labels (L-cysteine is (R) where the other L
+residues are (S), so a CIP mapping is wrong). 85.6% of these peptides carry at
+least one D residue.
 
 ### Stage B: representations benchmarked (gate still FAILS)
 
@@ -501,9 +504,14 @@ rendered as one string.
 but its median neighbour similarity of 0.941 makes that interpolation, not
 generalisation. The model publishes no numeric affinity estimates.
 
-Stereochemistry remains unresolved: D-Phe⁷ and L-Phe⁷ encode identically,
-which in a melanocortin dataset is a material omission and the most likely
-source of cheap improvement.
+Stereochemistry has since been implemented and measured
+(`docs/ATLAS_2.5_STEREOCHEMISTRY.md`), and Stage B's expectation of it was
+wrong. It is a real omission — adding configuration drops the representational
+ceiling from oracle MAE 0.186 to 0.128, and 33 pairs of molecules differing by
+up to 3.60 log units had byte-identical feature rows — but it is **not** a
+source of cheap improvement: cross-series MAE goes from 0.894 to 0.912, slightly
+worse. What changed instead is the ranking service, which used to call a
+stereoisomer pair "the same molecule" and now refuses it by name.
 
 ## ATLAS 2.5: biophysics-aware interaction intelligence
 
@@ -898,6 +906,45 @@ payload** — asserted over the whole serialised answer, not only named fields.
 Two measured molecules are labelled a comparison of measurements with no model
 accuracy attached.
 
+### Backbone configuration, and the claim it withdraws
+
+`atlas/ml/stereochemistry.py` · findings in `docs/ATLAS_2.5_STEREOCHEMISTRY.md`
+
+Every representation was stereo-blind until now: the side-chain fragment, the
+fragment fingerprint (`includeChirality=False`) and the whole-molecule Morgan
+fingerprint all encoded D-Phe and L-Phe identically. Configuration is now
+assigned per residue from the backbone arrangement of (N, C=O, side chain, H)
+against L-alanine, via a chiral substructure query — **not** from CIP labels,
+because L-cysteine is (R) where the other L residues are (S) and a CIP mapping
+needs an exception table no noncanonical residue has. Five outcomes are
+reported: L, D, achiral, alpha-disubstituted, and unspecified for a
+stereocentre the record does not define, which is never assumed to be L.
+
+Validated on nine reference standards including cysteine, threonine and
+proline, on renumbered copies of each, and on α-MSH (all L) against NDP-α-MSH
+(D at position 7, the substitution the whole dataset is designed on).
+
+**724 of 5409 alpha carbons are D, and 539 of 630 peptides (85.6%) carry at
+least one D residue.** Naming them drops the representational ceiling from
+oracle MAE 0.186 to 0.128, because 31 groups covering 134 molecules are merged
+by a constitutional key alone, with a median pKi range of 1.30 inside them.
+
+**It does not improve prediction.** Added to the fragment fingerprint,
+cross-series MAE goes from 0.894 to 0.912 — slightly worse — and within-series
+improves by 0.005. The gate is unchanged and still fails. That makes **0 of 5**:
+topology, residue chemistry, local context, assay context and stereochemistry
+have each been added and none improves cross-series generalisation, which
+agrees with the ~30 effective series and the pocket encoder's null result.
+
+What changed is the ranking service. It measured pair similarity on a
+chirality-free fingerprint, which scores a stereoisomer pair at exactly 1.0, and
+reported *"the two structures are the same molecule"* — false for CHEMBL263878
+and CHEMBL439128, whose measured pKi are 5.00 and 8.60. Identity is now decided
+on canonical SMILES; a same-constitution pair is refused as **stereoisomers**
+with the measured spread it is avoiding; and the refusal applies only when a
+model estimate is involved, so two measured stereoisomers are still ranked as a
+comparison of measurements. No frontend change was needed.
+
 ## Not built yet
 
 1. **PK coverage beyond approved products.** Only labelled drugs have a PK
@@ -930,6 +977,10 @@ accuracy attached.
 - RDKit 2026.09.1 is installed and required by the ML layer. PyTorch is not
   installed and is not needed: no model tried here benefited from it, and the
   best scaffold-split model is a nearest-neighbour regressor.
+- Only the alpha carbon's configuration is assigned. Side-chain stereocentres
+  are still lost — threonine and allo-threonine produce the same key — because
+  the side-chain fragment is rebuilt without chiral tags and fingerprinted with
+  chirality off. Unmeasured, so not assumed small.
 - The MC4R model covers one target. It says nothing about selectivity over
   MC1R, MC3R or MC5R, and binding affinity is not efficacy, exposure or safety.
 - Docker daemon is not running; no Postgres/Redis/Neo4j locally. Current code
@@ -938,7 +989,7 @@ accuracy attached.
 ## Reproducing
 
 ```bash
-python3 -m pytest -q                              # 820 tests
+python3 -m pytest -q                              # 854 tests
 PYTHONPATH=. python3 -m atlas.mechanistic.verify  # 63/63 solver checks
 PYTHONPATH=. python3 -m atlas.registry.build      # resolve registry (live)
 PYTHONPATH=. python3 -m atlas.analysis.report     # evidence/feasibility sweep

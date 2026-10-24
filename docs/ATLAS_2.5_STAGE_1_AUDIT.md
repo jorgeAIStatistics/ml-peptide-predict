@@ -444,9 +444,12 @@ Reported now where measurable, and marked outstanding where not yet.
   assumed pH of 7.4 uniformly and labels every ionisation estimate ESTIMATED.
   Condition sensitivity can be explored by varying the parameter; it cannot be
   fitted against measured conditions that are not present.
-- **Stereochemistry still unresolved.** D- and L-residues remain
-  indistinguishable in every representation, which matters in a melanocortin
-  dataset where D-Phe⁷ is a defining substitution.
+- **Stereochemistry was unresolved at the time of this audit.** D- and
+  L-residues were indistinguishable in every representation, which matters in a
+  melanocortin dataset where D-Phe⁷ is a defining substitution. Since resolved
+  (`docs/ATLAS_2.5_STEREOCHEMISTRY.md`): configuration is assigned per residue
+  and the ranking service now refuses stereoisomer pairs it cannot separate,
+  but the feature itself does not improve cross-series generalisation.
 
 ---
 

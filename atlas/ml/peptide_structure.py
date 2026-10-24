@@ -13,9 +13,16 @@ topology (linear, head-to-tail cyclic, or side-chain bridged), disulfide
 bridges, terminal state, and how many residues carry a recognisable canonical
 side chain.
 
-What it cannot do is also recorded. Backbone tracing establishes connectivity,
-not stereochemistry or residue order confidence for unusual chemistry, and a
-molecule can be a genuine peptidomimetic while tracing only two units.
+Configuration at each alpha carbon is read alongside the chain, by
+``atlas.ml.stereochemistry``: tracing the graph alone would make D-Phe and
+L-Phe the same residue, and 85.6% of the peptides in this dataset carry a D
+residue.
+
+What it cannot do is also recorded. Backbone tracing establishes connectivity
+and alpha-carbon configuration, not stereochemistry *within* a side chain --
+threonine's beta carbon and allo-threonine's still produce the same key -- nor
+residue order confidence for unusual chemistry, and a molecule can be a
+genuine peptidomimetic while tracing only two units.
 """
 
 from __future__ import annotations
@@ -28,6 +35,8 @@ from functools import lru_cache
 
 from rdkit import Chem, RDLogger
 from rdkit.Chem.MolStandardize import rdMolStandardize
+
+from atlas.ml.stereochemistry import Configuration, alpha_configurations
 
 RDLogger.DisableLog("rdApp.*")
 
@@ -58,6 +67,7 @@ __all__ = [
     "analyse_peptide",
     "classify_molecule",
     "CANONICAL_SIDE_CHAINS",
+    "Configuration",
 ]
 
 
@@ -171,6 +181,14 @@ class PeptideAnalysis:
     #: Per-position residue identity along the traced chain: the one-letter
     #: code where canonical, the side-chain fragment SMILES where not.
     residue_keys: list[str] = field(default_factory=list)
+    #: Configuration at each position's alpha carbon, aligned to
+    #: ``residue_keys``: "L", "D", "achiral", "alpha_disubstituted" or
+    #: "unspecified". Read from the deposited structure, not measured here.
+    residue_configs: list[str] = field(default_factory=list)
+    #: Atom index of each position's alpha carbon, so a caller can go back to
+    #: the molecule -- the interaction-feature code needs this to say which
+    #: residue a contact belongs to.
+    alpha_carbon_indices: list[int] = field(default_factory=list)
     has_free_n_terminus: bool = False
     has_acylated_n_terminus: bool = False
     has_c_terminal_amide: bool = False
@@ -194,6 +212,16 @@ class PeptideAnalysis:
     @property
     def is_peptide(self) -> bool:
         return self.peptide_class.is_peptide
+
+    @property
+    def n_d_residues(self) -> int:
+        return sum(1 for c in self.residue_configs
+                   if c == Configuration.D.value)
+
+    @property
+    def n_unspecified_configurations(self) -> int:
+        return sum(1 for c in self.residue_configs
+                   if c == Configuration.UNSPECIFIED.value)
 
     def summary(self) -> str:
         return (
@@ -377,6 +405,11 @@ def analyse_peptide(smiles: str) -> PeptideAnalysis:
         (code if code != "X" else (frag or "X"))
         for code, _bridge, frag in results
     ]
+    # Configuration is read per position along the same walk, so the two lists
+    # are aligned by construction rather than by a later zip.
+    configs = alpha_configurations(mol, longest)
+    analysis.alpha_carbon_indices = list(longest)
+    analysis.residue_configs = [configs[ca].value for ca in longest]
 
     analysis.n_residues_in_longest_chain = len(longest)
     analysis.is_cyclic_backbone = cyclic
@@ -398,6 +431,12 @@ def analyse_peptide(smiles: str) -> PeptideAnalysis:
             f"{analysis.n_backbone_units} backbone units were found but the "
             f"longest traceable chain is {len(longest)}; the molecule may be "
             "branched or contain separate peptide segments."
+        )
+    if analysis.n_unspecified_configurations:
+        analysis.caveats.append(
+            f"{analysis.n_unspecified_configurations} alpha carbon(s) are "
+            "stereocentres the deposited structure does not define; they are "
+            "recorded as unspecified rather than assumed to be L."
         )
     if n_unknown:
         analysis.caveats.append(

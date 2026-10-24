@@ -272,12 +272,16 @@ Not supported:
 
 ## Known limitations
 
-- **Stereochemistry is still unresolved.** The tracer does not distinguish D-
-  from L-residues, so `positional_fragment_fp` encodes D-Phe⁷ and L-Phe⁷
-  identically. In a melanocortin dataset this is a material omission: D-amino
-  acid substitution is a central design axis, and some of the unexplained
-  within-series variance is certainly stereochemical. This is the single most
-  likely source of cheap improvement and remains unaddressed.
+- **Stereochemistry was unresolved here, and the prediction made about it
+  was wrong.** This section said D/L was "the single most likely source of
+  cheap improvement". It has since been implemented and measured
+  (`docs/ATLAS_2.5_STEREOCHEMISTRY.md`), and it is not. The omission was real —
+  724 of 5409 alpha carbons are D, and 33 pairs of molecules received
+  byte-identical feature rows while differing by up to 3.60 log units — but
+  adding configuration to `positional_fragment_fp` moved cross-series MAE from
+  0.894 to 0.912, slightly *worse*, and within-series by 0.005. The correction
+  to record is the expectation of cheap improvement, not the diagnosis of the
+  gap.
 - No protein language model was run; §2 bounds them rather than measuring them.
 - Head-to-tail cyclic peptides (58 of 630) have their rotation canonicalised
   lexicographically. This makes position indices comparable but the choice of

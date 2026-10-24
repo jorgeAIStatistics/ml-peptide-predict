@@ -369,8 +369,10 @@ not survive. That is the result, and it is a negative one.
 - **Endpoints remain unpooled.** Only Ki was built. EC50 and IC50 are
   available through the same code path as separate datasets and have not been
   fetched.
-- **Stereochemistry is still unresolved**, now across four receptors rather
-  than one.
+- **Stereochemistry was unresolved at the time of this panel**, across four
+  receptors rather than one. Since resolved for the alpha carbon
+  (`docs/ATLAS_2.5_STEREOCHEMISTRY.md`); the panel has not been re-run with it,
+  because on MC4R the feature did not improve cross-series error.
 
 ---
 

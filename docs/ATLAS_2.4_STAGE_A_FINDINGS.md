@@ -288,6 +288,10 @@ outrank any prediction.
   L-residues are **not** resolved, and D-amino acid substitution is a central
   design axis in melanocortin peptides (melanotan II carries D-Phe⁷). This is a
   known gap in the current representation, not a solved problem.
+  **Resolved since, with a qualification** (`docs/ATLAS_2.5_STEREOCHEMISTRY.md`):
+  configuration is now assigned per residue, and 85.6% of these peptides carry
+  at least one D residue. Adding it to the model did not improve cross-series
+  error, so the gap was real but was not the one limiting accuracy.
 - Residue *order* is recovered along the traced chain, but for branched or
   multi-segment molecules the chain reported is the longest one; 
   discrepancies between total backbone units and the longest chain are recorded

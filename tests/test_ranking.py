@@ -341,3 +341,128 @@ def test_a_measurement_comparison_is_not_flagged_as_a_cliff(service):
                     assert r.band_meets_gate is None
                     return
     pytest.skip("no measured cliff-band pair found")
+
+
+# ------------------------------------------------- stereoisomers the model
+# ------------------------------------------------- cannot tell apart ----
+
+@pytest.fixture(scope="module")
+def stereoisomer_pair() -> tuple[str, str]:
+    """Two dataset molecules of one constitution and different configuration.
+
+    Chosen by construction rather than hardcoded, so the test keeps meaning if
+    the dataset is rebuilt. Both members are measured, which is what makes the
+    pair the test it is: the pair must be *ranked*, not refused.
+    """
+    import collections
+
+    from rdkit import Chem
+
+    from atlas.ml.dataset import load_dataset
+
+    groups: dict[str, list] = collections.defaultdict(list)
+    for r in load_dataset().records:
+        mol = Chem.MolFromSmiles(r.smiles)
+        if mol is None:
+            continue
+        flat = Chem.Mol(mol)
+        Chem.RemoveStereochemistry(flat)
+        groups[Chem.MolToSmiles(flat)].append(r.smiles)
+    for members in groups.values():
+        canon = {Chem.CanonSmiles(s) for s in members}
+        if len(canon) > 1:
+            a, b = sorted(canon)[:2]
+            return a, b
+    pytest.skip("no stereoisomer pair in the current dataset")
+
+
+def test_stereoisomers_are_not_called_the_same_molecule(service, stereoisomer_pair):
+    """The defect this check exists for.
+
+    The service measures similarity on a Morgan fingerprint built without
+    chirality, which gives a stereoisomeric pair a Tanimoto of exactly 1.0.
+    An earlier version read that as identity and told the user two different
+    peptides were "the same molecule" -- for one MC4R pair whose measured
+    affinities are 5.00 and 8.60, a 4000-fold difference.
+    """
+    a, b = stereoisomer_pair
+    assert service._similarity(a, b) >= 0.999, "fixture is not the hard case"
+    assert service._structural_relation(a, b) == "stereoisomers"
+    r = service.rank(a, b)
+    assert r.refusal_reason != "the_two_structures_are_the_same"
+
+
+def test_two_measured_stereoisomers_are_still_ranked(service, stereoisomer_pair):
+    """Chirality-blindness only matters when the model supplies a value.
+
+    Both members of this pair have measured affinities, so the ordering is a
+    comparison of measurements and the representation never enters it.
+    """
+    r = service.rank(*stereoisomer_pair)
+    assert not r.abstained
+    assert r.basis == "measurement"
+    assert r.confidence is None
+
+
+@pytest.fixture(scope="module")
+def estimated_stereo_comparison(service, stereoisomer_pair):
+    """Rank a known molecule against a stereoisomer the registry never saw.
+
+    One centre of a dataset molecule is inverted, which leaves the
+    constitution untouched and makes the result unmeasured -- so one side of
+    the comparison must come from the model.
+    """
+    from rdkit import Chem
+    from rdkit.Chem import ChiralType
+
+    from atlas.ml.peptide_structure import analyse_peptide
+
+    known = stereoisomer_pair[0]
+    mol = Chem.MolFromSmiles(known)
+    analysis = analyse_peptide(known)
+    assert analysis.alpha_carbon_indices, "fixture molecule traced no backbone"
+    atom = mol.GetAtomWithIdx(analysis.alpha_carbon_indices[0])
+    atom.SetChiralTag(
+        ChiralType.CHI_TETRAHEDRAL_CW
+        if atom.GetChiralTag() == ChiralType.CHI_TETRAHEDRAL_CCW
+        else ChiralType.CHI_TETRAHEDRAL_CCW)
+    novel = Chem.MolToSmiles(mol)
+    assert novel != Chem.CanonSmiles(known)
+    return service.rank(known, novel)
+
+
+def test_an_estimated_stereoisomer_comparison_is_refused(estimated_stereo_comparison):
+    r = estimated_stereo_comparison
+    assert r.abstained
+    assert r.refusal_reason == "stereoisomers_the_model_cannot_distinguish"
+    assert "chirality-blind" in r.refusal_explanation
+    assert r.what_would_resolve_it
+
+
+def test_the_refusal_quotes_the_measured_spread_it_is_avoiding(
+        estimated_stereo_comparison):
+    """The refusal has to say why it matters, with the measurement.
+
+    "The model cannot tell these apart" is only actionable alongside how far
+    apart they can be: a median 1.47 and a maximum 3.60 log units among the
+    MC4R stereoisomer groups.
+    """
+    text = estimated_stereo_comparison.refusal_explanation
+    assert "1.47" in text and "3.60" in text
+    assert "log units" in text
+
+
+def test_the_refusal_does_not_promise_a_fix_that_was_not_measured(
+        estimated_stereo_comparison):
+    """The remedy offered must not imply stereo features are an upgrade.
+
+    They were measured and they are not: adding backbone configuration to the
+    fragment fingerprint left cross-series MAE slightly worse (0.912 against
+    0.894). A refusal that pointed at a stereochemistry-aware model without
+    saying so would be promising an improvement this project has not
+    demonstrated.
+    """
+    remedies = " ".join(estimated_stereo_comparison.what_would_resolve_it)
+    assert "stereochemistry-aware model" in remedies
+    assert "does not yet have" in remedies
+    assert "unchanged or worse" in remedies

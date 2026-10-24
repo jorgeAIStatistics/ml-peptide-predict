@@ -17,6 +17,13 @@ is formed:
 3. **The two molecules are of one series.** The gate's accuracy was measured
    within series, so the claim is bounded to within series, and the condition
    is checked from the two queries by Tanimoto similarity -- no label needed.
+4. **The representation can tell the two apart.** Every feature block behind
+   this service is chirality-blind, so two stereoisomers produce identical
+   rows and any ordering between them is decided by nothing. The MC4R dataset
+   contains 25 such groups, and their measured affinities differ by a median
+   1.47 and as much as 3.60 log units -- a pair the earlier version of this
+   service called "the same molecule", which was false. They are now refused
+   as what they are.
 
 A ranking of two **measured** molecules is a comparison of measurements and is
 labelled as such. A ranking involving a prediction is an ordering with an
@@ -47,6 +54,13 @@ class RankingRefusal(str, enum.Enum):
     MOLECULE_REFUSED = "one_molecule_has_no_usable_answer"
     NOT_SAME_SERIES = "molecules_are_not_of_one_series"
     IDENTICAL_MOLECULES = "the_two_structures_are_the_same"
+    #: Different molecules with the same constitution. Every representation
+    #: this service is built on is chirality-blind, so the two receive
+    #: identical feature rows and any ordering would be an artefact.
+    STEREOISOMERS = "stereoisomers_the_model_cannot_distinguish"
+    #: Different constitutions that the folded fingerprint still cannot
+    #: separate. Rarer than the stereo case and handled the same way.
+    INDISTINGUISHABLE = "structures_the_representation_cannot_separate"
 
 
 @dataclass
@@ -149,6 +163,30 @@ class RankingService:
                 return {**band, "label": label} if band else None
         return None
 
+    @staticmethod
+    def _structural_relation(smiles_a: str, smiles_b: str) -> str:
+        """``identical``, ``stereoisomers`` or ``distinct``.
+
+        Decided on canonical SMILES rather than on a fingerprint. A folded
+        Morgan fingerprint built without chirality gives a stereoisomeric pair
+        a Tanimoto of exactly 1.0, which an earlier version of this service
+        read as "the same molecule" -- a false statement about two compounds
+        whose measured affinities differ by up to 3.60 log units.
+        """
+        from rdkit import Chem
+
+        mols = [Chem.MolFromSmiles(s) for s in (smiles_a, smiles_b)]
+        if any(m is None for m in mols):
+            return "distinct"
+        if Chem.MolToSmiles(mols[0]) == Chem.MolToSmiles(mols[1]):
+            return "identical"
+        flat = []
+        for m in mols:
+            copy = Chem.Mol(m)
+            Chem.RemoveStereochemistry(copy)
+            flat.append(Chem.MolToSmiles(copy))
+        return "stereoisomers" if flat[0] == flat[1] else "distinct"
+
     def _similarity(self, smiles_a: str, smiles_b: str) -> float | None:
         from rdkit import Chem
         from rdkit.Chem import rdFingerprintGenerator
@@ -194,7 +232,11 @@ class RankingService:
                 "membership of a series nor an ordering can be established.",
                 ["A valid SMILES string for both molecules."],
             )
-        if similarity >= 0.999:
+        # The relation is computed here and used twice: the identity case is
+        # decided now, and the stereoisomer case only once it is known whether
+        # a model estimate is involved at all.
+        relation = self._structural_relation(smiles_a, smiles_b)
+        if relation == "identical":
             return self._refuse(
                 RankingRefusal.IDENTICAL_MOLECULES,
                 "The two structures are the same molecule, so there is nothing "
@@ -236,6 +278,47 @@ class RankingService:
         meaningful = abs(margin) >= self.criteria["meaningful_delta_log_units"]
         basis = ("measurement" if kind_a == kind_b == "measurement"
                  else "prediction" if kind_a == kind_b == "prediction" else "mixed")
+
+        # Whether the model can tell the two structures apart only matters
+        # when the model is what produced a value. Two molecules with measured
+        # affinities are compared as measurements, and a pair of
+        # stereoisomers is then a perfectly orderable pair -- which is the
+        # case for the widest-spread pair in the MC4R set, both of whose
+        # members are measured.
+        if basis != "measurement":
+            if relation == "stereoisomers":
+                return self._refuse(
+                    RankingRefusal.STEREOISOMERS,
+                    "These are two different molecules with the same "
+                    "constitution, differing only in stereochemistry, and at "
+                    "least one side of the comparison is a model estimate. "
+                    "Every representation behind this ranking is "
+                    "chirality-blind, so the two produce identical feature "
+                    "rows and an ordering between them would be decided by "
+                    "nothing. The difference is not small in this dataset: "
+                    "among the 25 stereoisomer groups in the MC4R set the "
+                    "measured affinities differ by a median 1.47 and as much "
+                    "as 3.60 log units, so the ordering is refused rather "
+                    "than guessed.",
+                    ["A measured affinity for both molecules, which would make "
+                     "this a comparison of measurements rather than of "
+                     "estimates.",
+                     "A stereochemistry-aware model, which ATLAS has measured "
+                     "and does not yet have: adding backbone configuration to "
+                     "the features left cross-series error unchanged or worse."],
+                )
+            if similarity >= 0.999:
+                return self._refuse(
+                    RankingRefusal.INDISTINGUISHABLE,
+                    f"The two structures are different but share a Tanimoto "
+                    f"similarity of {similarity:.3f} on the fingerprint this "
+                    "service uses, so it cannot separate them, and an "
+                    "ordering resting on a model estimate would be an "
+                    "artefact of the representation rather than a statement "
+                    "about the molecules.",
+                    ["A measured affinity for both molecules."],
+                )
+
         c = self.within.get("clustered", {})
         band = self._band_for(similarity)
         is_cliff = similarity >= self.cliff_threshold

@@ -42,7 +42,7 @@ from atlas.ml.dataset import DATA_DIR, load_dataset
 from atlas.ml.features import featurize, morgan_matrix
 from atlas.ml.peptide_representations import (
     build_representations, canonical_sequence, oriented_keys,
-    residue_vocabulary,
+    residue_vocabulary, stereo_oriented_keys,
 )
 from atlas.ml.peptide_structure import analyse_peptide
 
@@ -122,10 +122,42 @@ def representational_ceilings(
         "canonical_composition_order_free": lambda a: tuple(sorted(canonical_sequence(a))),
         "chemistry_aware_composition_order_free": lambda a: tuple(sorted(oriented_keys(a))),
         "chemistry_aware_positional": lambda a: tuple(oriented_keys(a)),
+        "chemistry_aware_positional_with_stereo":
+            lambda a: tuple(stereo_oriented_keys(a)),
     }
     out = {}
     for name, fn in keyings.items():
         out[name] = oracle_ceiling([fn(a) for a in analyses], y)
+
+    # What stereo-blindness costs, isolated: groups that one key merges and
+    # the other separates. This is the only place the two ceilings can be
+    # compared molecule by molecule rather than in aggregate.
+    blind: dict[tuple, list[int]] = collections.defaultdict(list)
+    for i, a in enumerate(analyses):
+        blind[tuple(oriented_keys(a))].append(i)
+    split_groups, split_members, ranges = 0, 0, []
+    for members in blind.values():
+        if len(members) < 2:
+            continue
+        if len({tuple(stereo_oriented_keys(analyses[i])) for i in members}) > 1:
+            split_groups += 1
+            split_members += len(members)
+            idx = np.array(members)
+            ranges.append(float(y[idx].max() - y[idx].min()))
+    out["stereochemistry_collapse"] = {
+        "groups_merged_by_stereo_blindness": split_groups,
+        "molecules_affected": split_members,
+        "molecules_affected_fraction": float(split_members / max(len(y), 1)),
+        "median_pki_range_within_those_groups": (
+            float(np.median(ranges)) if ranges else 0.0),
+        "max_pki_range_within_those_groups": (
+            float(max(ranges)) if ranges else 0.0),
+        "note": (
+            "Molecules a constitutional key merges and a stereochemistry-aware "
+            "key separates. Their label spread is a cost no model on the "
+            "stereo-blind key can avoid."
+        ),
+    }
 
     # Make the collapse concrete: the worst canonical-sequence collision.
     groups: dict[str, list[int]] = collections.defaultdict(list)
@@ -330,12 +362,15 @@ def _evaluate(
     """Fit every representation on one split, vocabulary from training only."""
     # Fitting the vocabulary on all molecules would let the test set define the
     # feature space, which is leakage even though no label is touched.
-    vocab = residue_vocabulary([analyses[i] for i in tr])
+    train = [analyses[i] for i in tr]
+    vocab = residue_vocabulary(train)
+    svocab = residue_vocabulary(train, stereo=True)
     extra: dict[str, np.ndarray] = {"morgan_fp": morgan.astype(float)}
     assay = _assay_block(records, tr)
     if assay is not None:
         extra["assay_context"] = assay
-    reps = build_representations(analyses, vocabulary=vocab, extra=extra)
+    reps = build_representations(
+        analyses, vocabulary=vocab, stereo_vocabulary=svocab, extra=extra)
 
     results: dict[str, dict[str, float]] = {
         "baseline_mean": _score(
@@ -558,14 +593,43 @@ def _findings(
                 for k in hurt
             )
             + ". Across ATLAS 2.4 and 2.5 the representation layer has been "
-            "extended four times -- explicit topology, residue chemistry, local "
-            "sequence context and assay context -- and **none improves "
-            "cross-series generalisation.** The best cross-series model remains "
+            "extended five times -- explicit topology, residue chemistry, local "
+            "sequence context, assay context and backbone stereochemistry -- "
+            "and **none improves cross-series generalisation.** The best "
+            "cross-series model remains "
             f"{cb_name} at MAE {cb['mae']:.3f}, unchanged. On this dataset the "
             "representation is not the binding constraint, which agrees with "
             "Stage A's effective sample size of ~30 series and with the pocket "
             "encoder's null result."
         )
+        sc = ceilings["stereochemistry_collapse"]
+        aware = ceilings["chemistry_aware_positional_with_stereo"]
+        stereo_pair = xc.get("stereo_added_to_fragment_fp")
+        if stereo_pair:
+            out.append(
+                f"Stereochemistry is the one extension whose failure to help "
+                f"does not make it optional. Naming each residue's backbone "
+                f"configuration lowers the representational ceiling from oracle "
+                f"MAE {chem['oracle_mae']:.3f} to {aware['oracle_mae']:.3f} and "
+                f"cuts the colliding fraction from "
+                f"{chem['colliding_fraction']:.1%} to "
+                f"{aware['colliding_fraction']:.1%}, because "
+                f"{sc['groups_merged_by_stereo_blindness']} groups covering "
+                f"{sc['molecules_affected']} molecules "
+                f"({sc['molecules_affected_fraction']:.1%} of the set) are "
+                f"merged by a constitutional key alone -- with a median pKi "
+                f"range of {sc['median_pki_range_within_those_groups']:.2f} and "
+                f"a maximum of {sc['max_pki_range_within_those_groups']:.2f} "
+                f"log units inside them. Yet added to the fragment fingerprint "
+                f"it leaves cross-series MAE at "
+                f"{stereo_pair['best_mae_a']:.3f} against "
+                f"{stereo_pair['best_mae_b']:.3f}: no improvement, consistent "
+                "with every other extension. The conclusion is not that "
+                "configuration is unimportant but that the error is not where "
+                "the representation is. A model that cannot distinguish D-Phe "
+                "from L-Phe must not be asked to order them, which is a "
+                "refusal to implement rather than a metric to improve."
+            )
         ac_cross = cross["results"].get("assay_context__forest")
         ac_within = within["results"].get("assay_context__forest")
         if ac_cross and ac_within:
@@ -725,6 +789,11 @@ def run_benchmark(
             "assay_context_added_to_fragment_fp": pair(
                 d["results"], "positional_fragment_fp+assay_context",
                 "positional_fragment_fp"),
+            "stereo_added_to_fragment_fp": pair(
+                d["results"], "positional_fragment_fp+stereo",
+                "positional_fragment_fp"),
+            "stereo_aware_vs_blind_onehot": pair(
+                d["results"], "positional_onehot_stereo", "positional_onehot"),
         }
         for ev, d in (("cross_series", cross), ("within_series", within))
     }
