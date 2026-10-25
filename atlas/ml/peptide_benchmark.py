@@ -386,8 +386,19 @@ def _evaluate(
     analyses: Sequence, y: np.ndarray, morgan: np.ndarray,
     tr: np.ndarray, te: np.ndarray,
     records: Sequence[Any] | None = None,
+    *,
+    arms: Sequence[str] | None = None,
+    models: Sequence[str] = ("ridge", "forest"),
 ) -> dict[str, dict[str, float]]:
-    """Fit every representation on one split, vocabulary from training only."""
+    """Fit every representation on one split, vocabulary from training only.
+
+    ``arms`` and ``models`` restrict what is fitted. They exist for the seed
+    sweep in ``atlas.ml.split_noise``, which refits a handful of arms across a
+    dozen splits and would otherwise take twelve times the full benchmark. The
+    restriction is applied *after* the features are built, so a restricted run
+    measures exactly what the full run measures -- a noise band computed on a
+    different code path would calibrate the wrong number.
+    """
     # Fitting the vocabulary on all molecules would let the test set define the
     # feature space, which is leakage even though no label is touched.
     train = [analyses[i] for i in tr]
@@ -408,9 +419,14 @@ def _evaluate(
             _fit_predict(np.zeros((len(tr), 1)), y[tr], np.zeros((len(te), 1)), "mean"),
             y[te], y[tr]),
     }
-    for name in reps.names:
+    wanted = reps.names if arms is None else [n for n in arms if n in reps.matrices]
+    if arms is not None:
+        missing = [n for n in arms if n not in reps.matrices]
+        if missing:
+            logger.warning("requested arms not built: %s", ", ".join(missing))
+    for name in wanted:
         x = reps[name]
-        for model in ("ridge", "forest"):
+        for model in models:
             try:
                 pred = _fit_predict(x[tr], y[tr], x[te], model)
             except Exception as exc:        # a representation may be degenerate

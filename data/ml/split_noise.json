@@ -1,0 +1,485 @@
+{
+  "dataset_version": "29fe2a249bcd581d",
+  "endpoint": "MC4R binding affinity (pKi, -log10 M)",
+  "n_peptides": 630,
+  "n_clusters": 30,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "model": "forest",
+  "per_arm": {
+    "positional_fragment_fp": {
+      "n_seeds": 12,
+      "mean": 0.9416428625882775,
+      "sd": 0.08654156994595158,
+      "min": 0.8185298238113929,
+      "max": 1.1565164812879816,
+      "per_seed": {
+        "0": 0.8937281172377111,
+        "1": 1.1565164812879816,
+        "2": 0.9907240446359822,
+        "3": 0.8185298238113929,
+        "4": 0.9774071070498729,
+        "5": 0.8841075973874569,
+        "6": 0.9171307554055573,
+        "7": 0.8432288253460075,
+        "8": 0.9617983773547689,
+        "9": 0.9732149656102241,
+        "10": 0.9356225381524267,
+        "11": 0.9477057177799469
+      }
+    },
+    "positional_fragment_fp+topology": {
+      "n_seeds": 12,
+      "mean": 0.9958328909565964,
+      "sd": 0.14129695177515278,
+      "min": 0.7769114221648478,
+      "max": 1.22106959490741,
+      "per_seed": {
+        "0": 1.1677332590584235,
+        "1": 1.22106959490741,
+        "2": 0.9794695888587507,
+        "3": 0.7769114221648478,
+        "4": 0.9098740705215432,
+        "5": 1.154588721870604,
+        "6": 1.086686348232544,
+        "7": 0.8198087147696461,
+        "8": 0.9357409384119879,
+        "9": 0.9057784363131761,
+        "10": 1.0577507789183545,
+        "11": 0.9345828174518687
+      }
+    },
+    "residue_chemistry+positional_fragment_fp": {
+      "n_seeds": 12,
+      "mean": 0.9441696370856336,
+      "sd": 0.09841942525620934,
+      "min": 0.7930104325769035,
+      "max": 1.1412930900504843,
+      "per_seed": {
+        "0": 0.9082884568913228,
+        "1": 1.1096916546233226,
+        "2": 0.9306087470421649,
+        "3": 0.7930104325769035,
+        "4": 0.8989709390227875,
+        "5": 1.1412930900504843,
+        "6": 0.9559811864801259,
+        "7": 0.834846593811325,
+        "8": 0.9533746178677044,
+        "9": 0.9287538887510797,
+        "10": 0.964367228387765,
+        "11": 0.9108488095226193
+      }
+    },
+    "positional_fragment_fp+local_context": {
+      "n_seeds": 12,
+      "mean": 0.9597278357780472,
+      "sd": 0.10386953317279268,
+      "min": 0.8201100750413444,
+      "max": 1.2215582808435992,
+      "per_seed": {
+        "0": 0.9637204869897957,
+        "1": 1.2215582808435992,
+        "2": 0.9496609190914583,
+        "3": 0.8201100750413444,
+        "4": 0.9152045240978207,
+        "5": 0.9217888284727298,
+        "6": 1.0427827439474677,
+        "7": 0.8664379401103082,
+        "8": 0.9285579030549467,
+        "9": 0.9449276335331641,
+        "10": 1.041861553719089,
+        "11": 0.9001231404348417
+      }
+    },
+    "positional_fragment_fp+assay_context": {
+      "n_seeds": 12,
+      "mean": 0.9586781577755946,
+      "sd": 0.08223968213320704,
+      "min": 0.8177320401297689,
+      "max": 1.1371596861512097,
+      "per_seed": {
+        "0": 0.9461894974118878,
+        "1": 1.1371596861512097,
+        "2": 1.022103882365583,
+        "3": 0.8177320401297689,
+        "4": 0.9500382319814613,
+        "5": 0.9691884791826971,
+        "6": 0.944943326109572,
+        "7": 0.8393655780000965,
+        "8": 0.9739451522540107,
+        "9": 0.9706590219282746,
+        "10": 1.0075855958771398,
+        "11": 0.925227401915435
+      }
+    },
+    "positional_fragment_fp+stereo": {
+      "n_seeds": 12,
+      "mean": 0.9639902198180498,
+      "sd": 0.117882179398958,
+      "min": 0.8134961351975754,
+      "max": 1.2895698706675487,
+      "per_seed": {
+        "0": 0.9119326013281122,
+        "1": 1.2895698706675487,
+        "2": 1.0159517581204,
+        "3": 0.8134961351975754,
+        "4": 0.9884222327520455,
+        "5": 0.9239731847378755,
+        "6": 0.943959362912111,
+        "7": 0.8392713516719568,
+        "8": 0.9697780990112063,
+        "9": 0.9708341739701514,
+        "10": 0.9405801701306382,
+        "11": 0.9601136973169762
+      }
+    },
+    "positional_fragment_fp+esm2_embedding": {
+      "n_seeds": 12,
+      "mean": 1.008765110343952,
+      "sd": 0.10374197011560081,
+      "min": 0.8190433382166702,
+      "max": 1.19513458778595,
+      "per_seed": {
+        "0": 1.0928941849561613,
+        "1": 1.19513458778595,
+        "2": 0.9392804387426815,
+        "3": 0.8190433382166702,
+        "4": 0.9458093710640512,
+        "5": 1.0677853545442906,
+        "6": 1.1011736686464637,
+        "7": 0.9916586900865001,
+        "8": 0.9259226610934742,
+        "9": 0.958914594538254,
+        "10": 1.1003936429790773,
+        "11": 0.9671707914738525
+      }
+    },
+    "positional_onehot": {
+      "n_seeds": 12,
+      "mean": 0.9663395112487444,
+      "sd": 0.10280462937645973,
+      "min": 0.8389534437644006,
+      "max": 1.171336014229053,
+      "per_seed": {
+        "0": 1.009245614145252,
+        "1": 0.9104979749610962,
+        "2": 0.9985248676631233,
+        "3": 0.8389534437644006,
+        "4": 0.8763111068398267,
+        "5": 1.171336014229053,
+        "6": 0.9959939806665955,
+        "7": 0.8606745246514623,
+        "8": 0.8624139122976328,
+        "9": 1.0778812289963065,
+        "10": 1.0551042778813502,
+        "11": 0.9391371888888337
+      }
+    },
+    "morgan_fp": {
+      "n_seeds": 12,
+      "mean": 0.9880098703174696,
+      "sd": 0.07583166982490594,
+      "min": 0.9054322629435752,
+      "max": 1.1640077787842205,
+      "per_seed": {
+        "0": 0.9054322629435752,
+        "1": 1.1640077787842205,
+        "2": 0.9961568078159583,
+        "3": 0.9181980815006049,
+        "4": 1.0081321108843517,
+        "5": 0.9762852889960495,
+        "6": 1.0722636787905355,
+        "7": 1.0399524675764578,
+        "8": 0.9829371550466206,
+        "9": 0.9445394860745955,
+        "10": 0.9311325256629613,
+        "11": 0.9170807997337037
+      }
+    },
+    "positional_fragment_fp+morgan_fp": {
+      "n_seeds": 12,
+      "mean": 0.8906163951996348,
+      "sd": 0.0796852613425368,
+      "min": 0.7829487969975123,
+      "max": 1.114857250402577,
+      "per_seed": {
+        "0": 0.8803847236765571,
+        "1": 1.114857250402577,
+        "2": 0.8847322134317867,
+        "3": 0.7829487969975123,
+        "4": 0.8712923305366593,
+        "5": 0.9265745594735801,
+        "6": 0.885482570195086,
+        "7": 0.8293577662601608,
+        "8": 0.8751413217132887,
+        "9": 0.8987907342487096,
+        "10": 0.8927728100940971,
+        "11": 0.8450616653655998
+      }
+    }
+  },
+  "paired_contrasts": {
+    "topology": {
+      "arm": "positional_fragment_fp+topology",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 7,
+      "seed_0_difference": 0.27400514182071245,
+      "n_seeds": 12,
+      "mean_difference": 0.05419002836831893,
+      "sd_of_difference": 0.12548035338218907,
+      "min_difference": -0.06753303652832965,
+      "max_difference": 0.27400514182071245,
+      "sign_agreement": 0.4166666666666667,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "residue_chemistry": {
+      "arm": "residue_chemistry+positional_fragment_fp",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 8,
+      "seed_0_difference": 0.014560339653611698,
+      "n_seeds": 12,
+      "mean_difference": 0.0025267744973563044,
+      "sd_of_difference": 0.08775052707332695,
+      "min_difference": -0.07843616802708542,
+      "max_difference": 0.25718549266302737,
+      "sign_agreement": 0.3333333333333333,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "local_context": {
+      "arm": "positional_fragment_fp+local_context",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 5,
+      "seed_0_difference": 0.06999236975208467,
+      "n_seeds": 12,
+      "mean_difference": 0.018084973189769694,
+      "sd_of_difference": 0.06322061231826753,
+      "min_difference": -0.062202582952052166,
+      "max_difference": 0.1256519885419104,
+      "sign_agreement": 0.5833333333333334,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "assay_context": {
+      "arm": "positional_fragment_fp+assay_context",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 6,
+      "seed_0_difference": 0.052461380174176786,
+      "n_seeds": 12,
+      "mean_difference": 0.017035295187317268,
+      "sd_of_difference": 0.03722670852736778,
+      "min_difference": -0.02736887506841157,
+      "max_difference": 0.0850808817952402,
+      "sign_agreement": 0.5,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "stereo": {
+      "arm": "positional_fragment_fp+stereo",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 3,
+      "seed_0_difference": 0.018204484090401096,
+      "n_seeds": 12,
+      "mean_difference": 0.022347357229772335,
+      "sd_of_difference": 0.037413469546360434,
+      "min_difference": -0.0050336886138175885,
+      "max_difference": 0.13305338937956712,
+      "sign_agreement": 0.75,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "esm2_embedding": {
+      "arm": "positional_fragment_fp+esm2_embedding",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 4,
+      "seed_0_difference": 0.19916606771845025,
+      "n_seeds": 12,
+      "mean_difference": 0.0671222477556748,
+      "sd_of_difference": 0.0997267006297322,
+      "min_difference": -0.05144360589330066,
+      "max_difference": 0.19916606771845025,
+      "sign_agreement": 0.6666666666666666,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    }
+  },
+  "paired_contrasts_on_target": {
+    "topology": {
+      "arm": "positional_fragment_fp+topology",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 2,
+      "seed_0_difference": 0.27400514182071245,
+      "n_seeds": 7,
+      "mean_difference": 0.11743317549170325,
+      "sd_of_difference": 0.13178951683861126,
+      "min_difference": -0.06743652929704802,
+      "max_difference": 0.27400514182071245,
+      "sign_agreement": 0.7142857142857143,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "residue_chemistry": {
+      "arm": "residue_chemistry+positional_fragment_fp",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 3,
+      "seed_0_difference": 0.014560339653611698,
+      "n_seeds": 7,
+      "mean_difference": 0.026848536072703606,
+      "sd_of_difference": 0.10910949230495519,
+      "min_difference": -0.060115297593817285,
+      "max_difference": 0.25718549266302737,
+      "sign_agreement": 0.5714285714285714,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "local_context": {
+      "arm": "positional_fragment_fp+local_context",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 2,
+      "seed_0_difference": 0.06999236975208467,
+      "n_seeds": 7,
+      "mean_difference": 0.04789370669713771,
+      "sd_of_difference": 0.06331679186090149,
+      "min_difference": -0.04106312554452385,
+      "max_difference": 0.1256519885419104,
+      "sign_agreement": 0.7142857142857143,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "assay_context": {
+      "arm": "positional_fragment_fp+assay_context",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 2,
+      "seed_0_difference": 0.052461380174176786,
+      "n_seeds": 7,
+      "mean_difference": 0.035254998472717736,
+      "sd_of_difference": 0.03787849386287769,
+      "min_difference": -0.01935679513677191,
+      "max_difference": 0.0850808817952402,
+      "sign_agreement": 0.7142857142857143,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "stereo": {
+      "arm": "positional_fragment_fp+stereo",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 1,
+      "seed_0_difference": 0.018204484090401096,
+      "n_seeds": 7,
+      "mean_difference": 0.03510808887849959,
+      "sd_of_difference": 0.045428121577453275,
+      "min_difference": -0.0023807916400727658,
+      "max_difference": 0.13305338937956712,
+      "sign_agreement": 0.8571428571428571,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    },
+    "esm2_embedding": {
+      "arm": "positional_fragment_fp+esm2_embedding",
+      "reference": "positional_fragment_fp",
+      "n_splits_extension_helped": 2,
+      "seed_0_difference": 0.19916606771845025,
+      "n_seeds": 7,
+      "mean_difference": 0.10064742463936265,
+      "sd_of_difference": 0.10634764270105408,
+      "min_difference": -0.05144360589330066,
+      "max_difference": 0.19916606771845025,
+      "sign_agreement": 0.7142857142857143,
+      "demonstrated": false,
+      "direction": "extension is worse"
+    }
+  },
+  "on_target_seeds": [
+    0,
+    1,
+    2,
+    5,
+    6,
+    9,
+    10
+  ],
+  "split_sizes": {
+    "0": {
+      "n_train": 439,
+      "n_test": 191,
+      "test_fraction": 0.30317460317460315
+    },
+    "1": {
+      "n_train": 446,
+      "n_test": 184,
+      "test_fraction": 0.2920634920634921
+    },
+    "2": {
+      "n_train": 472,
+      "n_test": 158,
+      "test_fraction": 0.2507936507936508
+    },
+    "3": {
+      "n_train": 215,
+      "n_test": 415,
+      "test_fraction": 0.6587301587301587
+    },
+    "4": {
+      "n_train": 280,
+      "n_test": 350,
+      "test_fraction": 0.5555555555555556
+    },
+    "5": {
+      "n_train": 472,
+      "n_test": 158,
+      "test_fraction": 0.2507936507936508
+    },
+    "6": {
+      "n_train": 467,
+      "n_test": 163,
+      "test_fraction": 0.25873015873015875
+    },
+    "7": {
+      "n_train": 220,
+      "n_test": 410,
+      "test_fraction": 0.6507936507936508
+    },
+    "8": {
+      "n_train": 184,
+      "n_test": 446,
+      "test_fraction": 0.707936507936508
+    },
+    "9": {
+      "n_train": 467,
+      "n_test": 163,
+      "test_fraction": 0.25873015873015875
+    },
+    "10": {
+      "n_train": 463,
+      "n_test": 167,
+      "test_fraction": 0.2650793650793651
+    },
+    "11": {
+      "n_train": 203,
+      "n_test": 427,
+      "test_fraction": 0.6777777777777778
+    }
+  },
+  "findings": [
+    "The cross-series number has never had a noise band. Across 12 seeds the reference representation (positional_fragment_fp, random forest) scores a mean MAE of 0.942 with a standard deviation of 0.087 and a range of 0.819 to 1.157 \u2014 a spread of 0.338 log units from the choice of split alone. With 30 clusters in the set, a different seed holds out a materially different quarter of the chemistry, so this spread is a property of the dataset rather than a defect in the method.",
+    "The split is not merely noisy, it is structurally unstable, and this was not previously visible. The splitter assigns whole clusters until it reaches a 25% test target, but the largest cluster holds over half the set, so a seed that draws it first overshoots badly: across 12 seeds the test fraction ranges from 25% to 71% and the training set from 184 to 472 molecules. Seeds therefore differ in how much data the model gets as well as in which chemistry is held out \u2014 two effects a per-arm mean cannot separate, and a further reason the paired statistic is the only one that isolates the representation.",
+    "That spread is why the contrasts must be paired. Comparing two representations on different splits would be comparing split difficulty; comparing them on the same split and then summarising the difference across splits removes the part both arms share.",
+    "On the 7 seeds whose split met its 25% target, 6 of 6 extensions have a paired effect no larger than twice its own spread: assay_context (+0.035 \u00b1 0.038); esm2_embedding (+0.101 \u00b1 0.106); local_context (+0.048 \u00b1 0.063); residue_chemistry (+0.027 \u00b1 0.109); stereo (+0.035 \u00b1 0.045); topology (+0.117 \u00b1 0.132). Every one of them was reported as a measured non-improvement on a single seed. The direction is unchanged and none of them helps, but **the single-seed differences were not evidence of their own size**, and wherever this project quoted one as a quantity it was quoting something the split could have produced on its own.",
+    "The clearest case is topology. On seed 0 \u2014 the one split every published comparison used \u2014 it moved cross-series MAE by +0.274, which is what the findings report. Across the 7 seeds whose split met its 25% target the paired effect is +0.117 \u00b1 0.132, and the extension helps on 2 of 7 of them. Seed 0 overstated the effect by roughly 2.3x. The direction survives; the magnitude does not.",
+    "Stratifying by whether the split met its target changes the answer, which is why both are reported. Over all 12 seeds the extensions look nearly harmless \u2014 several help on a majority of splits \u2014 but 6 of 6 have a *larger* adverse effect once the overshooting splits are removed. The reason is mechanical: a seed that holds out 71% of the set leaves ~200 training molecules, and at that size every arm collapses toward the baseline together, compressing the differences between them. Pooling those in understates the contrast rather than adding evidence.",
+    "The headline conclusion holds and is now better supported than it was: on the 7 seeds whose split met its 25% target, 0 of 6 extensions improve the mean cross-series MAE. Six extensions were called failures on one split; on twelve splits they remain failures. What changes is the standing of the individual numbers, not the conclusion drawn from them."
+  ]
+}

@@ -183,6 +183,17 @@ is **not supported**:
 - topology alone: 1.214 (ridge), 1.508 (forest) — both worse than the 1.189
   mean baseline
 
+> **Correction (ATLAS 2.8).** Those figures come from one split, seed 0, and
+> the 0.894 → 1.168 gap is not the size of the effect.
+> `docs/ATLAS_2.8_SPLIT_NOISE.md` measures the paired contrast across twelve
+> splits: **+0.117 ± 0.132** on the seven whose split met its 25% target, with
+> topology *helping* on two of them. Seed 0 overstated it by about 2.3x, and
+> the difference does not clear twice its own spread. The direction below
+> stands — topology does not help cross-series — but the mechanistic argument
+> that follows was written against a gap three times larger than the measured
+> one, and should be read as a hypothesis about why the sign is negative
+> rather than as something the magnitude establishes.
+
 Residue count, molecular weight and ring size let a tree split on *series
 identity*, which is precisely what does not transfer to an unseen series. The
 constraint is better carried implicitly by the bridge chemistry already present
